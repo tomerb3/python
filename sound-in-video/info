@@ -1,0 +1,31 @@
+python 3.6.9
+pyenv install 3.6.9
+
+source /home/baum/venv/src/bin/activate
+
+python add_sound_from_freesound.py \
+  --query "click mouse" \
+  --input master.mp4 \
+  --output out.mp4 \
+  --frame 450 \
+  --gain 1.5 \
+  --bg-gain 0.8
+
+this will create folder and save 5 mp3 
+
+
+
+
+
+
+this will use folder "effects" and only will use the mp3 inside - choose random
+
+ 
+python add_sound_from_freesound.py \
+  --mp3-dir effects \
+  --input master.mp4 \
+  --output out.mp4 \
+  --frame 450 \
+  --gain 1.0 \
+  --bg-gain 0.5 \
+  --offset-ms 100
