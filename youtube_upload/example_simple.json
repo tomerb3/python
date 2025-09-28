@@ -1,0 +1,16 @@
+{
+  "output": "master.mp4",
+  "video": "input1.mp4",
+  "seconds": 10,
+  "audio": "input1.mp3",
+  "ass": "effects.ass",
+  "video_start": 0,
+  "audio_start": 0,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "video_codec": "libx264",
+  "audio_codec": "aac",
+  "crf": 23,
+  "preset": "medium"
+}

@@ -1,0 +1,1 @@
+ffmpeg -i '/home/node/tts/background/back-20.mp4' -filter_complex_script '/tmp/fftxt_if30q1tv/filters.txt' -t 6.0 -c:a copy 'acode-1#2.mp4' -y

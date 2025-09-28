@@ -1,0 +1,22 @@
+
+
+docker build -t yt-venv --build-arg PYTHON_IMAGE=python:3.6.9-slim .
+
+
+
+docker run --rm \
+  -v /home/baum/venv/src:/venv-host:ro \
+  -v /home/baum/src/python/youtube_upload:/app \
+  yt-venv \
+  python compose_video.py --config my_compose.json
+
+
+
+
+
+docker run --rm \
+  -v /home/baum/venv/src:/venv-host:ro \
+  -v /home/baum/src/python/youtube_upload:/app \
+  -v $HOME/.config/gcloud:/root/.config/gcloud \
+  yt-venv \
+  python uploader.py --client-secrets ./client_secrets.json --file ./master.mp4 --privacyStatus unlisted

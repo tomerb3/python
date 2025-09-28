@@ -1,0 +1,1 @@
+python compose_video.py --config my_compose.json

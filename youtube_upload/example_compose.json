@@ -1,0 +1,52 @@
+{
+  "output": "master.mp4",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "video_codec": "libx264",
+  "audio_codec": "aac",
+  "crf": 23,
+  "preset": "medium",
+  "sections": [
+    {
+      "duration": 6,
+      "video": "master.mp4",
+      "audio": "files/before-1#2.mp3"
+    },
+    {
+      "start": 6,
+      "end": 25,
+      "video": "master.mp4",
+      "ass": "effects.ass"
+    },
+    {
+      "duration": 6,
+      "video": "back/back-20.mp4",
+      "audio": "files/code-1#2.mp3",
+      "filter_script": "files/filters.txt"
+    },
+    {
+      "start": 25,
+      "end": 60,
+      "video": "input2.mp4",
+      "audio": "input3.mp3"
+    },
+    {
+      "duration": 8,
+      "video": "input2.mp4",
+      "audio": "input3.mp3",
+      "video_start": 10,
+      "audio_start": 3
+    },
+    {
+      "duration": 10,
+      "video": "input3.mp4",
+      "extra_filters": "hue=s=0,eq=brightness=0.05:contrast=1.1"
+    },
+    {
+      "duration": 5,
+      "video": "input4.mp4",
+      "audio": "input4.mp3"
+    }
+  ]
+}
