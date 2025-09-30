@@ -28,6 +28,25 @@ def ensure_ffmpeg() -> None:
 DefSection = Dict[str, Any]
 
 
+def clean_str_path(p: Optional[Any]) -> Optional[str]:
+    """Sanitize path-like strings coming from JSON/n8n.
+    - Cast to str
+    - Strip whitespace
+    - Remove common invisible chars (ZWSP, BOM)
+    - Strip surrounding quotes
+    """
+    if p is None:
+        return None
+    s = str(p)
+    # Remove invisible characters that sometimes sneak in from forms/CSV
+    s = s.replace("\u200b", "").replace("\ufeff", "")
+    s = s.strip()
+    # Remove accidental surrounding quotes
+    if (s.startswith('"') and s.endswith('"')) or (s.startswith("'") and s.endswith("'")):
+        s = s[1:-1].strip()
+    return s
+
+
 def seconds_from_section(sec: DefSection) -> float:
     if "duration" in sec:
         return float(sec["duration"])
@@ -52,12 +71,12 @@ def build_section_ffmpeg_cmd(
     if duration <= 0:
         raise ValueError(f"Section {idx}: duration must be > 0")
 
-    video = sec.get("video")
+    video = clean_str_path(sec.get("video"))
     if not video:
         raise ValueError(f"Section {idx}: 'video' is required")
-    audio = sec.get("audio")
-    ass = sec.get("ass")
-    filter_script = sec.get("filter_script")  # path to filter_complex_script file
+    audio = clean_str_path(sec.get("audio"))
+    ass = clean_str_path(sec.get("ass"))
+    filter_script = clean_str_path(sec.get("filter_script"))  # path to filter_complex_script file
 
     video_start = float(sec.get("video_start", 0))
     audio_start = float(sec.get("audio_start", 0))
@@ -217,6 +236,22 @@ def compose_from_dict(cfg: Dict[str, Any]) -> Path:
 
 def compose(config_path: Path) -> Path:
     cfg = json.loads(Path(config_path).read_text())
+    # Allow n8n-style outputs where the root is a list of config objects.
+    # If a list is provided, process each config sequentially and return the last output path.
+    if isinstance(cfg, list):
+        if not cfg:
+            raise ValueError("Config list is empty.")
+        outputs: List[Path] = []
+        for i, item in enumerate(cfg):
+            if not isinstance(item, dict):
+                raise ValueError(f"Config list element {i} must be an object/dict.")
+            # Unwrap n8n items shape: { "json": { ... actual config ... } }
+            if "json" in item and isinstance(item["json"], dict):
+                item_cfg = item["json"]
+            else:
+                item_cfg = item
+            outputs.append(compose_from_dict(item_cfg))
+        return outputs[-1]
     return compose_from_dict(cfg)
 
 

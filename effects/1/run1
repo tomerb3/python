@@ -1,0 +1,8 @@
+docker run --rm -v "$PWD:/data" lottie-overlay:latest \
+  node overlay.js \
+  --video /data/input.mp4 \
+  --lottie /data/anim.json \
+  --x 100 --y 120 --scale 1 \
+  --start 0 --duration 4 --fps 30 \
+  --overlayWidth 512 --overlayHeight 512 \
+  --out /data/out.mp4

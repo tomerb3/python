@@ -1,34 +1,29 @@
-{
-  "output": "output.mp4",
-  "width": 1920,
-  "height": 1080,
-  "fps": 30,
-  "video_codec": "libx264",
-  "audio_codec": "aac",
-  "crf": 23,
-  "preset": "medium",
-  "sections": [
-    {
-      "duration": 9,
-      "video": "back/back-20.mp4",
-      "audio": "files/before-1#2.mp3"
-    },
-    {
-      "duration": 13,
-      "video": "back/back-20.mp4",
-      "video_start": 9,
-      "audio": "files/code-1#2.mp3"
-    },
-    {
-      "duration": 6,
-      "video": "back/back-20.mp4",
-      "audio": "files/code-1#2.mp3",
-      "filter_script": "files/filters.txt"
-    },
-    {
-      "duration": 9,
-      "video": "back/back-20.mp4",
-      "audio": "files/after-1#2.wav"
-    }
-  ]
-}
+[
+  {
+    "output": "3.mp4",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "video_codec": "libx264",
+    "audio_codec": "aac",
+    "crf": 23,
+    "preset": "medium",
+    "sections": [
+      {
+        "duration": 11,
+        "video": "before.mp4",
+        "audio": "before.mp3"
+      },
+      {
+        "duration": 11,
+        "video": "code.mp4",
+        "audio": "code.mp3 "
+      },
+      {
+        "duration": 11,
+        "video": "after.mp3",
+        "audio": "after.mp3"
+      }
+    ]
+  }
+]

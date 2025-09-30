@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Lottie Renderer</title>
+    <style>
+      html, body {
+        margin: 0; padding: 0; background: transparent; overflow: hidden;
+        width: 100%; height: 100%;
+      }
+      #container {
+        position: absolute; left: 0; top: 0; background: transparent;
+      }
+      canvas { background: transparent !important; }
+    </style>
+    <script src="https://unpkg.com/lottie-web/build/player/lottie.min.js"></script>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script>
+      const query = new URLSearchParams(location.search);
+      const width  = parseInt(query.get('width')  || '512', 10);
+      const height = parseInt(query.get('height') || '512', 10);
+      const scale  = parseFloat(query.get('scale') || '1');
+      const lottieUrl = query.get('lottie');
+
+      // Resize container to desired overlay size
+      const container = document.getElementById('container');
+      container.style.width = width + 'px';
+      container.style.height = height + 'px';
+
+      let anim = null;
+      let readyResolve;
+      const ready = new Promise(r => readyResolve = r);
+
+      async function loadLottie(data) {
+        if (anim) { anim.destroy(); anim = null; }
+        anim = lottie.loadAnimation({
+          container,
+          renderer: 'canvas',      // uses 2D canvas with alpha
+          loop: false,
+          autoplay: false,
+          animationData: data
+        });
+        anim.addEventListener('DOMLoaded', () => {
+          // Apply scale by CSS transform to the canvas container
+          if (scale !== 1) {
+            container.style.transformOrigin = 'top left';
+            container.style.transform = `scale(${scale})`;
+          }
+          readyResolve();
+        });
+      }
+
+      async function fetchJson(u) {
+        const res = await fetch(u);
+        if (!res.ok) throw new Error(`Failed to fetch Lottie: ${res.status}`);
+        return res.json();
+      }
+
+      // Expose control functions to Node via puppeteer
+      window.__lottieReady = async function() {
+        if (lottieUrl) {
+          const data = await fetchJson(lottieUrl);
+          await loadLottie(data);
+        }
+        return ready;
+      };
+
+      window.__loadAnimation = async function(jsonStr) {
+        const data = JSON.parse(jsonStr);
+        await loadLottie(data);
+        return ready;
+      };
+
+      window.__getMeta = function() {
+        if (!anim) return null;
+        const fr = anim.frameRate;       // frames per second in the Lottie file
+        const totalFrames = Math.floor(anim.getDuration(true));
+        const duration = anim.getDuration(false); // seconds
+        return { fr, totalFrames, duration, width, height, scale };
+      };
+
+      window.__renderFrame = async function(frameNumber) {
+        if (!anim) throw new Error('Animation not loaded');
+        anim.goToAndStop(frameNumber, true);
+        // Find the canvas element created by lottie-web
+        const canvas = container.querySelector('canvas');
+        if (!canvas) throw new Error('Canvas not available yet');
+        return canvas.toDataURL('image/png');
+      };
+
+      // Kick initial ready if URL param exists
+      window.__lottieReady();
+    </script>
+  </body>
+</html>

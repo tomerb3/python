@@ -1,0 +1,3 @@
+drawtext=fontfile='/app/fonts/BebasNeue-Regular.ttf':textfile='/app/files/fftxt_pr6z07x0/step_0001.txt':expansion=none:fontcolor=white:fontsize=60:x=50:y=4:enable='between(t,0.0,0.08)',
+drawtext=fontfile='/app/fonts/BebasNeue-Regular.ttf':textfile='/app/files/fftxt_pr6z07x0/step_0002.txt':expansion=none:fontcolor=white:fontsize=60:x=50:y=4:enable='between(t,0.08,0.16)',
+drawtext=fontfile='/app/fonts/BebasNeue-Regular.ttf':textfile='/app/files/fftxt_pr6z07x0/step_0003.txt':expansion=none:fontcolor=white:fontsize=60:x=50:y=4:enable='between(t,0.16,0.24)',
