@@ -1,0 +1,19 @@
+# python run_tts.py --folder_name /home/baum/src/python/tts --output_file_name output.wav  --slowdown 1.05
+
+f(){
+
+python run_tts.py \
+  --folder_name /home/baum/src/python/tts \
+  --output_file_name p$1.wav \
+  --model_name tts_models/en/vctk/vits \
+  --speaker p$1 \
+  --slowdown 1.05
+}
+#226
+#
+f 280
+f 281
+f 283
+f 284
+f 285
+f 286

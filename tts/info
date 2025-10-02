@@ -1,0 +1,9 @@
+pip install "transformers==4.43.3"
+# or
+pip install "transformers==4.41.1"
+
+Python 3.10.18
+
+env  tts in main wsl 
+
+

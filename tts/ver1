@@ -1,0 +1,100 @@
+import torch
+import os
+import argparse
+from TTS.utils.radam import RAdam
+import collections
+import re
+import numpy as np
+import wave
+
+torch.serialization.add_safe_globals([RAdam])
+torch.serialization.add_safe_globals([collections.defaultdict])
+torch.serialization.add_safe_globals([dict])
+from TTS.api import TTS
+
+tts = TTS(model_name="tts_models/en/vctk/vits")
+
+parser = argparse.ArgumentParser(description="Process video_script.txt and output output.wav in the specified folder.")
+parser.add_argument('--folder_name', type=str, required=True, help='Folder containing video_script.txt and for output file')
+parser.add_argument('--output_file_name', type=str, required=True, help='Name of the output wav file (e.g., output.wav)')
+args = parser.parse_args()
+
+input_path = os.path.join(args.folder_name, "video_script.txt")
+output_path = os.path.join(args.folder_name, args.output_file_name)
+
+
+def _silence(duration_seconds: float, sample_rate: int) -> np.ndarray:
+    """Create a silence (float32) waveform for the given duration and sample rate."""
+    n = max(0, int(round(duration_seconds * sample_rate)))
+    return np.zeros(n, dtype=np.float32)
+
+
+def _write_wav(path: str, wav: np.ndarray, sample_rate: int) -> None:
+    """Write a mono float32 [-1,1] waveform to a 16-bit PCM WAV using stdlib only."""
+    # Clip to [-1, 1] and convert to int16
+    wav_i16 = np.clip(wav, -1.0, 1.0)
+    wav_i16 = (wav_i16 * 32767.0).astype(np.int16)
+    with wave.open(path, 'wb') as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)  # 16-bit
+        wf.setframerate(sample_rate)
+        wf.writeframes(wav_i16.tobytes())
+
+
+def _get_sample_rate(tts_obj: TTS, default_sr: int = 22050) -> int:
+    """Try to obtain the sample rate from the TTS synthesizer; fall back to default."""
+    # Coqui TTS exposes sample rate via synthesizer in different versions
+    for path in [
+        "synthesizer.output_sample_rate",
+        "synthesizer.ap.sample_rate",
+        "synthesizer.tts_config.audio.sample_rate",
+    ]:
+        try:
+            obj = tts_obj
+            for attr in path.split('.'):
+                obj = getattr(obj, attr)
+            if isinstance(obj, int) and obj > 0:
+                return obj
+        except Exception:
+            pass
+    return default_sr
+
+
+if os.path.exists(input_path):
+    with open(input_path, "r", encoding="utf-8") as f:
+        script_text = f.read()
+    # Keep only lines with meaningful content
+    lines = [line for line in script_text.splitlines() if len(line.strip()) > 5]
+    filtered_text = "\n".join(lines)
+
+    # Split text into chunks and dot-pauses, preserving '.' and '..'
+    tokens = re.split(r"(\.\.|\.)", filtered_text)
+
+    segments: list[np.ndarray] = []
+    sr: int = _get_sample_rate(tts)
+
+    for tok in tokens:
+        if tok is None or tok == "":
+            continue
+        if tok == "..":
+            # 2-second pause
+            segments.append(_silence(2.0, sr))
+        elif tok == ".":
+            # 1-second pause
+            segments.append(_silence(1.0, sr))
+        else:
+            # Normal speech chunk
+            text_chunk = tok.strip()
+            if not text_chunk:
+                continue
+            wav_chunk = tts.tts(text=text_chunk, speaker="p230")
+            segments.append(np.asarray(wav_chunk, dtype=np.float32))
+
+    if not segments:
+        print("No content to synthesize after filtering. Nothing written.")
+    else:
+        full_wav = np.concatenate(segments) if len(segments) > 1 else segments[0]
+        _write_wav(output_path, full_wav, sr)
+        print(f"Wrote: {output_path}")
+else:
+    print(f"Input file not found: {input_path}")

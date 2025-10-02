@@ -1,0 +1,17 @@
+hello my name is Tomer.
+I will teach you python,
+
+lets start .
+
+function ( a, b ) {
+    return a + b;
+}
+
+case b = 5
+then 
+goto north 
+
+    print('kuku lambda')
+
+do you understand this method ? 
+lets run it and i will explain.
