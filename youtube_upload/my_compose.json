@@ -17,11 +17,12 @@
       {
         "duration": 11,
         "video": "code.mp4",
-        "audio": "code.mp3 "
+        "audio": "code.mp3",
+        "filter_script": "files/filters.txt"
       },
       {
         "duration": 11,
-        "video": "after.mp3",
+        "video": "after.mp4",
         "audio": "after.mp3"
       }
     ]

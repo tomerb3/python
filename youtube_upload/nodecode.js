@@ -15,6 +15,24 @@ const num = (v) => {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
 };
+const clean = (v) => {
+  if (v == null) return v;
+  let s = String(v);
+  // Remove BOM and zero-width space
+  s = s.replace(/\ufeff|\u200b/g, '');
+  s = s.trim();
+  // Strip surrounding quotes
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+};
+const fixVideoExt = (p) => {
+  const s = clean(p);
+  if (!s) return s;
+  // Common user mistake: provide an mp3 where a video is expected; switch to mp4
+  return s.replace(/\.mp3$/i, '.mp4');
+};
 
 // Build candidate sections based on your fields
 const candidates = [
@@ -32,7 +50,8 @@ const candidates = [
     audio: i.code_audio ?? i.code_autio,         // support both spellings
     duration: num(i.duration_code),
     video_start: i.video_start_code,             // optional
-    filter_script: i.filter_script_code,         // optional
+    // Prefer specific code filter, fallback to a generic filter_script if provided
+    filter_script: i.filter_script_code ?? i.filter_script,         // optional
   },
   {
     name: 'running',
@@ -59,29 +78,35 @@ for (const s of candidates) {
 
   const sec = {
     duration: s.duration,
-    video: String(s.video),
-    audio: String(s.audio),
+    video: fixVideoExt(s.video),
+    audio: clean(s.audio),
   };
   // Optional fields if provided and valid
   if (s.video_start != null && Number.isFinite(num(s.video_start)) && num(s.video_start) >= 0) {
     sec.video_start = num(s.video_start);
   }
   if (s.filter_script && !isNone(s.filter_script)) {
-    sec.filter_script = String(s.filter_script);
+    sec.filter_script = clean(s.filter_script);
+  }
+  // For the 'code' section, always include a filter_script:
+  // use provided value if valid; otherwise default to files/filters.txt
+  if (s.name === 'code') {
+    const provided = !isNone(s.filter_script) ? clean(s.filter_script) : null;
+    sec.filter_script = provided || 'files/filters.txt';
   }
   sections.push(sec);
 }
 
 // Build final result with top-level defaults (can be overridden via inputs)
 const result = {
-  output: String(i.output ?? 'output.mp4'),
+  output: clean(i.output ?? 'output.mp4'),
   width: Number(i.width ?? 1920),
   height: Number(i.height ?? 1080),
   fps: Number(i.fps ?? 30),
-  video_codec: String(i.video_codec ?? 'libx264'),
-  audio_codec: String(i.audio_codec ?? 'aac'),
+  video_codec: clean(i.video_codec ?? 'libx264'),
+  audio_codec: clean(i.audio_codec ?? 'aac'),
   crf: Number(i.crf ?? 23),
-  preset: String(i.preset ?? 'medium'),
+  preset: clean(i.preset ?? 'medium'),
   sections,
 };
 
