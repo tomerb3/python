@@ -19,12 +19,15 @@
         "video": "/app/back/back-20.mp4",
         "audio": "/app/data/code.mp3",
         "filter_script": "files/filters.txt",
+        "last_frame_video": "/app/data/last_frame_code.mp4",
         "second_audio": "/tmp/a.mp3"
       },
       {
         "duration": 11,
         "video": "/app/back/back-20.mp4",
-        "audio": "/app/data/coderun.mp3"
+        "audio": "/app/data/coderun.mp3",
+        "start_sound_effect" :"/tmp/sound1.mp3",
+        "lower_run" : "/tmp/1.txt"
       },
       {
         "duration": 11,
