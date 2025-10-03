@@ -2,10 +2,9 @@ docker build -t lottie-overlay:latest .
 docker run --rm -v "$PWD:/data" -v /home/baum/src/tmp:/data/base lottie-overlay:latest \
   node overlay.js \
   --video /data/base/back-20.mp4 \
-  --text "hello world from tomer" \
-  --font "David" --fontSize 72 --color "#D63413" \
-  --effect slide \
+   --lottie /data/anim1.json \
+  --textOverride  "hello world from tomer" \
   --x 100 --y 120 --scale 1 \
-  --fps 30 --duration 6 \
+  -fps 30 \
   --overlayWidth 1024 --overlayHeight 256 \
   --out /data/output.mp4

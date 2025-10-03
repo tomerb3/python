@@ -115,12 +115,14 @@ if os.path.exists(input_path):
                 continue
             # Build kwargs depending on model capability/inputs
             tts_kwargs = {"text": text_chunk}
+            is_xtts = "xtts" in (args.model_name or "").lower()
             if args.speaker_wav:
                 tts_kwargs["speaker_wav"] = args.speaker_wav
-                if args.language:
-                    tts_kwargs["language"] = args.language
             elif args.speaker:
                 tts_kwargs["speaker"] = args.speaker
+            # Force language for XTTS to avoid auto-detect switching when text has code
+            if is_xtts and args.language:
+                tts_kwargs["language"] = args.language
             wav_chunk = tts.tts(**tts_kwargs)
             segments.append((False, np.asarray(wav_chunk, dtype=np.float32)))
 

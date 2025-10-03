@@ -11,16 +11,22 @@ function arg(name, defVal = undefined) {
   return defVal;
 }
 function flag(name) {
-  return process.argv.includes(`--${name}`);
 }
 
 (async () => {
   const video = arg('video');
   const lottie = arg('lottie');               // URL or local file path
+  // Text mode arguments
+  const text = arg('text');
+  const textOverride = arg('textOverride');   // overrides text layers inside Lottie
+  const font = arg('font', 'Arial');
+  const fontSize = parseInt(arg('fontSize', '72'), 10);
+  const color = arg('color', '#ffffff');
+  const effect = arg('effect', 'fade'); // fade | typewriter | slide
   const out = arg('out', 'output.mp4');
 
-  if (!video || !lottie) {
-    console.error('Usage: node overlay.js --video <videoPathOrURL> --lottie <jsonPathOrURL> [--x 0 --y 0 --scale 1 --start 0 --duration 5 --fps 30 --overlayWidth 512 --overlayHeight 512]');
+  if (!video || (!lottie && !text)) {
+    console.error('Usage: node overlay.js --video <videoPathOrURL> [--lottie <jsonPathOrURL> [--textOverride "Your text"] | --text "Your text" [--font Arial --fontSize 72 --color #ffffff --effect fade]] [--x 0 --y 0 --scale 1 --start 0 --duration 5 --fps 30 --overlayWidth 512 --overlayHeight 512]');
     process.exit(2);
   }
 
@@ -57,7 +63,26 @@ function flag(name) {
     await page.setViewport({ width: overlayWidth, height: overlayHeight, deviceScaleFactor: 1 });
 
     const htmlPath = path.resolve(__dirname, 'renderer.html');
-    const url = `file://${htmlPath}?width=${overlayWidth}&height=${overlayHeight}&scale=${scale}&lottie=${encodeURIComponent(toUrlMaybeLocal(lottie))}`;
+    let url = `file://${htmlPath}?width=${overlayWidth}&height=${overlayHeight}&scale=${scale}`;
+    if (lottie) {
+      url += `&lottie=${encodeURIComponent(toUrlMaybeLocal(lottie))}`;
+      if (textOverride) {
+        const params = new URLSearchParams({ textOverride: textOverride });
+        url += `&${params.toString()}`;
+      }
+    } else if (text) {
+      // Pass text mode params
+      const params = new URLSearchParams({
+        text: text,
+        font: font,
+        fontSize: String(fontSize),
+        color: color,
+        effect: effect,
+        fps: String(fps),
+        duration: duration != null ? String(duration) : ''
+      });
+      url += `&${params.toString()}`;
+    }
     await page.goto(url, { waitUntil: 'load' });
 
     // Ensure anim is ready
@@ -77,7 +102,8 @@ function flag(name) {
     const filterComplex = `[0:v][1:v]overlay=${x}:${y}:format=auto:eval=frame:enable='${enableExpr}'[vout]`;
     const fullArgs = [
       '-y',
-      '-i', toUrlMaybeLocal(video),
+      // ffmpeg does not accept file:// for local files; pass the raw path/URL
+      '-i', video,
       '-f', 'image2pipe',
       '-framerate', String(effectiveFps),
       '-i', 'pipe:0',

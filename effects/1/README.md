@@ -10,6 +10,11 @@ Install deps:
 npm i --omit=dev
 ```
 
+
+anim1.json  https://app.lottiefiles.com/animation/48a9da0d-9df6-4c49-8ea0-2591214820b4?channel=web&from=download&panel=download&source=public-animation
+
+
+
 Run:
 
 ```bash

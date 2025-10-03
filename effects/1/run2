@@ -1,0 +1,8 @@
+python3 generate_lottie_text.py \
+  --text "hello world from tomer" \
+  --out anim2.json \
+  --width 1024 --height 256 \
+  --duration 4 --fps 30 \
+  --font "Arial" --fontSize 72 \
+  --color "#ffffff" \
+  --effect slide
