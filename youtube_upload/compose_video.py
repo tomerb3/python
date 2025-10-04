@@ -153,7 +153,7 @@ def build_section_ffmpeg_cmd(
     return cmd
 
 
-def compose_from_dict(cfg: Dict[str, Any]) -> Path:
+def compose_from_dict(cfg: Dict[str, Any], *, phase: Optional[str] = None, workdir: Optional[Path] = None) -> Path:
     ensure_ffmpeg()
 
     # Support shorthand JSON: {"video": "file.mp4", "seconds": 10, ...}
@@ -187,54 +187,74 @@ def compose_from_dict(cfg: Dict[str, Any]) -> Path:
     crf = int(cfg.get("crf", 23))
     preset = cfg.get("preset", "medium")
 
-    tmpdir = Path(tempfile.mkdtemp(prefix="compose_ffmpeg_"))
+    # Use a stable temp root under /app/data/tmp for all intermediate compose files
+    tmp_root = Path("/app/data/tmp")
+    tmp_root.mkdir(parents=True, exist_ok=True)
+    # If running in phased mode, default to a deterministic workdir per output name unless a workdir is provided
+    if phase:
+        if workdir is not None:
+            tmpdir = Path(workdir)
+        else:
+            tmpdir = tmp_root / f"compose_{output.stem}"
+        tmpdir.mkdir(parents=True, exist_ok=True)
+    else:
+        # Non-phased mode: create a unique temp directory for this run
+        tmpdir = Path(tempfile.mkdtemp(prefix="compose_ffmpeg_", dir=str(tmp_root)))
     print(f"Working directory: {tmpdir}")
 
-    segment_paths: List[Path] = []
-    for i, sec in enumerate(sections):
-        seg_out = tmpdir / f"segment_{i:02d}.mp4"
-        cmd = build_section_ffmpeg_cmd(
-            i,
-            sec,
-            seg_out,
-            width,
-            height,
-            fps,
-            vcodec,
-            acodec,
-            crf,
-            preset,
-        )
-        run(cmd)
-        segment_paths.append(seg_out)
+    # Phase 1: render segments and write concat list
+    if phase is None or phase == "phase1":
+        segment_paths: List[Path] = []
+        for i, sec in enumerate(sections):
+            seg_out = tmpdir / f"segment_{i:02d}.mp4"
+            cmd = build_section_ffmpeg_cmd(
+                i,
+                sec,
+                seg_out,
+                width,
+                height,
+                fps,
+                vcodec,
+                acodec,
+                crf,
+                preset,
+            )
+            run(cmd)
+            segment_paths.append(seg_out)
 
-    # Create concat list file
-    list_path = tmpdir / "concat_list.txt"
-    with list_path.open("w") as f:
-        for p in segment_paths:
-            f.write(f"file '{p.as_posix()}'\n")
+        # Create/overwrite concat list file in workdir
+        list_path = tmpdir / "concat_list.txt"
+        with list_path.open("w") as f:
+            for p in segment_paths:
+                f.write(f"file '{p.as_posix()}'\n")
+        print(f"Phase1 complete. Concat list written to {list_path}")
 
-    # Concat segments using stream copy (codecs and params are uniform)
-    out_dir = output.parent
-    out_dir.mkdir(parents=True, exist_ok=True)
+    # Phase 2: concatenate segments
+    if phase is None or phase == "phase2":
+        list_path = tmpdir / "concat_list.txt"
+        if not list_path.exists():
+            raise FileNotFoundError(f"Concat list not found: {list_path}. Run with --phase phase1 first or specify the correct --workdir.")
 
-    concat_cmd = [
-        "ffmpeg",
-        "-hide_banner",
-        "-y",
-        "-f", "concat",
-        "-safe", "0",
-        "-i", list_path.as_posix(),
-        "-c", "copy",
-        output.as_posix(),
-    ]
-    run(concat_cmd)
+        out_dir = output.parent
+        out_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Wrote {output}")
+        concat_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-y",
+            "-f", "concat",
+            "-safe", "0",
+            "-i", list_path.as_posix(),
+            "-c", "copy",
+            output.as_posix(),
+        ]
+        run(concat_cmd)
+        print(f"Wrote {output}")
+
     return output
 
 
-def compose(config_path: Path) -> Path:
+def compose(config_path: Path, *, phase: Optional[str] = None, workdir: Optional[Path] = None) -> Path:
     cfg = json.loads(Path(config_path).read_text())
     # Allow n8n-style outputs where the root is a list of config objects.
     # If a list is provided, process each config sequentially and return the last output path.
@@ -250,9 +270,9 @@ def compose(config_path: Path) -> Path:
                 item_cfg = item["json"]
             else:
                 item_cfg = item
-            outputs.append(compose_from_dict(item_cfg))
+            outputs.append(compose_from_dict(item_cfg, phase=phase, workdir=workdir))
         return outputs[-1]
-    return compose_from_dict(cfg)
+    return compose_from_dict(cfg, phase=phase, workdir=workdir)
 
 
 def example_config() -> Dict[str, Any]:
@@ -289,6 +309,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     p = argparse.ArgumentParser(description="Compose up to 8 video sections into one master.mp4 using ffmpeg.")
     p.add_argument("--config", required=False, help="Path to JSON config file describing sections.")
     p.add_argument("--print-example", action="store_true", help="Print an example config JSON and exit.")
+    p.add_argument("--phase", choices=["phase1", "phase2"], help="Run only a specific phase: phase1=create segments, phase2=concat segments. Omit to run both.")
+    p.add_argument("--workdir", help="Working directory to place/find intermediate segment files and concat_list.txt. Defaults to /app/data/tmp/compose_<outputname> when --phase is set.")
     # Simple mode: one MP4 and a number of seconds (optional audio/ass)
     p.add_argument("--video", help="Shorthand: input video file for a single section")
     p.add_argument("--seconds", type=float, help="Shorthand: duration in seconds for the single section")
@@ -320,7 +342,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         if args.audio_start:
             cfg["audio_start"] = float(args.audio_start)
         try:
-            compose_from_dict(cfg)
+            wd = Path(args.workdir) if args.workdir else None
+            compose_from_dict(cfg, phase=args.phase, workdir=wd)
             return 0
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)
@@ -331,7 +354,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 2
 
     try:
-        compose(Path(args.config))
+        wd = Path(args.workdir) if args.workdir else None
+        compose(Path(args.config), phase=args.phase, workdir=wd)
         return 0
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
