@@ -1,0 +1,5 @@
+docker run -ti --rm -v /home/baum/venv/src:/venv-host:ro -v /home/baum/src/example:/app/data \
+  -v /home/baum/src/example:/app/back -v /home/baum/src/example/fonts:/home/node/tts/fonts \
+    -v /home/baum/src/python/video-compose:/app test1 python video_functions.py \
+      --action animate_text_with_lottie --input_video /app/data/back-20.mp4 \
+       --output_video /app/data/output.mp4 --lottie_json /app/data/lottie.json --x 100 --y 100 --start 0 --duration 10

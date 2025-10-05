@@ -1,0 +1,9 @@
+{
+  "name": "lottie-overlay",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "dependencies": {
+    "lottie-web": "^5.13.0",
+    "puppeteer": "^22.15.0"
+  }
+}

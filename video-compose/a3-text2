@@ -1,0 +1,4 @@
+docker run -ti --entrypoint=/bin/bash --rm -v /home/baum/venv/src:/venv-host:ro -v /home/baum/src/example:/app/data \
+  -v /home/baum/src/example:/app/back -v /home/baum/src/example/fonts:/home/node/tts/fonts \
+    -v /home/baum/src/python/video-compose:/app test1 
+

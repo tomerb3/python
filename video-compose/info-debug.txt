@@ -1,0 +1,32 @@
+
+sshn8n
+docker exec ...
+
+docker run -i --rm -v /home/node/tts/venv/src:/venv-host:ro -v /home/node/tts/1#1-mgaraqb7_nn5d7va_32:/app/data -v /home/node/tts/background:/app/back -v /home/node/tts/scripts/video:/app video-venv python compose_video.py --config /app/data/merge_info.json
+
+
+in my main wsl2 
+
+
+docker run -ti --rm -v /home/baum/venv/src:/venv-host:ro -v /home/baum/src/example:/app/data -v /home/baum/example:/app/back -v /home/baum/src/python/video-compose:/app video-venv python compose_video.py --config /app/data/merge_info.json
+
+about the docker image: 
+
+docker build -t test1 --build-arg PYTHON_IMAGE=python:3.6.9-slim .
+
+
+to test first script: compose_video.py  a1 a2  in example 
+
+docker run -ti --rm -v /home/baum/venv/src:/venv-host:ro -v /home/baum/src/example:/app/data -v /home/baum/src/example:/app/back -v /home/baum/src/example/fonts:/home/node/tts/fonts -v /home/baum/src/python/video-compose:/app test1 python compose_video.py --config /app/data/merge_info.json
+
+docker run -ti --entrypoint=/bin/bash --rm -v /home/baum/venv/src:/venv-host:ro -v /home/baum/src/example:/app/data -v /home/baum/src/example:/app/back -v /home/baum/src/example/fonts:/home/node/tts/fonts -v /home/baum/src/python/video-compose:/app test1
+
+
+
+to test second function script a3 a4 
+
+docker run -ti --rm -v /home/baum/venv/src:/venv-host:ro -v /home/baum/src/example:/app/data -v /home/baum/src/example:/app/back -v /home/baum/src/example/fonts:/home/node/tts/fonts -v /home/baum/src/python/video-compose:/app test1 python video_functions.py --action animate_text_with_lottie --input_video /app/data/input.mp4 --output_video /app/data/output.mp4 --lottie_json /app/data/lottie.json --x 100 --y 100 --start 0 --duration 10
+
+
+
+

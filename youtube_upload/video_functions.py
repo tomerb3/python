@@ -207,8 +207,14 @@ def action_running_code_drawtext(
     ensure_ffmpeg()
 
     # drawtext positions can be expressions; accept raw strings for x/y
+    # Escape text for ffmpeg drawtext: escape backslashes, colons, and single quotes
+    escaped_text = (
+        text.replace('\\', r'\\')
+            .replace(':', r'\:')
+            .replace("'", r"\'")
+    )
     draw_opts = [
-        f"text={text.replace(':', '\\:').replace("'", "\\'")}",
+        f"text={escaped_text}",
         f"x={x}", f"y={y}",
         f"fontsize={fontsize}", f"fontcolor={fontcolor}",
         f"enable='between(t,{start},{start + duration})'",
@@ -234,7 +240,7 @@ def action_running_code_drawtext(
 
 def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Video utility actions: last_frame, add_sound, animate_text (Lottie), running_code (drawtext), mouse_move (cursor PNG overlay)")
-    p.add_argument("--action", required=True, choices=["last_frame", "add_sound", "animate_text", "running_code", "mouse_move"], help="Action to perform")
+    p.add_argument("--action", required=True, choices=["last_frame", "add_sound", "animate_text", "animate_text_with_lottie", "running_code", "mouse_move"], help="Action to perform")
     p.add_argument("--input_video", required=True, help="Path of input video file")
     p.add_argument("--output_video", required=True, help="Path of output video file")
 
@@ -245,12 +251,13 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     p.add_argument("--seconds", type=float, help="Duration in seconds for the still video (last_frame)")
 
     # add_sound
+    p.add_argument("--sound", help="Path to the sound file to mix (required for add_sound)")
     p.add_argument("--start", type=float, help="Start time (seconds) for sound/text overlays")
     p.add_argument("--sound_duration", type=float, help="Duration (seconds) of the sound effect (add_sound)")
     p.add_argument("--volume", type=float, help="Volume multiplier for the sound effect (e.g., 0.6)")
 
     # animate_text (Lottie)
-    p.add_argument("--lottie", help="Path to Lottie JSON to overlay (required for animate_text)")
+    p.add_argument("--lottie", "--lottie_json", dest="lottie", help="Path to Lottie JSON to overlay (required for animate_text)")
     p.add_argument("--x", help="X position (can be number or ffmpeg expr for drawtext; integer for Lottie)")
     p.add_argument("--y", help="Y position (can be number or ffmpeg expr for drawtext; integer for Lottie)")
     p.add_argument("--duration", type=float, help="Duration (seconds) for overlay/text display")
@@ -321,7 +328,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         )
         return 0
 
-    if args.action == "animate_text":
+    if args.action in ("animate_text", "animate_text_with_lottie"):
         # For Lottie text animations, user must provide a Lottie JSON that encodes the desired text animation.
         # We overlay that animation at (x,y) for the specified window.
         if not args.lottie:
