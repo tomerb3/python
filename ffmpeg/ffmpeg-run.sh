@@ -14,6 +14,20 @@ usage() {
   exit 1
 }
 
+
+# before run filter_script function 
+check_num_lines() {
+  LINES_COUNT=$(
+    awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' /home/baum/src/python/ffmpeg/video_script.txt
+  )
+  echo "lines_count=$LINES_COUNT"
+}
+
+
+
+
+
+
 dur() {
   ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$1" | awk '{printf "%.3f\n", $1}'
 }

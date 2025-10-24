@@ -1,0 +1,11 @@
+You've jjust created a function
+that uses parameters to
+
+
+function(a > b):then
+echo tomer
+fi
+
+case a < 80 (a):
+  then go
+
