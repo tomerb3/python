@@ -199,7 +199,9 @@ freeze_last_frame() {
   if [ -z "${seconds}" ]; then echo "seconds is required" >&2; exit 1; fi
   # extract last frame (seek from end) to a temp image
   local tmpimg
-  tmpimg=$(mktemp /tmp/lastframe.XXXXXX.jpg)
+rm -f /tmp/lastfram1.jpg  
+touch /tmp/lastfram1.jpg  
+  tmpimg=/tmp/lastfram1.jpg
   ffmpeg -y -sseof -0.05 -i "$in_mp4" -frames:v 1 -q:v 2 "$tmpimg"
   # build a constant video from the still image
   ffmpeg -y -loop 1 -i "$tmpimg" -t "$seconds" -r 30 \

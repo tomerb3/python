@@ -1,20 +1,23 @@
-#!/bin/bash
+#!/bin/bash -x
 
 output_folder=${output_folder:-/mnt/c/ffmpeg}
 backup_folder=${backup_folder:-/tmp/a}
 font_folder=${font_folder:-/tmp/a/fonts}
-
-
+if [ -e /home/node/tts/scripts/ffmpeg ];then 
+  home=/home/node/tts/scripts/ffmpeg
+else
+  home=/home/baum/src/python/ffmpeg
+fi
 good(){
   # mp3 mp4 and key.mp3 
-  ./ffmpeg-run.sh two_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/before.mp3 ${output_folder}/key-long1.mp3 3 ${output_folder}/before-and-keys.mp4
+  ${home}/ffmpeg-run.sh two_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/before.mp3 ${output_folder}/key-long1.mp3 3 ${output_folder}/before-and-keys.mp4
   # good testing 
 
 }
 code_run_verb(){
-./ffmpeg-run.sh running_code \
+${home}/ffmpeg-run.sh running_code \
   ${output_folder}/frozen-7s.mp4 \
-  ${output_folder}/running_script.txt \
+  ${output_folder}/video_script.txt \
   50 1200 \
   3 \
   1.2 \
@@ -25,15 +28,18 @@ code_run_verb(){
 
 
 #testing before section 
-./ffmpeg-run.sh one_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
+${home}/ffmpeg-run.sh one_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
 # testing is good !
+#A1
+#
+
 
 
 
 
 filter1() { 
  number_lines=5   
- ./ffmpeg-run.sh filter_script \
+ ${home}/ffmpeg-run.sh filter_script \
   ${backup_folder}/back-45.mp4 \
   ${output_folder}/files/filters.txt \
   ${output_folder}/code.mp3 \
@@ -60,10 +66,18 @@ sed -E -i "s/enable='between\(t,([0-9.]+),([0-9.]+)\)'/enable='gte(t,\1)'/g" ${o
 # 2) Make sure drawtext reloads the text files (prevents stale/bad frames)
 sed -E -i "s/:enable='/:reload=1:enable='/g" ${output_folder}/files/filters.txt
 
+
+
+
+#A2
 filter1
 
 
-./ffmpeg-run.sh freeze_last_frame ${output_folder}/output-code.mp4 60 ${output_folder}/frozen-code-60s.mp4
+
+
+#A3
+${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/output-code.mp4 60 ${output_folder}/frozen-code-60s.mp4
+
 
 export RC_FONTFILE="${font_folder}/BebasNeue-Regular.ttf"
 export RC_FONTSIZE=48
@@ -81,9 +95,9 @@ export RC_FONTCOLOR="#ffcc00@0.95"
 
 
 code_run_vera(){
-./ffmpeg-run.sh running_code \
+${home}/ffmpeg-run.sh running_code \
   ${output_folder}/frozen-code-60s.mp4 \
-  ${output_folder}/running_script.txt \
+  ${output_folder}/video_script.txt \
   50 1200 \
   3 \
   1.2 \
@@ -94,15 +108,21 @@ code_run_vera(){
 
 # code run 
 code_run_vera
+#A4
+#
+#
+#
+#
+#
 
 
-./ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4
+${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4
 
 
 #after 
-./ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
+${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
 
 
 #check combine 
-./ffmpeg-run.sh concat "${output_folder}/master-output-combine.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
+${home}/ffmpeg-run.sh concat "${output_folder}/master-output-combine.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
 #good  testing
