@@ -115,26 +115,27 @@ concat_v() {
   local inputs=("$@")
   local n=${#inputs[@]}
   if [ "$n" -lt 2 ]; then echo "concat requires at least 2 inputs" >&2; exit 1; fi
-  local maps_v="" maps_a="" idx=0
-  local fc=""
+  # Validate files
+  local f
   for f in "${inputs[@]}"; do
-    maps_v+=" -i \"$f\""
+    if [ ! -f "$f" ]; then echo "concat input missing: $f" >&2; exit 1; fi
   done
+  local fc=""
+  local idx
   for idx in $(seq 0 $((n-1))); do
     fc+="[$idx:v]fps=30,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v$idx];"
     fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000[a$idx];"
   done
-  local vlist="" alist=""
+  local concat_inputs=""
   for idx in $(seq 0 $((n-1))); do
-    vlist+="[v$idx]"; alist+="[a$idx]"
+    concat_inputs+="[v$idx][a$idx]"
   done
-  fc+="$vlist$alistconcat=n=$n:v=1:a=1[vcat][acat];[acat]aformat=channel_layouts=stereo:sample_rates=48000,loudnorm=I=-14:TP=-1.0:LRA=11[aout]"
-  eval ffmpeg -y $maps_v \
-    -filter_complex "$fc" \
-    -map "[vcat]" -map "[aout]" \
-    -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p \
-    -c:a aac -b:a 192k \
-    "$out_mp4"
+  fc+="${concat_inputs}concat=n=$n:v=1:a=1[vcat][acat];[acat]aformat=channel_layouts=stereo:sample_rates=48000,loudnorm=I=-14:TP=-1.0:LRA=11[aout]"
+  # Build args array to avoid eval and preserve spaces
+  local args=( -y )
+  for f in "${inputs[@]}"; do args+=( -i "$f" ); done
+  args+=( -filter_complex "$fc" -map "[vcat]" -map "[aout]" -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4" )
+  ffmpeg "${args[@]}"
 }
 
 cmd="$1"; shift || true
