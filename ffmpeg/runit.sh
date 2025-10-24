@@ -17,4 +17,13 @@ echo .
 }
 
 #./ffmpeg-run.sh filter_script /tmp/a/back-45.mp4 /tmp/a/files/filters.txt /tmp/a/key-long1.mp3 /mnt/c/ffmpeg/output-code.mp4 
- ./ffmpeg-run.sh filter_script /tmp/a/back-45.mp4 /tmp/a/files/filters.txt /tmp/a/code.mp3 /tmp/a/key-long1.mp3 /mnt/c/ffmpeg/output-code.mp4
+ #./ffmpeg-run.sh filter_script /tmp/a/back-45.mp4 /tmp/a/files/filters.txt /tmp/a/code.mp3 /tmp/a/key-long1.mp3 /mnt/c/ffmpeg/output-code.mp4
+
+
+ ./ffmpeg-run.sh filter_script \
+  /tmp/a/back-45.mp4 \
+  /tmp/a/files/filters.txt \
+  /tmp/a/code.mp3 \
+  /tmp/a/key-2s.wav \
+  5 \
+  /mnt/c/ffmpeg/output-code.mp4

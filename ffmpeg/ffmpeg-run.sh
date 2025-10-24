@@ -10,7 +10,7 @@ usage() {
   echo "  concat <out_mp4> <in1.mp4> [in2.mp4 ...]" >&2
   echo "didnt test yet"
 
-  echo "  filter_script <in_mp4> <filters.txt> <voice.mp3> <key.mp3> <out_mp4>" >&2
+  echo "  filter_script <in_mp4> <filters.txt> <voice.mp3> <key.mp3> <lines_count> <out_mp4>" >&2
   exit 1
 }
 
@@ -65,8 +65,9 @@ encode_video_filter_script() {
   local script="$2"
   local voice_mp3="$3"
   local key_mp3="$4"
-  local out_mp4="$5"
-  local duration="$6"
+  local lines_count="$5"
+  local out_mp4="$6"
+  local duration="$7"
   # Read and flatten the video filter chain from the script
   local fchain
   fchain=$(tr -d '\n' < "$script")
@@ -78,7 +79,8 @@ encode_video_filter_script() {
   local fc
   fc="[0:v]${fchain}[vout];"
   fc+="[1:a]aformat=channel_layouts=stereo:sample_rates=48000,apad=pad_dur=${duration},atrim=0:${duration},asetpts=PTS-STARTPTS[a1];"
-  fc+="[2:a]aformat=channel_layouts=stereo:sample_rates=48000,apad=pad_dur=${duration},atrim=0:${duration},asetpts=PTS-STARTPTS[a2];"
+  # Loop the first 2 seconds of key audio lines_count times: at 48kHz, 2s -> size=96000 samples, loop=(lines_count-1)
+  fc+="[2:a]aformat=channel_layouts=stereo:sample_rates=48000,atrim=0:2,asetpts=PTS-STARTPTS,aloop=loop=$((lines_count-1)):size=96000:start=0,apad=pad_dur=${duration},atrim=0:${duration}[a2];"
   fc+="[a1][a2]amix=inputs=2:duration=longest:dropout_transition=0,loudnorm=I=-14:TP=-1.0:LRA=11[aout]"
   ffmpeg -y \
     -i "$in_mp4" -i "$voice_mp3" -stream_loop -1 -i "$key_mp3" \
@@ -118,15 +120,16 @@ two_mp3() {
 }
 
 filter_script() {
-  local in_mp4="$1"; local script="$2"; local voice="$3"; local key="$4"; local out_mp4="$5"
-  local v_base v_rem v_total k_base target
+  local in_mp4="$1"; local script="$2"; local voice="$3"; local key="$4"; local lines_count="$5"; local out_mp4="$6"
+  local v_base v_rem v_total k_total target
   v_base=$(dur "$voice")
   v_rem=$(trailing_silence_remain "$voice")
   v_total=$(awk -v a="$v_base" -v b="$v_rem" 'BEGIN{printf "%.3f\n", a+b}')
-  k_base=$(dur "$key")
-  # target = max(v_total, k_base) + 1.000
-  target=$(awk -v v="$v_total" -v k="$k_base" 'BEGIN{m=(v>k?v:k); printf "%.3f\n", m+1.0}')
-  encode_video_filter_script "$in_mp4" "$script" "$voice" "$key" "$out_mp4" "$target"
+  # key duration = lines_count * 2 seconds
+  k_total=$(awk -v n="$lines_count" 'BEGIN{printf "%.3f\n", n*2.0}')
+  # target = max(v_total, k_total) + 1.000
+  target=$(awk -v v="$v_total" -v k="$k_total" 'BEGIN{m=(v>k?v:k); printf "%.3f\n", m+1.0}')
+  encode_video_filter_script "$in_mp4" "$script" "$voice" "$key" "$lines_count" "$out_mp4" "$target"
 }
 
 concat_v() {
@@ -168,8 +171,8 @@ case "$cmd" in
     two_mp3 "$1" "$2" "$3" "$4" "$5"
     ;;
   filter_script)
-    [ "$#" -eq 5 ] || usage
-    filter_script "$1" "$2" "$3" "$4" "$5"
+    [ "$#" -eq 6 ] || usage
+    filter_script "$1" "$2" "$3" "$4" "$5" "$6"
     ;;
   concat)
     [ "$#" -ge 3 ] || usage
