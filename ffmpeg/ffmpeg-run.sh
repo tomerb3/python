@@ -89,6 +89,22 @@ encode_video_filter_script() {
   fchain=$(tr -d '\n' < "$script")
   fchain="${fchain%,}"
   fchain="${fchain%.}"
+  # Optional defaults for drawtext injected via env vars (do not override per-filter settings)
+  # RC_FONTFILE or RC_FONT, RC_FONTSIZE, RC_FONTCOLOR
+  if [ -n "${RC_FONTFILE:-}" ]; then
+    esc=$(printf %s "$RC_FONTFILE" | sed -e "s/[\\/&]/\\\\&/g")
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontfile='${esc}':/g")
+  elif [ -n "${RC_FONT:-}" ]; then
+    esc=$(printf %s "$RC_FONT" | sed -e "s/[\\/&]/\\\\&/g")
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=font='${esc}':/g")
+  fi
+  if [ -n "${RC_FONTSIZE:-}" ]; then
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontsize=${RC_FONTSIZE}:/g")
+  fi
+  if [ -n "${RC_FONTCOLOR:-}" ]; then
+    esc=$(printf %s "$RC_FONTCOLOR" | sed -e "s/[\\/&]/\\\\&/g")
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontcolor=${esc}:/g")
+  fi
   # Build a unified filter_complex: video + audio mix
   # [0:v] -> video filters -> [vout]
   # [1:a] voice trimmed -> [a1]; [2:a] key (looped via -stream_loop) trimmed -> [a2]; amix -> [aout]
@@ -196,7 +212,26 @@ running_code() {
   local fade=0.15
   # alpha over time, shifted by start_delay; fade-in only, then stay visible until end
   local alpha_expr="if(lt(t,${start_delay}),0, if(lt(t,${start_delay}+${fade}),(t-${start_delay})/${fade}, 1))"
-  local dt="[0:v]drawtext=fontfile='/tmp/a/fonts/BebasNeue-Regular.ttf':textfile='${textfile}':reload=1:expansion=none:fontcolor=white:fontsize=60:x=${x}:y=${y}:alpha='${alpha_expr}'[v]"
+  # Build drawtext options honoring env overrides
+  local dt_opts="textfile='${textfile}':reload=1:expansion=none"
+  if [ -n "${RC_FONTFILE:-}" ]; then
+    dt_opts="fontfile='${RC_FONTFILE}':${dt_opts}"
+  elif [ -n "${RC_FONT:-}" ]; then
+    dt_opts="font='${RC_FONT}':${dt_opts}"
+  else
+    dt_opts="fontfile='/tmp/a/fonts/BebasNeue-Regular.ttf':${dt_opts}"
+  fi
+  if [ -n "${RC_FONTSIZE:-}" ]; then
+    dt_opts="fontsize=${RC_FONTSIZE}:${dt_opts}"
+  else
+    dt_opts="fontsize=60:${dt_opts}"
+  fi
+  if [ -n "${RC_FONTCOLOR:-}" ]; then
+    dt_opts="fontcolor=${RC_FONTCOLOR}:${dt_opts}"
+  else
+    dt_opts="fontcolor=white:${dt_opts}"
+  fi
+  local dt="[0:v]drawtext=${dt_opts}:x=${x}:y=${y}:alpha='${alpha_expr}'[v]"
 
   if [ -n "$sfx" ] && [ -f "$sfx" ] && [ -n "$explain" ] && [ -f "$explain" ]; then
     local delay_ms

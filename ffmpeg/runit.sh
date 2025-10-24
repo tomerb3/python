@@ -23,6 +23,36 @@ echo .
 #good
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 filter1() { 
  number_lines=5   
  ./ffmpeg-run.sh filter_script \
@@ -34,10 +64,10 @@ filter1() {
   /mnt/c/ffmpeg/output-code.mp4
 
 }
-#filter1
+
+
 
 #./ffmpeg-run.sh freeze_last_frame /mnt/c/ffmpeg/output-code.mp4 60 /mnt/c/ffmpeg/frozen-60s.mp4
-
 
 
 
@@ -64,4 +94,18 @@ code_run_verb(){
   '' \
  /tmp/a/coderun.mp3 
 }
-code_run_verb
+
+
+
+export RC_FONTFILE="/tmp/a/fonts/BebasNeue-Regular.ttf"
+export RC_FONTSIZE=48
+export RC_FONTCOLOR="#ffcc00@0.95"
+
+
+#export RC_FONT="DejaVu Sans"
+#export RC_FONTSIZE=48
+#export RC_FONTCOLOR="white"
+
+
+#filter1
+code_run_vera
