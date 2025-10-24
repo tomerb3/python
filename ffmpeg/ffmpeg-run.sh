@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 set -euo pipefail
 
@@ -45,14 +45,14 @@ trailing_silence_remain() {
 
 encode_video_audio() {
   local in_mp4="$1"
-  local a_input_spec="$2"
+  local a_file="$2"
   local out_mp4="$3"
   local duration="$4"
   ffmpeg -y \
-    -i "$in_mp4" $a_input_spec \
+    -i "$in_mp4" -i "$a_file" \
     -map 0:v:0 -map 1:a:0 \
     -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p \
-    -filter:a "aresample=48000,channelmap=channel_layout=stereo,loudnorm=I=-14:TP=-1.0:LRA=11" \
+    -filter:a "aformat=channel_layouts=stereo:sample_rates=48000,loudnorm=I=-14:TP=-1.0:LRA=11" \
     -c:a aac -b:a 192k \
     -t "$duration" \
     "$out_mp4"
@@ -68,7 +68,7 @@ encode_video_filter_script() {
     -i "$in_mp4" -i "$a_file" \
     -filter_complex_script "$script" -map "[outv]" -map 1:a:0 \
     -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p \
-    -filter:a "aresample=48000,channelmap=channel_layout=stereo,loudnorm=I=-14:TP=-1.0:LRA=11" \
+    -filter:a "aformat=channel_layouts=stereo:sample_rates=48000,loudnorm=I=-14:TP=-1.0:LRA=11" \
     -c:a aac -b:a 192k \
     -t "$duration" \
     "$out_mp4"
@@ -80,7 +80,7 @@ one_mp3() {
   base_dur=$(dur "$mp3")
   rem=$(trailing_silence_remain "$mp3")
   target=$(awk -v a="$base_dur" -v b="$rem" 'BEGIN{printf "%.3f\n", a+b}')
-  encode_video_audio "$in_mp4" "-i \"$mp3\"" "$out_mp4" "$target"
+  encode_video_audio "$in_mp4" "$mp3" "$out_mp4" "$target"
 }
 
 two_mp3() {
@@ -93,7 +93,7 @@ two_mp3() {
   offset_ms=$(awk -v s="$offset_sec" 'BEGIN{ if (s < 0) s=0; printf "%d", s*1000 }')
   ffmpeg -y \
     -i "$in_mp4" -i "$mp3_primary" -i "$mp3_secondary" \
-    -filter_complex "[1:a]aresample=48000,channelmap=channel_layout=stereo,volume=1.0[a1];[2:a]adelay=${offset_ms}:all=1,aresample=48000,channelmap=channel_layout=stereo,volume=0.3[a2];[a1][a2]amix=inputs=2:duration=first:dropout_transition=0,loudnorm=I=-14:TP=-1.0:LRA=11[aout]" \
+    -filter_complex "[1:a]aformat=channel_layouts=stereo:sample_rates=48000,volume=1.0[a1];[2:a]adelay=${offset_ms}:all=1,aformat=channel_layouts=stereo:sample_rates=48000,volume=0.3[a2];[a1][a2]amix=inputs=2:duration=first:dropout_transition=0,loudnorm=I=-14:TP=-1.0:LRA=11[aout]" \
     -map 0:v:0 -map "[aout]" \
     -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p \
     -c:a aac -b:a 192k \
@@ -122,13 +122,13 @@ concat_v() {
   done
   for idx in $(seq 0 $((n-1))); do
     fc+="[$idx:v]fps=30,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v$idx];"
-    fc+="[$idx:a]aresample=48000,channelmap=channel_layout=stereo[a$idx];"
+    fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000[a$idx];"
   done
   local vlist="" alist=""
   for idx in $(seq 0 $((n-1))); do
     vlist+="[v$idx]"; alist+="[a$idx]"
   done
-  fc+="$vlist$alistconcat=n=$n:v=1:a=1[vcat][acat];[acat]loudnorm=I=-14:TP=-1.0:LRA=11[aout]"
+  fc+="$vlist$alistconcat=n=$n:v=1:a=1[vcat][acat];[acat]aformat=channel_layouts=stereo:sample_rates=48000,loudnorm=I=-14:TP=-1.0:LRA=11[aout]"
   eval ffmpeg -y $maps_v \
     -filter_complex "$fc" \
     -map "[vcat]" -map "[aout]" \
