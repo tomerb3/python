@@ -7,8 +7,10 @@ usage() {
   echo "Commands:" >&2
   echo "  one_mp3 <in_mp4> <mp3> <out_mp4>" >&2
   echo "  two_mp3 <in_mp4> <mp3_primary> <mp3_secondary> <offset_seconds> <out_mp4>" >&2
-  echo "  filter_script <in_mp4> <filters.txt> <mp3> <out_mp4>" >&2
   echo "  concat <out_mp4> <in1.mp4> [in2.mp4 ...]" >&2
+  echo "didnt test yet"
+
+  echo "  filter_script <in_mp4> <filters.txt> <mp3> <out_mp4>" >&2
   exit 1
 }
 
@@ -66,11 +68,12 @@ encode_video_filter_script() {
   local duration="$5"
   ffmpeg -y \
     -i "$in_mp4" -i "$a_file" \
-    -filter_complex_script "$script" -map "[outv]" -map 1:a:0 \
-    -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p \
+    -t "$duration" \
+    -filter_complex_script "$script" \
+    -map 1:a:0? \
+    -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
     -filter:a "aformat=channel_layouts=stereo:sample_rates=48000,loudnorm=I=-14:TP=-1.0:LRA=11" \
     -c:a aac -b:a 192k \
-    -t "$duration" \
     "$out_mp4"
 }
 
