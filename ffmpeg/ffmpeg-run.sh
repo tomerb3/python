@@ -12,6 +12,7 @@ usage() {
 
   echo "  filter_script <in_mp4> <filters.txt> <voice.mp3> <key.mp3> <lines_count> <out_mp4>" >&2
   echo "  freeze_last_frame <in_mp4> <seconds> <out_mp4>" >&2
+  echo "  running_code <in_mp4> <textfile> <x> <y> <seconds> <start_delay> <out_mp4> [sfx.mp3] [explain.mp3]" >&2
   exit 1
 }
 
@@ -190,6 +191,34 @@ freeze_last_frame() {
   rm -f "$tmpimg"
 }
 
+running_code() {
+  local in_mp4="$1"; local textfile="$2"; local x="$3"; local y="$4"; local seconds="$5"; local start_delay="$6"; local out_mp4="$7"; local sfx="${8:-}"; local explain="${9:-}"
+  local fade=0.15
+  # alpha over time, shifted by start_delay; fade-in only, then stay visible until end
+  local alpha_expr="if(lt(t,${start_delay}),0, if(lt(t,${start_delay}+${fade}),(t-${start_delay})/${fade}, 1))"
+  local dt="[0:v]drawtext=fontfile='/tmp/a/fonts/BebasNeue-Regular.ttf':textfile='${textfile}':reload=1:expansion=none:fontcolor=white:fontsize=60:x=${x}:y=${y}:alpha='${alpha_expr}'[v]"
+
+  if [ -n "$sfx" ] && [ -f "$sfx" ] && [ -n "$explain" ] && [ -f "$explain" ]; then
+    local delay_ms
+    delay_ms=$(awk -v d="$start_delay" 'BEGIN{printf "%d", d*1000}')
+    ffmpeg -y -i "$in_mp4" -i "$sfx" -i "$explain" \
+      -filter_complex "$dt;[1:a]adelay=${delay_ms}:all=1,asetpts=PTS-STARTPTS[sfx];[2:a]asetpts=PTS-STARTPTS[exp];[sfx][exp]amix=inputs=2:normalize=0[a]" \
+      -map "[v]" -map "[a]" -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4"
+  elif [ -n "$sfx" ] && [ -f "$sfx" ]; then
+    local delay_ms
+    delay_ms=$(awk -v d="$start_delay" 'BEGIN{printf "%d", d*1000}')
+    ffmpeg -y -i "$in_mp4" -i "$sfx" \
+      -filter_complex "$dt;[1:a]adelay=${delay_ms}:all=1,asetpts=PTS-STARTPTS[a]" \
+      -map "[v]" -map "[a]" -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4"
+  elif [ -n "$explain" ] && [ -f "$explain" ]; then
+    ffmpeg -y -i "$in_mp4" -i "$explain" \
+      -filter_complex "$dt;[1:a]asetpts=PTS-STARTPTS[a]" \
+      -map "[v]" -map "[a]" -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4"
+  else
+    ffmpeg -y -i "$in_mp4" -filter_complex "$dt" -map "[v]" -an -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p "$out_mp4"
+  fi
+}
+
 cmd="$1"; shift || true
 case "$cmd" in
   one_mp3)
@@ -212,6 +241,17 @@ case "$cmd" in
   freeze_last_frame)
     [ "$#" -eq 3 ] || usage
     freeze_last_frame "$1" "$2" "$3"
+    ;;
+  running_code)
+    if [ "$#" -eq 7 ]; then
+      running_code "$1" "$2" "$3" "$4" "$5" "$6" "$7"
+    elif [ "$#" -eq 8 ]; then
+      running_code "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8"
+    elif [ "$#" -eq 9 ]; then
+      running_code "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+    else
+      usage
+    fi
     ;;
   *)
     usage

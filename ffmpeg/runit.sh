@@ -34,6 +34,34 @@ filter1() {
   /mnt/c/ffmpeg/output-code.mp4
 
 }
-filter1
+#filter1
 
-./ffmpeg-run.sh freeze_last_frame /mnt/c/ffmpeg/output-code.mp4 60 /mnt/c/ffmpeg/frozen-60s.mp4
+#./ffmpeg-run.sh freeze_last_frame /mnt/c/ffmpeg/output-code.mp4 60 /mnt/c/ffmpeg/frozen-60s.mp4
+
+
+
+
+code_run_vera(){
+./ffmpeg-run.sh running_code \
+  /mnt/c/ffmpeg/frozen-7s.mp4 \
+  /tmp/a/running_script.txt \
+  50 1200 \
+  3 \
+  1.2 \
+  /mnt/c/ffmpeg/running-code-demo.mp4 \
+  /tmp/a/gong.mp3 \
+ /tmp/a/coderun.mp3 
+}
+
+code_run_verb(){
+./ffmpeg-run.sh running_code \
+  /mnt/c/ffmpeg/frozen-7s.mp4 \
+  /tmp/a/running_script.txt \
+  50 1200 \
+  3 \
+  1.2 \
+  /mnt/c/ffmpeg/running-code-demo.mp4 \
+  '' \
+ /tmp/a/coderun.mp3 
+}
+code_run_verb
