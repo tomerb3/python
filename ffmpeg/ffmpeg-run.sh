@@ -11,6 +11,7 @@ usage() {
   echo "didnt test yet"
 
   echo "  filter_script <in_mp4> <filters.txt> <voice.mp3> <key.mp3> <lines_count> <out_mp4>" >&2
+  echo "  freeze_last_frame <in_mp4> <seconds> <out_mp4>" >&2
   exit 1
 }
 
@@ -174,6 +175,21 @@ concat_v() {
   ffmpeg "${args[@]}"
 }
 
+# Create a silent video by freezing the last frame for a given number of seconds
+freeze_last_frame() {
+  local in_mp4="$1"; local seconds="$2"; local out_mp4="$3"
+  if [ ! -f "$in_mp4" ]; then echo "input not found: $in_mp4" >&2; exit 1; fi
+  if [ -z "${seconds}" ]; then echo "seconds is required" >&2; exit 1; fi
+  # extract last frame (seek from end) to a temp image
+  local tmpimg
+  tmpimg=$(mktemp /tmp/lastframe.XXXXXX.jpg)
+  ffmpeg -y -sseof -0.05 -i "$in_mp4" -frames:v 1 -q:v 2 "$tmpimg"
+  # build a constant video from the still image
+  ffmpeg -y -loop 1 -i "$tmpimg" -t "$seconds" -r 30 \
+    -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -an "$out_mp4"
+  rm -f "$tmpimg"
+}
+
 cmd="$1"; shift || true
 case "$cmd" in
   one_mp3)
@@ -192,6 +208,10 @@ case "$cmd" in
     [ "$#" -ge 3 ] || usage
     out="$1"; shift
     concat_v "$out" "$@"
+    ;;
+  freeze_last_frame)
+    [ "$#" -eq 3 ] || usage
+    freeze_last_frame "$1" "$2" "$3"
     ;;
   *)
     usage

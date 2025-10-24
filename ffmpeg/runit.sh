@@ -23,11 +23,17 @@ echo .
 #good
 
 
-
+filter1() { 
+ number_lines=5   
  ./ffmpeg-run.sh filter_script \
   /tmp/a/back-45.mp4 \
   /tmp/a/files/filters.txt \
   /tmp/a/code.mp3 \
   /tmp/a/key-2s.wav \
-  5 \
-  /mnt/c/ffmpeg/output-code-3.mp4
+  $number_lines \
+  /mnt/c/ffmpeg/output-code.mp4
+
+}
+filter1
+
+./ffmpeg-run.sh freeze_last_frame /mnt/c/ffmpeg/output-code.mp4 60 /mnt/c/ffmpeg/frozen-60s.mp4
