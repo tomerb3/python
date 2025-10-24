@@ -95,7 +95,12 @@ code_run_verb(){
  /tmp/a/coderun.mp3 
 }
 
+export RC_FONTFILE="/tmp/a/fonts/BebasNeue-Regular.ttf"
+export RC_FONTSIZE=66
+export RC_FONTCOLOR="#27d3f5"
 
+
+filter1
 
 export RC_FONTFILE="/tmp/a/fonts/BebasNeue-Regular.ttf"
 export RC_FONTSIZE=48
@@ -107,5 +112,5 @@ export RC_FONTCOLOR="#ffcc00@0.95"
 #export RC_FONTCOLOR="white"
 
 
-#filter1
+
 code_run_vera
