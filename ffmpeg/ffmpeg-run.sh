@@ -233,22 +233,41 @@ running_code() {
   fi
   local dt="[0:v]drawtext=${dt_opts}:x=${x}:y=${y}:alpha='${alpha_expr}'[v]"
 
+  # Determine target duration based on audio inputs: max(end times) + 1s
+  # end time for explain starts at 0; end time for sfx is start_delay + dur(sfx)
+  local target=""
+  if { [ -n "$sfx" ] && [ -f "$sfx" ]; } || { [ -n "$explain" ] && [ -f "$explain" ]; }; then
+    local end_audio=0 d
+    if [ -n "$explain" ] && [ -f "$explain" ]; then
+      d=$(dur "$explain")
+      end_audio=$(awk -v a="$end_audio" -v b="$d" 'BEGIN{print (a>b)?a:b}')
+    fi
+    if [ -n "$sfx" ] && [ -f "$sfx" ]; then
+      d=$(dur "$sfx")
+      # sfx placed at start_delay
+      local end_sfx
+      end_sfx=$(awk -v s="$start_delay" -v d="$d" 'BEGIN{printf "%.3f", s + d}')
+      end_audio=$(awk -v a="$end_audio" -v b="$end_sfx" 'BEGIN{print (a>b)?a:b}')
+    fi
+    target=$(awk -v a="$end_audio" 'BEGIN{printf "%.3f", a + 1.0}')
+  fi
+
   if [ -n "$sfx" ] && [ -f "$sfx" ] && [ -n "$explain" ] && [ -f "$explain" ]; then
     local delay_ms
     delay_ms=$(awk -v d="$start_delay" 'BEGIN{printf "%d", d*1000}')
     ffmpeg -y -i "$in_mp4" -i "$sfx" -i "$explain" \
       -filter_complex "$dt;[1:a]adelay=${delay_ms}:all=1,asetpts=PTS-STARTPTS[sfx];[2:a]asetpts=PTS-STARTPTS[exp];[sfx][exp]amix=inputs=2:normalize=0[a]" \
-      -map "[v]" -map "[a]" -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4"
+      -map "[v]" -map "[a]" -t "$target" -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4"
   elif [ -n "$sfx" ] && [ -f "$sfx" ]; then
     local delay_ms
     delay_ms=$(awk -v d="$start_delay" 'BEGIN{printf "%d", d*1000}')
     ffmpeg -y -i "$in_mp4" -i "$sfx" \
       -filter_complex "$dt;[1:a]adelay=${delay_ms}:all=1,asetpts=PTS-STARTPTS[a]" \
-      -map "[v]" -map "[a]" -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4"
+      -map "[v]" -map "[a]" -t "$target" -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4"
   elif [ -n "$explain" ] && [ -f "$explain" ]; then
     ffmpeg -y -i "$in_mp4" -i "$explain" \
       -filter_complex "$dt;[1:a]asetpts=PTS-STARTPTS[a]" \
-      -map "[v]" -map "[a]" -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4"
+      -map "[v]" -map "[a]" -t "$target" -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4"
   else
     ffmpeg -y -i "$in_mp4" -filter_complex "$dt" -map "[v]" -an -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p "$out_mp4"
   fi
