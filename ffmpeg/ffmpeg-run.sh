@@ -221,7 +221,7 @@ running_code() {
   elif [ -n "${RC_FONT:-}" ]; then
     dt_opts="font='${RC_FONT}':${dt_opts}"
   else
-    dt_opts="fontfile='/tmp/a/fonts/BebasNeue-Regular.ttf':${dt_opts}"
+    dt_opts="fontfile='/tmp/a/fonts/DejaVuSans.ttf':${dt_opts}"
   fi
   if [ -n "${RC_FONTSIZE:-}" ]; then
     dt_opts="fontsize=${RC_FONTSIZE}:${dt_opts}"

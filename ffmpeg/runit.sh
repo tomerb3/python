@@ -8,6 +8,7 @@ if [ -e /home/node/tts/scripts/ffmpeg ];then
 else
   home=/home/baum/src/python/ffmpeg
 fi
+
 good(){
   # mp3 mp4 and key.mp3 
   ${home}/ffmpeg-run.sh two_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/before.mp3 ${output_folder}/key-long1.mp3 3 ${output_folder}/before-and-keys.mp4
@@ -17,7 +18,7 @@ good(){
 code_run_verb(){
 ${home}/ffmpeg-run.sh running_code \
   ${output_folder}/frozen-7s.mp4 \
-  ${output_folder}/video_script.txt \
+  ${output_folder}/code_run.txt \
   50 1200 \
   3 \
   1.2 \
@@ -38,13 +39,18 @@ ${home}/ffmpeg-run.sh one_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/befo
 
 
 filter1() { 
- number_lines=5   
+
+
+  num_lines=$(
+    awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' ${output_folder}/code_show.txt
+  )
+
  ${home}/ffmpeg-run.sh filter_script \
   ${backup_folder}/back-45.mp4 \
   ${output_folder}/files/filters.txt \
   ${output_folder}/code.mp3 \
   ${backup_folder}/key-2s.wav \
-  $number_lines \
+  $num_lines \
   ${output_folder}/output-code.mp4
 
 }
@@ -52,7 +58,7 @@ filter1() {
 
 
 
-export RC_FONTFILE="${font_folder}/BebasNeue-Regular.ttf"
+export RC_FONTFILE="${font_folder}/DejaVuSans.ttf"
 export RC_FONTSIZE=66
 #https://www.colorhexa.com/27d3f5
 export RC_FONTCOLOR="#27d3f5"
@@ -79,7 +85,7 @@ filter1
 ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/output-code.mp4 60 ${output_folder}/frozen-code-60s.mp4
 
 
-export RC_FONTFILE="${font_folder}/BebasNeue-Regular.ttf"
+export RC_FONTFILE="${font_folder}/DejaVuSans.ttf"
 export RC_FONTSIZE=48
 #https://www.colorhexa.com/27d3f5
 export RC_FONTCOLOR="#ffcc00@0.95"
@@ -97,7 +103,7 @@ export RC_FONTCOLOR="#ffcc00@0.95"
 code_run_vera(){
 ${home}/ffmpeg-run.sh running_code \
   ${output_folder}/frozen-code-60s.mp4 \
-  ${output_folder}/video_script.txt \
+  ${output_folder}/code_run.txt \
   50 1200 \
   3 \
   1.2 \
