@@ -1,0 +1,5 @@
+docker run -it --rm \
+  -v "$(pwd)":/manim \
+  -u "$(id -u)":"$(id -g)" \
+  manimcommunity/manim \
+  manim -pql ./text_scene.py TextScene

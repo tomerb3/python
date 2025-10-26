@@ -102,14 +102,17 @@ encode_video_filter_script() {
     fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontsize=${RC_FONTSIZE}:/g")
   fi
   if [ -n "${RC_FONTCOLOR:-}" ]; then
-    esc=$(printf %s "$RC_FONTCOLOR" | sed -e "s/[\\/&]/\\\\&/g")
+    esc=$(printf %s "$RC_FONTCOLOR" | sed -e "s/[\\\/&]/\\\\&/g")
     fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontcolor=${esc}:/g")
   fi
+  # Improve text sharpness: enable FreeType autohint for all drawtext filters
+  fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=ft_load_flags=force_autohint:/g")
   # Build a unified filter_complex: video + audio mix
   # [0:v] -> video filters -> [vout]
   # [1:a] voice trimmed -> [a1]; [2:a] key (looped via -stream_loop) trimmed -> [a2]; amix -> [aout]
   local fc
-  fc="[0:v]${fchain}[vout];"
+  # Render in RGB for crisper glyph rasterization, then convert to 4:4:4 before encode step
+  fc="[0:v]format=rgb24,${fchain},format=yuv444p[vout];"
   fc+="[1:a]aformat=channel_layouts=stereo:sample_rates=48000,apad=pad_dur=${duration},atrim=0:${duration},asetpts=PTS-STARTPTS[a1];"
   # Loop the first 2 seconds of key audio lines_count times: at 48kHz, 2s -> size=96000 samples, loop=(lines_count-1)
   fc+="[2:a]aformat=channel_layouts=stereo:sample_rates=48000,atrim=0:2,asetpts=PTS-STARTPTS,aloop=loop=$((lines_count-1)):size=96000:start=0,apad=pad_dur=${duration},atrim=0:${duration}[a2];"
