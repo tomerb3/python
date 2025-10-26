@@ -29,9 +29,10 @@ ${home}/ffmpeg-run.sh running_code \
 
 
 filter1() { 
-  num_lines=$(
-    awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' ${output_folder}/code_show.txt
-  )
+#  num_lines=$(
+#    awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' ${output_folder}/code_show.txt
+#  )
+num_lines=$(( $(awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' "${output_folder}/code_show.txt") + 1 ))
 
  ${home}/ffmpeg-run.sh filter_script \
   ${backup_folder}/back-45.mp4 \
@@ -93,18 +94,16 @@ ${home}/ffmpeg-run.sh concat "${output_folder}/master.mp4" "${output_folder}/bef
 cmd_merge_examples_to_chapter(){
   cd /home/node/tts
   folder=${folder:-none}
-  check=$(echo $folder |cut -d '-' -f2)
-  rm -rf "chapter-${check}" 
-  ls -1tr |grep $check > list.txt
-  mkdir -p chapter-${check}
-  LIST_FILE="list.txt"; mkdir -p chapter-${check} 
+  #check=$(echo $folder |cut -d '-' -f2)
+  rm -rf "chapter-${folder}" 
+  ls -1tr |grep $folder > list.txt
+  mkdir -p chapter-${folder}
+  LIST_FILE="list.txt"; mkdir -p chapter-${folder} 
   mapfile -t d < <(awk 'NF' "$LIST_FILE"); \
-  chapter_name=( "chapter-${check}/${check}.mp4" )
+  chapter_name=( "chapter-${folder}/${folder}.mp4" )
   for x in "${d[@]}"; do chapter_name+=( "$x/master.mp4" ); done
-echo ===
-  echo "${home}/ffmpeg-run.sh" concat "${chapter_name[@]}" 
+#  echo "${home}/ffmpeg-run.sh" concat "${chapter_name[@]}" 
   "${home}/ffmpeg-run.sh" concat "${chapter_name[@]}" 
-echo ===
 
 }
 
