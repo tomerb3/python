@@ -1,11 +1,24 @@
+#!/bin/bash -x 
+# ./run "Custom hex color" "#ffcc00"
+rm -rf media
 docker run -it --rm \
   -v "$(pwd)":/manim \
   -u "$(id -u)":"$(id -g)" \
+  -e TEXT="${1:-Hello 1from Manim!}" \
+  -e COLOR="${2:-blue}" \
   manimcommunity/manim \
-  manim -ql  ./text_scene.py TextScene
+   manim -ql -t -o text_alpha.webm ./text_scene.py TextScene
+#  manim -ql ./text_scene.py TextScene
 
-  a(){
-    ffmpeg -i background.mp4 -i text_alpha.webm \
+
+  ffmpeg1(){
+  
+  cd media/videos/text_scene/480p15
+  pwd 
+  ffmpeg -i ~/a/back-45.mp4 -i text_alpha.webm.mov \
   -filter_complex "[1:v]scale=1920:-1[fg];[0:v][fg]overlay=0:0:format=auto" \
-  -c:v libx264 -pix_fmt yuv420p -c:a copy output.mp4
+  -c:v libx264 -pix_fmt yuv420p -c:a copy back-for-before.mp4 -y 
+  cp -a back-for-before.mp4 /mnt/c/ffmpeg/
+
   }
+  ffmpeg1
