@@ -11,7 +11,7 @@ fi
 
 good(){
   # mp3 mp4 and key.mp3 
-  ${home}/ffmpeg-run.sh two_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/before.mp3 ${output_folder}/key-long1.mp3 3 ${output_folder}/before-and-keys.mp4
+  ${home}/ffmpeg-run.sh two_mp3 ${output_folder}/back-for-before.mp4 ${output_folder}/before.mp3 ${output_folder}/key-long1.mp3 3 ${output_folder}/before-and-keys.mp4
   # good testing 
 }
 
@@ -56,8 +56,12 @@ ${home}/ffmpeg-run.sh running_code \
 }
 
 cmd_create_example(){
-#testing before section 
-${home}/ffmpeg-run.sh one_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
+   #testing before section 
+   ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/back-for-before.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
+   #${home}/ffmpeg-run.sh one_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
+
+
+
 # testing is good !
 #A1
 export RC_FONTFILE="${font_folder}/DejaVuSans.ttf"
