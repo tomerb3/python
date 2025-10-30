@@ -1,0 +1,18 @@
+docker run --rm \
+  -v /home/baum/a:/in:ro \
+  -v /home/baum/src/python/movement:/workspace/tool:ro \
+  -v /home/baum/a:/out \
+  cursor-move:latest \
+  /workspace/tool/main-shapes.py \
+    --video /in/back-45.mp4 \
+    --out /out/output_shapes.mp4 \
+    --start 2 \
+    --duration 8 \
+    --text "objects" \
+    --opacity 0.85 \
+    --fade-in 0.3 \
+    --fade-out 0.3 \
+    --easing ease-in-out \
+    --seed 42
+
+    #python loops   python loops objects list numbers

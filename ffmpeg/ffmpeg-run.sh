@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+
+# to download 5 pexels video relate to string: 
+# ./ffmpeg-run.sh pexels "laptop code" 5
+
 usage() {
   echo "Usage: $0 <command> [args...]" >&2
   echo "Commands:" >&2
@@ -10,7 +14,7 @@ usage() {
   echo "  concat <out_mp4> <in1.mp4> [in2.mp4 ...]" >&2
   echo "didnt test yet"
 
-  echo "  filter_script <in_mp4> <filters.txt> <voice.mp3> <key.mp3> <lines_count> <out_mp4>" >&2
+  echo "  filter_script <in_mp4> <filters.txt> <voice.mp3> <key.mp3> <lines_count> <out_mp4> [halfkey.mp3]" >&2
   echo "  freeze_last_frame <in_mp4> <seconds> <out_mp4>" >&2
   echo "  running_code <in_mp4> <textfile> <x> <y> <seconds> <start_delay> <out_mp4> [sfx.mp3] [explain.mp3]" >&2
   exit 1
@@ -27,6 +31,50 @@ check_num_lines() {
 
 
 
+
+pexels_download_videos() {
+  local query="$1"; local count="$2"; local outdir
+  if [ -z "${PEXELS_API_KEY:-}" ]; then echo "PEXELS_API_KEY is required" >&2; exit 1; fi
+  if [ -z "$query" ] || [ -z "$count" ]; then echo "query and count are required" >&2; exit 1; fi
+  outdir="${output:-${output_folder:-./output}}"
+  mkdir -p "$outdir"
+  local downloaded=0 page=1 per_page=30
+  while [ "$downloaded" -lt "$count" ]; do
+    local remaining=$((count-downloaded))
+    local pp=$per_page; if [ "$remaining" -lt "$per_page" ]; then pp="$remaining"; fi
+    local resp
+    resp=$(curl -sS -G "https://api.pexels.com/videos/search" \
+      --data-urlencode "query=$query" --data-urlencode "per_page=$pp" --data-urlencode "page=$page" \
+      -H "Authorization: $PEXELS_API_KEY")
+    mapfile -t lines < <(printf '%s' "$resp" | python3 -c '
+import sys, json
+data = json.loads(sys.stdin.read() or "{}")
+for v in data.get("videos", []):
+    vid = v.get("id")
+    files = v.get("video_files") or []
+    if not files:
+        continue
+    def key(f):
+        return (f.get("width") or 0, f.get("height") or 0, f.get("bitrate") or 0)
+    best = max(files, key=key)
+    url = best.get("link") or best.get("file")
+    if vid is not None and url:
+        print(f"{vid}\t{url}")
+')
+    if [ "${#lines[@]}" -eq 0 ]; then break; fi
+    local line id url fname base
+    for line in "${lines[@]}"; do
+      if [ "$downloaded" -ge "$count" ]; then break; fi
+      id="${line%%$'\t'*}"
+      url="${line#*$'\t'}"
+      base=$(printf '%s' "$query" | tr ' /\t' '___')
+      fname="$outdir/${base}__${id}_${downloaded}.mp4"
+      curl -sSL "$url" -o "$fname"
+      downloaded=$((downloaded+1))
+    done
+    page=$((page+1))
+  done
+}
 
 
 
@@ -84,6 +132,7 @@ encode_video_filter_script() {
   local lines_count="$5"
   local out_mp4="$6"
   local duration="$7"
+  local halfkey_mp3="${8:-}"
   # Read and flatten the video filter chain from the script
   local fchain
   fchain=$(tr -d '\n' < "$script")
@@ -109,22 +158,38 @@ encode_video_filter_script() {
   fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=ft_load_flags=force_autohint:/g")
   # Build a unified filter_complex: video + audio mix
   # [0:v] -> video filters -> [vout]
-  # [1:a] voice trimmed -> [a1]; [2:a] key (looped via -stream_loop) trimmed -> [a2]; amix -> [aout]
+  # [1:a] voice trimmed -> [a1]; [2:a] key (looped) -> [a2m]; optional [3:a] halfkey -> [a3]; concat -> [a2]; amix -> [aout]
   local fc
   # Render in RGB for crisper glyph rasterization, then convert to 4:4:4 before encode step
   fc="[0:v]format=rgb24,${fchain},format=yuv444p[vout];"
   fc+="[1:a]aformat=channel_layouts=stereo:sample_rates=48000,apad=pad_dur=${duration},atrim=0:${duration},asetpts=PTS-STARTPTS[a1];"
   # Loop the first 2 seconds of key audio lines_count times: at 48kHz, 2s -> size=96000 samples, loop=(lines_count-1)
-  fc+="[2:a]aformat=channel_layouts=stereo:sample_rates=48000,atrim=0:2,asetpts=PTS-STARTPTS,aloop=loop=$((lines_count-1)):size=96000:start=0,apad=pad_dur=${duration},atrim=0:${duration}[a2];"
+  fc+="[2:a]aformat=channel_layouts=stereo:sample_rates=48000,atrim=0:2,asetpts=PTS-STARTPTS,aloop=loop=$((lines_count-1)):size=96000:start=0[a2m];"
+  if [ -n "$halfkey_mp3" ] && [ -f "$halfkey_mp3" ]; then
+    fc+="[3:a]aformat=channel_layouts=stereo:sample_rates=48000,atrim=0:2,asetpts=PTS-STARTPTS[a3];[a2m][a3]concat=n=2:v=0:a=1,apad=pad_dur=${duration},atrim=0:${duration}[a2];"
+  else
+    fc+="[a2m]apad=pad_dur=${duration},atrim=0:${duration}[a2];"
+  fi
   fc+="[a1][a2]amix=inputs=2:duration=longest:dropout_transition=0,loudnorm=I=-14:TP=-1.0:LRA=11[aout]"
-  ffmpeg -y \
-    -i "$in_mp4" -i "$voice_mp3" -stream_loop -1 -i "$key_mp3" \
-    -t "$duration" \
-    -filter_complex "$fc" \
-    -map "[vout]" -map "[aout]" \
-    -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
-    -c:a aac -b:a 192k \
-    "$out_mp4"
+  if [ -n "$halfkey_mp3" ] && [ -f "$halfkey_mp3" ]; then
+    ffmpeg -y \
+      -i "$in_mp4" -i "$voice_mp3" -stream_loop -1 -i "$key_mp3" -i "$halfkey_mp3" \
+      -t "$duration" \
+      -filter_complex "$fc" \
+      -map "[vout]" -map "[aout]" \
+      -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
+      -c:a aac -b:a 192k \
+      "$out_mp4"
+  else
+    ffmpeg -y \
+      -i "$in_mp4" -i "$voice_mp3" -stream_loop -1 -i "$key_mp3" \
+      -t "$duration" \
+      -filter_complex "$fc" \
+      -map "[vout]" -map "[aout]" \
+      -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
+      -c:a aac -b:a 192k \
+      "$out_mp4"
+  fi
 }
 
 one_mp3() {
@@ -155,23 +220,27 @@ two_mp3() {
 }
 
 filter_script() {
-  local in_mp4="$1"; local script="$2"; local voice="$3"; local key="$4"; local lines_count="$5"; local out_mp4="$6"
+  local in_mp4="$1"; local script="$2"; local voice="$3"; local key="$4"; local lines_count="$5"; local out_mp4="$6"; local halfkey="${7:-}"
   local v_base v_rem v_total k_total target
   v_base=$(dur "$voice")
   v_rem=$(trailing_silence_remain "$voice")
   v_total=$(awk -v a="$v_base" -v b="$v_rem" 'BEGIN{printf "%.3f\n", a+b}')
   # key duration = lines_count * 2 seconds
-  k_total=$(awk -v n="$lines_count" 'BEGIN{printf "%.3f\n", n*2.0}')
+  if [ -n "$halfkey" ] && [ -f "$halfkey" ]; then
+    k_total=$(awk -v n="$lines_count" 'BEGIN{printf "%.3f\n", n*2.0 + 2.0}')
+  else
+    k_total=$(awk -v n="$lines_count" 'BEGIN{printf "%.3f\n", n*2.0}')
+  fi
   # target = max(v_total, k_total) + 1.000
-  target=$(awk -v v="$v_total" -v k="$k_total" 'BEGIN{m=(v>k?v:k); printf "%.3f\n", m+1.0}')
-  encode_video_filter_script "$in_mp4" "$script" "$voice" "$key" "$lines_count" "$out_mp4" "$target"
+  target=$(awk -v v="$v_total" -v k="$k_total" 'BEGIN{ve=v-1.0; m=(ve>k?ve:k); printf "%.3f\n", m+1.0}')
+  encode_video_filter_script "$in_mp4" "$script" "$voice" "$key" "$lines_count" "$out_mp4" "$target" "$halfkey"
 }
 
 concat_v() {
   local out_mp4="$1"; shift
   local inputs=("$@")
   local n=${#inputs[@]}
-  if [ "$n" -lt 2 ]; then echo "concat requires at least 2 inputs" >&2; exit 1; fi
+  #if [ "$n" -lt 2 ]; then echo "concat requires at least 2 inputs" >&2; exit 1; fi
   # Validate files
   local f
   for f in "${inputs[@]}"; do
@@ -278,6 +347,28 @@ running_code() {
   fi
 }
 
+overlay_pip_left_bottom() {
+  local v1="$1"; local v2="$2"; local out="$3"; local pip_w="${4:-480}"; local margin="${5:-20}"
+  ffmpeg -y \
+    -i "$v1" -i "$v2" \
+    -filter_complex "[1:v]scale=${pip_w}:-2,setsar=1[pip];[0:v][pip]overlay=${margin}:main_h-overlay_h-${margin}:format=auto[vout]" \
+    -map "[vout]" -map 0:a? \
+    -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
+    -c:a aac -b:a 192k \
+    "$out"
+}
+
+overlay_pip_right_bottom() {
+  local v1="$1"; local v2="$2"; local out="$3"; local pip_w="${4:-480}"; local margin="${5:-20}"
+  ffmpeg -y \
+    -i "$v1" -i "$v2" \
+    -filter_complex "[1:v]scale=${pip_w}:-2,setsar=1[pip];[0:v][pip]overlay=main_w-overlay_w-${margin}:main_h-overlay_h-${margin}:format=auto[vout]" \
+    -map "[vout]" -map 0:a? \
+    -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
+    -c:a aac -b:a 192k \
+    "$out"
+}
+
 cmd="$1"; shift || true
 case "$cmd" in
   one_mp3)
@@ -289,8 +380,13 @@ case "$cmd" in
     two_mp3 "$1" "$2" "$3" "$4" "$5"
     ;;
   filter_script)
-    [ "$#" -eq 6 ] || usage
-    filter_script "$1" "$2" "$3" "$4" "$5" "$6"
+    if [ "$#" -eq 6 ]; then
+      filter_script "$1" "$2" "$3" "$4" "$5" "$6"
+    elif [ "$#" -eq 7 ]; then
+      filter_script "$1" "$2" "$3" "$4" "$5" "$6" "$7"
+    else
+      usage
+    fi
     ;;
   concat)
     [ "$#" -ge 3 ] || usage
@@ -311,6 +407,14 @@ case "$cmd" in
     else
       usage
     fi
+    ;;
+  pip_left_bottom)
+    [ "$#" -ge 3 ] || { echo "Usage: $0 pip_left_bottom <video1> <video2> <out.mp4> [pip_width] [margin]" >&2; exit 1; }
+    overlay_pip_left_bottom "$1" "$2" "$3" "${4:-}" "${5:-}"
+    ;;
+  pip_right_bottom)
+    [ "$#" -ge 3 ] || { echo "Usage: $0 pip_right_bottom <video1> <video2> <out.mp4> [pip_width] [margin]" >&2; exit 1; }
+    overlay_pip_right_bottom "$1" "$2" "$3" "${4:-}" "${5:-}"
     ;;
   *)
     usage

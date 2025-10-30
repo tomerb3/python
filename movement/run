@@ -1,0 +1,17 @@
+ #docker build -t cursor-move .
+
+docker run -ti --rm \
+  -v /home/baum/a:/in:ro \
+  -v /home/baum/src/python/movement:/workspace/tool:ro \
+  -v /home/baum/a:/out \
+  cursor-move:latest \
+  /workspace/tool/main.py \
+    --video /in/back-45.mp4 \
+    --cursor /in/cursor.png \
+    --out /out/output.mp4 \
+    --duration 10 \
+    --start 0 \
+    --speed 180 \
+    --segment 1.5 \
+    --scale 0.24 \
+    --seed 42

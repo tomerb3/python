@@ -1,0 +1,2 @@
+drawtext=ft_load_flags=force_autohint:fontfile='/home/node/tts/fonts/DejaVuSans.ttf':textfile='files/step_0077.txt':expansion=none:fontcolor=white:fontsize=60:x=50:y=4:reload=1:enable='gte(t,6.08)',
+drawtext=ft_load_flags=force_autohint:fontfile='/home/node/tts/fonts/DejaVuSans.ttf':textfile='files/step_9999.txt':expansion=none:fontcolor=white:fontsize=60:x=50:y=4:reload=1:enable='gte(t,6.16)'%      

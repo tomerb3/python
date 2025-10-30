@@ -1,4 +1,4 @@
-#!/bin/bash -x 
+#!/bin/bash 
 
 rm -rf /tmp/scripts1
 mkdir /tmp/scripts1

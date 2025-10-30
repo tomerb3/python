@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+set -x
+
+docker build -t pythonmanim_v2 -f Dockerfile .
+docker run -it --rm \
+  -v "$(pwd)":/Timelaps \
+  -v "/home/baum/a":/back \
+  -w /Timelaps \
+  pythonmanim_v2

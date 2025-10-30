@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+
+
+
+#--no-cache
+ 
+ docker build --no-cache -t pythonmanim_v2 \
+  -f /home/baum/src/python/manim/ver2/Dockerfile \
+  /home/baum/src/python/manim/ver2

@@ -1,0 +1,6 @@
+# This file is used internally by FFMPEG.
+file 'file:/manim/media/videos/ver2/480p15/partial_movie_files/TextScene/3543656982_1611180886_2358810818.mov'
+file 'file:/manim/media/videos/ver2/480p15/partial_movie_files/TextScene/1747226900_1749334886_3054436005.mov'
+file 'file:/manim/media/videos/ver2/480p15/partial_movie_files/TextScene/1747226900_2099004869_3054436005.mov'
+file 'file:/manim/media/videos/ver2/480p15/partial_movie_files/TextScene/1747226900_3394500337_2036114019.mov'
+file 'file:/manim/media/videos/ver2/480p15/partial_movie_files/TextScene/1747226900_4063887820_4068892875.mov'

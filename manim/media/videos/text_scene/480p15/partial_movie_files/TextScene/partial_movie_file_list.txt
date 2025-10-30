@@ -1,3 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/manim/media/videos/text_scene/480p15/partial_movie_files/TextScene/2106007601_2953500402_223132457.mov'
-file 'file:/manim/media/videos/text_scene/480p15/partial_movie_files/TextScene/747195266_4217992463_2647890398.mov'
