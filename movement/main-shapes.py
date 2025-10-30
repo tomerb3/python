@@ -121,8 +121,11 @@ def motif_code_rain(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float, co
         for k in range(0, 6):
             yy = y + k * 14
             if 0 <= yy < h:
-                cv2.putText(canvas_bgr, chr(0x30A0 + (c+k) % 96), (x, yy), cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
-                cv2.putText(canvas_a, '.', (x, yy), cv2.FONT_HERSHEY_PLAIN, 1, (1,1,1), 1, cv2.LINE_AA)
+                glyph = chr(0x30A0 + (c+k) % 96)
+                # Draw glyph with larger size and thickness for visibility
+                cv2.putText(canvas_bgr, glyph, (x, yy), cv2.FONT_HERSHEY_PLAIN, 1.2, color, 2, cv2.LINE_AA)
+                # Write the same glyph into alpha mask (value=1.0 means fully opaque before global opacity)
+                cv2.putText(canvas_a, glyph, (x, yy), cv2.FONT_HERSHEY_PLAIN, 1.2, 1, 2, cv2.LINE_AA)
 
 
 def draw_text_particles(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float, text: str, colors: List[Tuple[int, int, int]]):
@@ -139,6 +142,123 @@ def draw_text_particles(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float
         cv2.putText(canvas_bgr, token, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.1, color, 2, cv2.LINE_AA)
         cv2.putText(canvas_a, token, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.1, (alpha, alpha, alpha), 2, cv2.LINE_AA)
 
+
+# New motif: grid pulse
+def motif_grid_pulse(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float, colors: List[Tuple[int, int, int]], rng: random.Random):
+    h, w = canvas_bgr.shape[:2]
+    step = max(24, min(w, h) // 20)
+    color = colors[0] if colors else (0, 255, 0)
+    # Static grid lines
+    for x in range(0, w, step):
+        cv2.line(canvas_bgr, (x, 0), (x, h - 1), color, 1)
+        cv2.line(canvas_a, (x, 0), (x, h - 1), 1, 1)
+    for y in range(0, h, step):
+        cv2.line(canvas_bgr, (0, y), (w - 1, y), color, 1)
+        cv2.line(canvas_a, (0, y), (w - 1, y), 1, 1)
+    # Pulsing cells
+    phase = t01 * 2 * np.pi
+    for gy in range(0, h, step):
+        for gx in range(0, w, step):
+            v = 0.5 + 0.5 * np.sin(phase + 0.3 * gy + 0.2 * gx)
+            a = float(v) * 0.25  # keep subtle
+            if a > 0.01:
+                x1, y1 = gx + 2, gy + 2
+                x2, y2 = min(w - 1, gx + step - 2), min(h - 1, gy + step - 2)
+                cv2.rectangle(canvas_bgr, (x1, y1), (x2, y2), color, -1)
+                cv2.rectangle(canvas_a, (x1, y1), (x2, y2), a, -1)
+
+
+# New motif: scanlines sweep
+def motif_scanlines(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float, colors: List[Tuple[int, int, int]], rng: random.Random):
+    h, w = canvas_bgr.shape[:2]
+    band_h = max(8, h // 14)
+    # Sweep from top to bottom and loop
+    y_center = int((t01 % 1.0) * (h + band_h)) - band_h // 2
+    y1 = max(0, y_center - band_h // 2)
+    y2 = min(h, y_center + band_h // 2)
+    if y2 > y1:
+        color = colors[1 % len(colors)]
+        cv2.rectangle(canvas_bgr, (0, y1), (w - 1, y2), color, -1)
+        # Gradient alpha across band
+        for yy in range(y1, y2):
+            t = (yy - y1) / max(1, (y2 - y1))
+            a = 0.15 + 0.25 * (1.0 - abs(2 * t - 1))  # peak in middle
+            canvas_a[yy:yy + 1, 0:w] = np.maximum(canvas_a[yy:yy + 1, 0:w], a)
+
+
+# New motif: constellation (nodes + connecting lines)
+def motif_constellation(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float, colors: List[Tuple[int, int, int]], rng: random.Random):
+    h, w = canvas_bgr.shape[:2]
+    n = 12
+    # Deterministic pseudo positions that drift slightly with t01
+    nodes = []
+    for i in range(n):
+        angle = (i / n) * 2 * np.pi
+        radius = 0.3 + 0.15 * np.sin(2 * np.pi * t01 + i)
+        x = int(w * (0.5 + radius * np.cos(angle + 0.7 * t01)))
+        y = int(h * (0.5 + radius * np.sin(angle + 0.5 * t01)))
+        nodes.append((x, y))
+    # Draw nodes
+    for i, (x, y) in enumerate(nodes):
+        color = colors[i % len(colors)]
+        cv2.circle(canvas_bgr, (x, y), 3, color, -1)
+        cv2.circle(canvas_a, (x, y), 4, 1, -1)
+    # Connect near neighbors
+    for i in range(n):
+        for j in range(i + 1, n):
+            x1, y1 = nodes[i]
+            x2, y2 = nodes[j]
+            dist2 = (x1 - x2) ** 2 + (y1 - y2) ** 2
+            if dist2 < (min(w, h) * 0.25) ** 2:
+                color = colors[(i + j) % len(colors)]
+                cv2.line(canvas_bgr, (x1, y1), (x2, y2), color, 1)
+                cv2.line(canvas_a, (x1, y1), (x2, y2), 1, 1)
+
+# New motif: waveform bars
+def motif_waveform(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float, colors: List[Tuple[int, int, int]], rng: random.Random):
+    h, w = canvas_bgr.shape[:2]
+    # Fewer bars and smaller height (~4cm ≈ ~150px), for a compact waveform
+    bars = 20
+    bar_w = max(3, w // bars)
+    base_y = int(h * 0.78)
+    max_h = min(int(h * 0.15), 150)
+    base_color = colors[0] if colors else (0, 255, 255)
+    for i in range(bars):
+        phase = (t01 * 4.0 + i * 0.2)
+        val = 0.5 + 0.5 * np.sin(phase * 2 * np.pi)
+        bar_h = int(6 + val * max_h)
+        x1 = i * bar_w
+        x2 = min(w - 1, x1 + bar_w - 2)
+        y1 = base_y - bar_h
+        y2 = base_y
+        cv2.rectangle(canvas_bgr, (x1, y1), (x2, y2), base_color, -1)
+        cv2.rectangle(canvas_a, (x1, y1), (x2, y2), 0.35 + 0.35 * val, -1)
+
+
+# New motif: radar sweep
+def motif_radar(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float, colors: List[Tuple[int, int, int]], rng: random.Random):
+    h, w = canvas_bgr.shape[:2]
+    cx, cy = int(w * 0.15), int(h * 0.8)  # place radar bottom-leftish
+    radius = int(min(w, h) * 0.25)
+    color = colors[0]
+    # Draw circular outline
+    cv2.circle(canvas_bgr, (cx, cy), radius, color, 1)
+    cv2.circle(canvas_a, (cx, cy), radius, 1, 1)
+    # Sweep arc
+    angle = (t01 * 2 * np.pi) % (2 * np.pi)
+    sweep_width = np.deg2rad(35)
+    segments = 40
+    for s in range(segments):
+        a0 = angle - sweep_width * (s / segments)
+        x = int(cx + radius * np.cos(a0))
+        y = int(cy + radius * np.sin(a0))
+        a = max(0.03, 0.3 * (1.0 - s / segments))
+        cv2.line(canvas_bgr, (cx, cy), (x, y), color, 2)
+        cv2.line(canvas_a, (cx, cy), (x, y), a, 2)
+    # Ticks
+    for r in (radius // 3, 2 * radius // 3):
+        cv2.circle(canvas_bgr, (cx, cy), r, color, 1)
+        cv2.circle(canvas_a, (cx, cy), r, 1, 1)
 
 # ---------------------- Main ----------------------
 
@@ -167,8 +287,18 @@ def pick_motifs_from_text(text: str):
         motifs.append(motif_objects)
     if "list" in text_l or "number" in text_l:
         motifs.append(motif_list_numbers)
-    # Always include techy ambient motifs (excluding random lines)
-    motifs.append(motif_code_rain)
+    if "grid" in text_l:
+        motifs.append(motif_grid_pulse)
+    if "scanlines" in text_l or "scanline" in text_l:
+        motifs.append(motif_scanlines)
+    if "constellation" in text_l or "stars" in text_l:
+        motifs.append(motif_constellation)
+    if "waveform" in text_l:
+        motifs.append(motif_waveform)
+    if "radar" in text_l:
+        motifs.append(motif_radar)
+    if "code rain" in text_l or "matrix" in text_l:
+        motifs.append(motif_code_rain)
     return motifs
 
 

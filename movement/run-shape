@@ -1,3 +1,17 @@
+f2(){
+
+    docker run --rm -v /home/baum/a:/in:ro \
+  -v /home/baum/src/python/movement:/workspace/tool:ro \
+  -v /home/baum/a:/out cursor-move:latest \
+  /workspace/tool/main-shapes.py \
+    --video /in/back-45.mp4 \
+    --out /out/output_shapes_scan_cyan.mp4 \
+    --start 2 --duration 8 \
+    --text "scanlines" \
+    --palette "#00FFC8,#19A7F6,#76EEC6" \
+    --opacity 0.6 --fade-in 0.25 --fade-out 0.25
+}
+f(){
 docker run --rm \
   -v /home/baum/a:/in:ro \
   -v /home/baum/src/python/movement:/workspace/tool:ro \
@@ -5,14 +19,42 @@ docker run --rm \
   cursor-move:latest \
   /workspace/tool/main-shapes.py \
     --video /in/back-45.mp4 \
-    --out /out/output_shapes.mp4 \
+    --out /out/output_shapes_$1.mp4 \
     --start 2 \
     --duration 8 \
-    --text "objects" \
+    --text "$1" \
     --opacity 0.85 \
     --fade-in 0.3 \
     --fade-out 0.3 \
     --easing ease-in-out \
     --seed 42
+ cp -a /home/baum/a/output_shapes_$1.mp4 /mnt/c/ffmpeg
 
-    #python loops   python loops objects list numbers
+}
+
+a(){
+f loops
+f waveform
+f objects
+f list numbers
+f code rain
+f grid
+f scanlines
+f constellation
+f radar
+f text particles
+}
+
+a
+#f2
+
+
+
+
+
+
+
+
+# --text "objects waveform"
+# --text "loops radar grid"
+# --text "scanlines constellation code rain"
