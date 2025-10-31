@@ -1,0 +1,7 @@
+
+
+    docker run -ti --rm -v /home/baum/a:/in:ro \
+  -v /home/baum/src/python/movement:/workspace/tool:ro \
+  -v /home/baum/a:/out cursor-move:latest \
+  /workspace/tool/3.py 
+

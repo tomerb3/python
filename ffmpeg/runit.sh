@@ -4,7 +4,7 @@ output_folder=${output_folder:-/mnt/c/ffmpeg}
 backup_folder=${backup_folder:-/tmp/a}
 font_folder=${font_folder:-/tmp/a/fonts}
 back_before_video=${back_before_video:-none}
-
+back_45_video=${back_45_video:-none}
 if [ -e /home/node/tts/scripts/ffmpeg ];then 
   home=/home/node/tts/scripts/ffmpeg
 else
@@ -46,7 +46,7 @@ num_lines=$(( $(awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1}
    -map "[a]" "${output_folder}/code_with_tail.mp3"
 
  ${home}/ffmpeg-run.sh filter_script \
-  ${backup_folder}/back-45.mp4 \
+  ${output_folder}/${back_45_video} \
   ${output_folder}/files/filters.txt \
   ${output_folder}/code_with_tail.mp3 \
   ${backup_folder}/key-2s.wav \
@@ -91,11 +91,13 @@ _code(){
 cmd_create_example(){
 
   if [ -e "${output_folder}/master.mp4" ];then 
-     echo "${output_folder}/master.mp4 exists lets do only filter1 video code "
-    _code
+     echo .
+
+
 
 
     else 
+        
       #testing before section 
       
       ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
@@ -105,10 +107,20 @@ cmd_create_example(){
       # testing is good !
       #A1
       
-      _code
+      if [ -e ${output_folder}/output-code.mp4 ];then 
+        echo . 
+      else 
+        _code
+      fi 
       
       #A3
+      if [ -e ${output_folder}/frozen-code-60s.mp4 ];then 
+        echo .
+      else 
       ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/output-code.mp4 60 ${output_folder}/frozen-code-60s.mp4
+      fi 
+
+
       export RC_FONTFILE="${font_folder}/DejaVuSans.ttf"
       export RC_FONTSIZE=48
       #https://www.colorhexa.com/27d3f5
@@ -117,18 +129,39 @@ cmd_create_example(){
       #export RC_FONTSIZE=48
       #export RC_FONTCOLOR="white"
       # code run 
-      code_run_vera
+      
+      if [ -e ${output_folder}/running-code-demo.mp4 ];then 
+        echo .
+      else 
+        code_run_vera
+      fi 
+      
+      
       #A4
-      ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4
+      if [ -e ${output_folder}/frozen-run-60s.mp4 ];then 
+        echo .
+      else 
+      set -x 
+        ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4 > line143_frozen-run-60s.txt 2>&1
+      fi 
+
       #after 
-      ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
+      if [ -e ${output_folder}/after.mp4 ];then 
+        echo .
+      else 
+        ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
+      fi
+
       #check combine 
 fi
 
 
+if [ -e ${output_folder}/master.mp4 ];then 
+  echo . 
+else 
+  ${home}/ffmpeg-run.sh concat "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
+fi 
 
-
-${home}/ffmpeg-run.sh concat "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
 #good  testing
 }
 
@@ -143,19 +176,23 @@ ${home}/ffmpeg-run.sh concat "${output_folder}/master.mp4" "${output_folder}/bef
 
 cmd_merge_examples_to_chapter(){
   cd /home/node/tts
-  folder=${folder:-none}
-  #check=$(echo $folder |cut -d '-' -f2)
-  rm -rf "chapter-${folder}" 
-  ls -1tr |grep $folder |sort -n > list.txt
-  mkdir -p chapter-${folder}
-  LIST_FILE="list.txt"; mkdir -p chapter-${folder} 
-  mapfile -t d < <(awk 'NF' "$LIST_FILE"); \
-  chapter_name=( "chapter-${folder}/${folder}.mp4" )
-  for x in "${d[@]}"; do chapter_name+=( "$x/master.mp4" ); done
-#  echo "${home}/ffmpeg-run.sh" concat "${chapter_name[@]}" 
-  "${home}/ffmpeg-run.sh" concat "${chapter_name[@]}" 
-
+  if [ -e chapter-${folder} ];then 
+      echo . 
+  else 
+      folder=${folder:-none}
+      #check=$(echo $folder |cut -d '-' -f2)
+      rm -rf "chapter-${folder}" 
+      ls -1tr |grep $folder |sort -n > list.txt
+      mkdir -p chapter-${folder}
+      LIST_FILE="list.txt"; mkdir -p chapter-${folder} 
+      mapfile -t d < <(awk 'NF' "$LIST_FILE"); \
+      chapter_name=( "chapter-${folder}/${folder}.mp4" )
+      for x in "${d[@]}"; do chapter_name+=( "$x/master.mp4" ); done
+     #  echo "${home}/ffmpeg-run.sh" concat "${chapter_name[@]}" 
+     "${home}/ffmpeg-run.sh" concat "${chapter_name[@]}" 
+  fi 
 }
+
 
 cmd_debug(){
   filter1

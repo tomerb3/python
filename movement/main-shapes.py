@@ -58,6 +58,49 @@ def motif_loops(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float, colors
         cv2.circle(canvas_a, (x, y), 14, 1, -1)
 
 
+def motif_loops_v2(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float, colors: List[Tuple[int, int, int]], rng: random.Random):
+    h, w = canvas_bgr.shape[:2]
+    n = 20
+    max_travel = 0.9 * min(w, h)
+    for i in range(n):
+        local = random.Random(1000 + i)
+        x0 = local.uniform(0, w)
+        y0 = local.uniform(0, h)
+        angle = local.uniform(0, 2 * np.pi)
+        speed = 0.4 + 0.6 * local.random()  # relative speed factor
+        dx = np.cos(angle) * max_travel * speed * t01
+        dy = np.sin(angle) * max_travel * speed * t01
+        x = int((x0 + dx) % w)
+        y = int((y0 + dy) % h)
+        color = colors[i % len(colors)]
+        cv2.circle(canvas_bgr, (x, y), 6, color, -1)
+        cv2.circle(canvas_a, (x, y), 8, 1, -1)
+
+
+def motif_loops_v3(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float, colors: List[Tuple[int, int, int]], rng: random.Random):
+    h, w = canvas_bgr.shape[:2]
+    cx, cy = int(w * 0.5), int(h * 0.5)
+    radius = int(min(w, h) * 0.28)
+    k = 4  # four circles
+    base_angle = (t01 * 2 * np.pi) % (2 * np.pi)
+    # phase offset so each circle chases the previous one
+    phase_offset = np.deg2rad(35)
+    for i in range(k):
+        a = base_angle - i * phase_offset
+        x = int(cx + radius * np.cos(a))
+        y = int(cy + radius * np.sin(a))
+        color = colors[i % len(colors)]
+        cv2.circle(canvas_bgr, (x, y), 14, color, -1)
+        cv2.circle(canvas_bgr, (x, y), 18, color, 2)
+        cv2.circle(canvas_a, (x, y), 18, 1, -1)
+        # subtle motion trail behind each dot
+        a_trail = a - 0.25
+        xt = int(cx + radius * np.cos(a_trail))
+        yt = int(cy + radius * np.sin(a_trail))
+        cv2.circle(canvas_bgr, (xt, yt), 10, color, -1)
+        cv2.circle(canvas_a, (xt, yt), 12, 0.4, -1)
+
+
 def motif_objects(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float, colors: List[Tuple[int, int, int]], rng: random.Random):
     h, w = canvas_bgr.shape[:2]
     # Slightly smaller group dimensions
@@ -136,11 +179,11 @@ def draw_text_particles(canvas_bgr: np.ndarray, canvas_a: np.ndarray, t01: float
     base_y = int(h * 0.2)
     for i, token in enumerate(tokens):
         color = colors[i % len(colors)]
-        x = int(w * 0.1 + i * (w * 0.2))
-        y = base_y + int(20 * np.sin((t01 + i * 0.2) * 2 * np.pi))
-        alpha = clamp01(0.2 + 0.8 * ease(t01))
-        cv2.putText(canvas_bgr, token, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.1, color, 2, cv2.LINE_AA)
-        cv2.putText(canvas_a, token, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.1, (alpha, alpha, alpha), 2, cv2.LINE_AA)
+        x = int(w * 0.08 + i * (w * 0.28))
+        y = base_y + int(45 * np.sin(((t01 * 3.0) + i * 0.25) * 2 * np.pi))
+        alpha = clamp01(0.4 + 0.6 * ease(t01))
+        cv2.putText(canvas_bgr, token, (x, y), cv2.FONT_HERSHEY_TRIPLEX, 2.2, color, 3, cv2.LINE_AA)
+        cv2.putText(canvas_a, token, (x, y), cv2.FONT_HERSHEY_TRIPLEX, 2.2, (alpha, alpha, alpha), 3, cv2.LINE_AA)
 
 
 # New motif: grid pulse
@@ -283,6 +326,10 @@ def pick_motifs_from_text(text: str):
     motifs = []
     if "loop" in text_l:
         motifs.append(motif_loops)
+    if "loops_v2" in text_l or "loops v2" in text_l:
+        motifs.append(motif_loops_v2)
+    if "loops_v3" in text_l or "loops v3" in text_l:
+        motifs.append(motif_loops_v3)
     if "object" in text_l:
         motifs.append(motif_objects)
     if "list" in text_l or "number" in text_l:
@@ -297,7 +344,7 @@ def pick_motifs_from_text(text: str):
         motifs.append(motif_waveform)
     if "radar" in text_l:
         motifs.append(motif_radar)
-    if "code rain" in text_l or "matrix" in text_l:
+    if "code rain" in text_l or "matrix" in text_l or "code" in text_l:
         motifs.append(motif_code_rain)
     return motifs
 
@@ -369,6 +416,18 @@ def main():
             # Draw motifs
             for m in motifs:
                 m(overlay, alpha, t_eased, colors, rng)
+
+            # Text overlay if requested via keyword "text"
+            if "text" in args.text.lower():
+                txt = args.text
+                tl = txt.lower().lstrip()
+                if tl.startswith("text "):
+                    display_text = txt[len(txt) - len(tl) + 5:]
+                elif tl == "text":
+                    display_text = ""
+                else:
+                    display_text = txt
+                draw_text_particles(overlay, alpha, t_eased, display_text, colors)
 
             # Normalize alpha channel and apply global opacity and fade
             alpha = np.clip(alpha, 0.0, 1.0)

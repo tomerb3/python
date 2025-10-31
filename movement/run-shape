@@ -19,7 +19,7 @@ docker run --rm \
   cursor-move:latest \
   /workspace/tool/main-shapes.py \
     --video /in/back-45.mp4 \
-    --out /out/output_shapes_$1.mp4 \
+    --out /out/output.mp4 \
     --start 2 \
     --duration 8 \
     --text "$1" \
@@ -28,7 +28,7 @@ docker run --rm \
     --fade-out 0.3 \
     --easing ease-in-out \
     --seed 42
- cp -a /home/baum/a/output_shapes_$1.mp4 /mnt/c/ffmpeg
+ #cp -a /home/baum/a/output_shapes_$1.mp4 /mnt/c/ffmpeg
 
 }
 
@@ -45,11 +45,12 @@ f radar
 f text particles
 }
 
-a
+#a
 #f2
 
-
-
+#f loops_v2
+f "text hellow tomer baum"
+#f matrix
 
 
 
