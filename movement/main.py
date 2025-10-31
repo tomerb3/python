@@ -184,8 +184,8 @@ def main():
     else:
         end_frame = min(start_frame + duration_frames, total_src_frames)
 
-    # Initial static position (right side area) from t=0 until start
-    right_min_x = max(0, int(width * 0.6))
+    # Initial static position (right half of the screen) from t=0 until start
+    right_min_x = max(0, int(width * 0.5))
     right_max_x = max(0, width - cw)
     if right_min_x > right_max_x:
         right_min_x = max(0, width - cw)
