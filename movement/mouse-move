@@ -4,8 +4,14 @@ folder=${folder:-/home/baum/a}
 back=${back:-/home/baum/a}
 tool=${tool:-/home/baum/src/python/movement}
 seed_num=$((3 +RANDOM % 800))
+output_file=${output_file:-output.mp4}
+in_file=${in_file:-back-45.mp4}
 echo "seed_num: $seed_num"
-
+echo "output_file: $output_file"
+echo "in_file: $in_file"
+echo "back: $back"
+echo "folder: $folder"
+echo "tool: $tool"
 start_num=$((3 +RANDOM % 5))
 echo "start_num: $start_num"
 duration_num=$((2 + RANDOM % 3))
@@ -19,9 +25,9 @@ docker run -ti --rm \
   -v ${folder}:/out \
   cursor-move:latest \
   /workspace/tool/main.py \
-    --video /in/back-45.mp4 \
+    --video /in/${in_file} \
     --cursor /in/cursor.png \
-    --out /out/output.mp4 \
+    --out /out/${output_file} \
     --duration $duration_num \
     --start $start_num \
     --speed $speed_num \
