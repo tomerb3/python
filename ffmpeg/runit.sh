@@ -3,6 +3,8 @@
 output_folder=${output_folder:-/mnt/c/ffmpeg}
 backup_folder=${backup_folder:-/tmp/a}
 font_folder=${font_folder:-/tmp/a/fonts}
+back_before_video=${back_before_video:-none}
+
 if [ -e /home/node/tts/scripts/ffmpeg ];then 
   home=/home/node/tts/scripts/ffmpeg
 else
@@ -95,7 +97,10 @@ cmd_create_example(){
 
     else 
       #testing before section 
-      ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/back-for-before.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
+      
+      ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
+      #${home}/ffmpeg-run.sh one_mp3 ${output_folder}/back-for-before.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
+
       #${home}/ffmpeg-run.sh one_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
       # testing is good !
       #A1

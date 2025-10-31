@@ -12,7 +12,13 @@ echo "in_file: $in_file"
 echo "back: $back"
 echo "folder: $folder"
 echo "tool: $tool"
-start_num=$((3 +RANDOM % 5))
+
+start_num=${start_num:-none}
+if [ "$start_num" = "none" ]; then
+  start_num=$((3 +RANDOM % 5))
+fi
+
+
 echo "start_num: $start_num"
 duration_num=$((2 + RANDOM % 3))
 echo "duration_num: $duration_num"
@@ -35,4 +41,4 @@ docker run -ti --rm \
     --scale 0.24 \
     --seed $seed_num
 
-#cp ${folder}/output.mp4 /mnt/c/ffmpeg
+cp -a /home/baum/a/output.mp4 /mnt/c/ffmpeg/
