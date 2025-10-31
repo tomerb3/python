@@ -85,14 +85,16 @@ def generate_path(
     end_frame: int,
     avg_speed: float,
     avg_segment_sec: float,
+    init_x: int,
+    init_y: int,
 ) -> np.ndarray:
     total_frames = end_frame - start_frame
     if total_frames <= 0:
         return np.zeros((0, 2), dtype=np.int32)
 
-    # Choose a starting position within bounds
-    x = rng.randint(0, max(0, width - cursor_w))
-    y = rng.randint(0, max(0, height - cursor_h))
+    # Use provided starting position within bounds
+    x = max(0, min(init_x, width - cursor_w))
+    y = max(0, min(init_y, height - cursor_h))
 
     # Determine number of segments
     est_segments = max(1, int(np.ceil((total_frames / fps) / max(0.05, avg_segment_sec))))
@@ -182,6 +184,14 @@ def main():
     else:
         end_frame = min(start_frame + duration_frames, total_src_frames)
 
+    # Initial static position (right side area) from t=0 until start
+    right_min_x = max(0, int(width * 0.6))
+    right_max_x = max(0, width - cw)
+    if right_min_x > right_max_x:
+        right_min_x = max(0, width - cw)
+    init_x = rng.randint(right_min_x, right_max_x) if right_max_x >= right_min_x else right_max_x
+    init_y = rng.randint(0, max(0, height - ch))
+
     positions = generate_path(
         rng=rng,
         width=width,
@@ -193,27 +203,36 @@ def main():
         end_frame=end_frame,
         avg_speed=args.speed,
         avg_segment_sec=args.segment,
+        init_x=init_x,
+        init_y=init_y,
     )
 
     current_frame = 0
     pos_index = 0
+
+    last_pos = (init_x, init_y) if len(positions) == 0 else (int(positions[-1][0]), int(positions[-1][1]))
 
     while True:
         ok, frame = cap.read()
         if not ok:
             break
 
-        if start_frame <= current_frame < end_frame and pos_index < len(positions):
+        if current_frame < start_frame:
+            # Before movement: show static cursor at initial right-side position
+            overlay_cursor(frame, cursor_bgr, cursor_alpha, init_x, init_y)
+        elif start_frame <= current_frame < end_frame and pos_index < len(positions):
+            # During movement window
             x, y = positions[pos_index]
-            overlay_cursor(frame, cursor_bgr, cursor_alpha, x, y)
+            overlay_cursor(frame, cursor_bgr, cursor_alpha, int(x), int(y))
             pos_index += 1
+        else:
+            # After movement window (or if no movement), keep last position
+            overlay_cursor(frame, cursor_bgr, cursor_alpha, last_pos[0], last_pos[1])
 
         writer.write(frame)
         current_frame += 1
 
-        if total_src_frames is None and current_frame >= end_frame:
-            # Stop after we've written the requested duration when input length is unknown
-            break
+        # Do not early-stop; preserve full original video duration
 
     cap.release()
     writer.release()

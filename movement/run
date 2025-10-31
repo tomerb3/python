@@ -9,9 +9,11 @@ docker run -ti --rm \
     --video /in/back-45.mp4 \
     --cursor /in/cursor.png \
     --out /out/output.mp4 \
-    --duration 10 \
-    --start 0 \
-    --speed 180 \
+    --duration 3 \
+    --start 5 \
+    --speed 262 \
     --segment 1.5 \
     --scale 0.24 \
     --seed 42
+
+    cp -a /home/baum/a/output.mp4 /mnt/c/ffmpeg
