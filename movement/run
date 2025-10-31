@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -x 
-
-
-#seed_num=$(( (RANDOM << 16) | RANDOM ))
+folder=${folder:-/home/baum/a}
+back=${back:-/home/baum/a}
+tool=${tool:-/home/baum/src/python/movement}
 seed_num=$((3 +RANDOM % 800))
 echo "seed_num: $seed_num"
 
@@ -14,9 +14,9 @@ speed_num=$((180 + (RANDOM % 121)))   # 180..300
 echo "speed_num: $speed_num"
 
 docker run -ti --rm \
-  -v /home/baum/a:/in:ro \
-  -v /home/baum/src/python/movement:/workspace/tool:ro \
-  -v /home/baum/a:/out \
+  -v ${back}:/in:ro \
+  -v ${tool}:/workspace/tool:ro \
+  -v ${folder}:/out \
   cursor-move:latest \
   /workspace/tool/main.py \
     --video /in/back-45.mp4 \
@@ -29,4 +29,4 @@ docker run -ti --rm \
     --scale 0.24 \
     --seed $seed_num
 
-cp /home/baum/a/output.mp4 /mnt/c/ffmpeg
+#cp ${folder}/output.mp4 /mnt/c/ffmpeg
