@@ -20,9 +20,9 @@ fi
 
 
 echo "start_num: $start_num"
-duration_num=$((1 + RANDOM % 2))
+duration_num=$((1 + RANDOM % 1))
 echo "duration_num: $duration_num"
-speed_num=$((245 + (RANDOM % 121)))   # 180..300
+speed_num=$((333 + (RANDOM % 121)))   # 180..300
 echo "speed_num: $speed_num"
 
 docker run --rm \

@@ -4,7 +4,7 @@ output_folder=${output_folder:-/mnt/c/ffmpeg}
 backup_folder=${backup_folder:-/tmp/a}
 font_folder=${font_folder:-/tmp/a/fonts}
 back_before_video=${back_before_video:-none}
-back_45_video=${back_45_video:-none}
+back_45_video=${back_45_video:-back-45_m0.mp4}
 if [ -e /home/node/tts/scripts/ffmpeg ];then 
   home=/home/node/tts/scripts/ffmpeg
 else
