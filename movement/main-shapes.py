@@ -1,6 +1,7 @@
 import argparse
 import os
 import random
+import subprocess
 from typing import List, Tuple
 
 import cv2
@@ -445,6 +446,65 @@ def main():
 
     cap.release()
     writer.release()
+
+    # Preserve original audio: mux input audio back into the output
+    def _has_audio(path: str) -> bool:
+        try:
+            r = subprocess.run(
+                [
+                    "ffprobe",
+                    "-v",
+                    "error",
+                    "-select_streams",
+                    "a",
+                    "-show_entries",
+                    "stream=index",
+                    "-of",
+                    "csv=p=0",
+                    path,
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            return bool(r.stdout.strip())
+        except Exception:
+            return False
+
+    try:
+        if _has_audio(args.video):
+            tmp_out = args.out + ".mux.mp4"
+            # Copy video from our render and copy audio from original without re-encoding
+            cmd = [
+                "ffmpeg",
+                "-y",
+                "-i",
+                args.out,
+                "-i",
+                args.video,
+                "-map",
+                "0:v:0",
+                "-map",
+                "1:a:0",
+                "-c:v",
+                "copy",
+                "-c:a",
+                "copy",
+                tmp_out,
+            ]
+            r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if r.returncode == 0 and os.path.exists(tmp_out):
+                try:
+                    os.replace(tmp_out, args.out)
+                except Exception:
+                    pass
+            else:
+                if os.path.exists(tmp_out):
+                    os.remove(tmp_out)
+        # if no audio, do nothing (keep video-only)
+    except Exception:
+        # On any failure, keep the existing args.out as is
+        pass
 
 
 if __name__ == "__main__":
