@@ -57,12 +57,24 @@ words_for_each_loop=2
 not_empty_lines=$(grep -cve '^[[:space:]]*$' ${output_folder}/code_show.txt)
 calc=$((2 * $not_empty_lines - 1))
 words_in_code=$(( $(wc -w < ${output_folder}/code_show.txt) + $calc ))
+echo "${words_in_code}" > code_to_show_words_for_click_auto
+code_to_show_words_for_click=$(cat ${output_folder}/code_to_show_words_for_click)
+if [ ${code_to_show_words_for_click} -eq 0 ];then 
+  echo .
+else 
+  words_in_code=${code_to_show_words_for_click}
+fi 
+
+
+
+
+
 sleep 1
 ${home}/ffmpeg-run.sh filter_script_v2 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code.mp3 ${backup_folder}/keys_dir $words_in_code $words_for_each_loop ${output_folder}/output-code.mp4
 
 
 
-kind=loops in_file=output-code.mp4 output_file=output-code-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
+#kind=loops in_file=output-code.mp4 output_file=output-code-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
 echo "new555 end" 
 
 
@@ -163,7 +175,23 @@ cmd_create_example(){
       if [ -e ${output_folder}/after.mp4 ];then 
         echo .
       else 
-        ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
+       #check seconds for frozen-run-60s.mp4
+
+       s=$(basename -- "${output_folder}" |cut -d '-' -f1)
+       if [ "${s%%#*}" -eq "${s##*#}" ]; then 
+         echo "equal"
+         seconds=$( ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${output_folder}/after.mp3  |cut -d "." -f1 ) 
+         seconds2=$(( $seconds - 4 ))
+         start=${seconds2} kind=scanlines in_file=frozen-run-60s.mp4 output_file=frozen-run-60s-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
+         ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s-v2.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
+       else 
+         echo "not equal"
+         ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
+       fi
+
+
+        
+
       fi
 
       #check combine 
