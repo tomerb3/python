@@ -387,6 +387,8 @@ def main():
         colors = [(200, 255, 200), (255, 200, 255), (200, 200, 255)]
 
     motifs = pick_motifs_from_text(args.text)
+    if "text" in args.text.lower():
+        motifs = []
 
     frame_idx = 0
     while True:

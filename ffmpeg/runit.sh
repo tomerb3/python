@@ -35,23 +35,37 @@ filter1() {
 #    awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' ${output_folder}/code_show.txt
 #  )
 
-num_lines=$(( $(awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' "${output_folder}/code_show.txt")   ))
+#num_lines=$(( $(awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' "${output_folder}/code_show.txt")   ))
 #num_lines=$(( $(awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' "${output_folder}/code_show.txt") + 1 ))
 
  # Build voice track with 1s silence tail
- ffmpeg -y \
-   -i "${output_folder}/code.mp3" \
-   -i "${backup_folder}/silence-3s.mp3" \
-   -filter_complex "[0:a]aformat=channel_layouts=stereo:sample_rates=48000[a0];[1:a]aformat=channel_layouts=stereo:sample_rates=48000[a1];[a0][a1]concat=n=2:v=0:a=1[a]" \
-   -map "[a]" "${output_folder}/code_with_tail.mp3"
+ #ffmpeg -y \
+  # -i "${output_folder}/code.mp3" \
+  # -i "${backup_folder}/silence-3s.mp3" \
+  # -filter_complex "[0:a]aformat=channel_layouts=stereo:sample_rates=48000[a0];[1:a]aformat=channel_layouts=stereo:sample_rates=48000[a1];[a0][a1]concat=n=2:v=0:a=1[a]" \
+  # -map "[a]" "${output_folder}/code_with_tail.mp3"
 
- ${home}/ffmpeg-run.sh filter_script \
-  ${output_folder}/${back_45_video} \
-  ${output_folder}/files/filters.txt \
-  ${output_folder}/code_with_tail.mp3 \
-  ${backup_folder}/key-2s.wav \
-  $num_lines \
-  ${output_folder}/output-code.mp4
+ #${home}/ffmpeg-run.sh filter_script \
+ # ${output_folder}/${back_45_video} \
+ # ${output_folder}/files/filters.txt \
+ # ${output_folder}/code.mp3 \
+ # ${backup_folder}/key-2s.wav \
+ # $num_lines \
+ # ${output_folder}/output-code.mp4
+echo "new555 start"
+words_for_each_loop=2
+not_empty_lines=$(grep -cve '^[[:space:]]*$' ${output_folder}/code_show.txt)
+calc=$((2 * $not_empty_lines - 1))
+words_in_code=$(( $(wc -w < ${output_folder}/code_show.txt) + $calc ))
+sleep 1
+${home}/ffmpeg-run.sh filter_script_v2 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code.mp3 ${backup_folder}/keys_dir $words_in_code $words_for_each_loop ${output_folder}/output-code.mp4
+
+
+
+kind=loops in_file=output-code.mp4 output_file=output-code-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
+echo "new555 end" 
+
+
 }
 
 code_run_vera(){

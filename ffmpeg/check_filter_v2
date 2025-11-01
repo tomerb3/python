@@ -1,0 +1,11 @@
+#!/bin/bash -x 
+
+#words=$(cat /mnt/c/ffmpeg/c/code_show.txt |wc -w)
+words=$(( $(wc -w < /mnt/c/ffmpeg/c/code_show.txt) + 4 ))
+sleep 3
+
+./ffmpeg-run.sh filter_script_v2 /home/baum/a/back-45.mp4 files/filters.txt /mnt/c/ffmpeg/c/code.mp3 /mnt/c/ffmpeg/c/keys_dir $words 2 /mnt/c/ffmpeg/c/out1.mp4
+
+#Custom key volume 0.35 and 3s tail pad:
+#./ffmpeg-run.sh filter_script_v2 in.mp4 filters.txt voice.mp3 /path/to/keys 21 3 out.mp4 0.35 3
+

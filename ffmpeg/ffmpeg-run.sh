@@ -15,6 +15,7 @@ usage() {
   echo "didnt test yet"
 
   echo "  filter_script <in_mp4> <filters.txt> <voice.mp3> <key.mp3> <lines_count> <out_mp4> [halfkey.mp3]" >&2
+  echo "  filter_script_v2 <in_mp4> <filters.txt> <voice.mp3> <keys_dir> <words> <calc> <out_mp4> [key_volume] [tail_pad_s]" >&2
   echo "  freeze_last_frame <in_mp4> <seconds> <out_mp4>" >&2
   echo "  running_code <in_mp4> <textfile> <x> <y> <seconds> <start_delay> <out_mp4> [sfx.mp3] [explain.mp3]" >&2
   exit 1
@@ -236,6 +237,99 @@ filter_script() {
   encode_video_filter_script "$in_mp4" "$script" "$voice" "$key" "$lines_count" "$out_mp4" "$target" "$halfkey"
 }
 
+# v2: keys_dir of 1s mp3s, words/calc => unique random picks, adjustable key volume and tail padding
+filter_script_v2() {
+  local in_mp4="$1"; local script="$2"; local voice="$3"; local keys_dir="$4"; local words="$5"; local calc="$6"; local out_mp4="$7"
+  local key_vol="${8:-0.25}"; local tail_pad="${9:-2}"
+  if [ ! -d "$keys_dir" ]; then echo "keys_dir not found: $keys_dir" >&2; exit 1; fi
+  # compute voice total (normalized later in mix)
+  local v_base v_rem v_total
+  v_base=$(dur "$voice")
+  v_rem=$(trailing_silence_remain "$voice")
+  v_total=$(awk -v a="$v_base" -v b="$v_rem" 'BEGIN{printf "%.3f\n", a+b}')
+  # determine loops = floor(words/calc), unique picks limited by file count
+  local files=()
+  while IFS= read -r -d '' f; do files+=("$f"); done < <(find "$keys_dir" -maxdepth 1 -type f \( -iname "*.mp3" -o -iname "*.wav" -o -iname "*.m4a" \) -print0 | sort -z)
+  local n_files=${#files[@]}
+  if [ "$n_files" -eq 0 ]; then echo "no audio files in $keys_dir" >&2; exit 1; fi
+  local loops
+  loops=$(awk -v w="$words" -v c="$calc" 'BEGIN{ if (c<1) c=1; printf "%d", int(w/c) }')
+  if [ "$loops" -gt "$n_files" ]; then loops="$n_files"; fi
+  if [ "$loops" -lt 0 ]; then loops=0; fi
+  # pick unique random files
+  local sel=()
+  if [ "$loops" -gt 0 ]; then
+    # shuffle indices and take first loops
+    mapfile -t idxs < <(printf '%s\n' "${!files[@]}" | shuf)
+    local i
+    for i in $(seq 0 $((loops-1))); do sel+=("${files[${idxs[$i]}]}"); done
+  fi
+  # build key track by concatenation via filter_complex (robust to codec differences)
+  local key_track
+  local tmp_dir
+  tmp_dir=${TMPDIR:-/tmp}
+  key_track="${tmp_dir}/key_track_$$-$(date +%s%N 2>/dev/null || date +%s)-$RANDOM.wav"
+  : > "$key_track"
+  if [ "$loops" -eq 0 ]; then
+    # create silence of small duration to keep amix stable
+    ffmpeg -y -f lavfi -i anullsrc=r=48000:cl=stereo -t 0.1 -c:a pcm_s16le "$key_track" >/dev/null 2>&1
+  else
+    local args=( -y ); local fc=""; local j
+    for j in "${sel[@]}"; do args+=( -i "$j" ); done
+    local n=$loops; local k
+    for k in $(seq 0 $((n-1))); do fc+="[$k:a]aformat=channel_layouts=stereo:sample_rates=48000[a$k];"; done
+    local ins=""; for k in $(seq 0 $((n-1))); do ins+="[a$k]"; done
+    fc+="${ins}concat=n=$n:v=0:a=1,asetpts=PTS-STARTPTS[aout]"
+    args+=( -filter_complex "$fc" -map "[aout]" -c:a pcm_s16le "$key_track" )
+    ffmpeg "${args[@]}" >/dev/null 2>&1
+  fi
+  # compute key total duration (sum of selected or measured from file)
+  local k_total
+  k_total=$(dur "$key_track")
+  # final target duration = max(voice_total, key_total) + tail_pad seconds
+  local target
+  target=$(awk -v v="$v_total" -v k="$k_total" -v t="$tail_pad" 'BEGIN{ m=(v>k?v:k); if (t<0) t=0; printf "%.3f\n", m + t }')
+  # build video filter chain from script (reuse logic)
+  local fchain esc
+  fchain=$(tr -d '\n' < "$script")
+  fchain="${fchain%,}"
+  fchain="${fchain%.}"
+  if [ -n "${RC_FONTFILE:-}" ]; then
+    esc=$(printf %s "$RC_FONTFILE" | sed -e "s/[\\\/&]/\\\\&/g")
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontfile='${esc}':/g")
+  elif [ -n "${RC_FONT:-}" ]; then
+    esc=$(printf %s "$RC_FONT" | sed -e "s/[\\\/&]/\\\\&/g")
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=font='${esc}':/g")
+  fi
+  if [ -n "${RC_FONTSIZE:-}" ]; then
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontsize=${RC_FONTSIZE}:/g")
+  fi
+  if [ -n "${RC_FONTCOLOR:-}" ]; then
+    esc=$(printf %s "$RC_FONTCOLOR" | sed -e "s/[\\\\\/&]/\\\\&/g")
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontcolor=${esc}:/g")
+  fi
+  fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=ft_load_flags=force_autohint:/g")
+  # build combined filter_complex for final render
+  local fc
+  fc="[0:v]format=rgb24,${fchain},format=yuv444p[vout];"
+  fc+="[1:a]aformat=channel_layouts=stereo:sample_rates=48000,apad=pad_dur=${target},atrim=0:${target},asetpts=PTS-STARTPTS[a1];"
+  fc+="[2:a]aformat=channel_layouts=stereo:sample_rates=48000,volume=${key_vol},apad=pad_dur=${target},atrim=0:${target},asetpts=PTS-STARTPTS[a2];"
+  fc+="[a1][a2]amix=inputs=2:duration=longest:dropout_transition=0,loudnorm=I=-14:TP=-1.0:LRA=11[aout]"
+  # ensure output directory exists
+  local out_dir
+  out_dir=$(dirname "$out_mp4")
+  mkdir -p "$out_dir" 2>/dev/null || true
+  ffmpeg -y \
+    -i "$in_mp4" -i "$voice" -i "$key_track" \
+    -t "$target" \
+    -filter_complex "$fc" \
+    -map "[vout]" -map "[aout]" \
+    -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
+    -c:a aac -b:a 192k \
+    "$out_mp4"
+  rm -f "$key_track" || true
+}
+
 concat_v() {
   local out_mp4="$1"; shift
   local inputs=("$@")
@@ -404,6 +498,13 @@ case "$cmd" in
       running_code "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8"
     elif [ "$#" -eq 9 ]; then
       running_code "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+    else
+      usage
+    fi
+    ;;
+  filter_script_v2)
+    if [ "$#" -ge 7 ] && [ "$#" -le 9 ]; then
+      filter_script_v2 "$1" "$2" "$3" "$4" "$5" "$6" "$7" "${8:-}" "${9:-}"
     else
       usage
     fi
