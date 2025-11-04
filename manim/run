@@ -1,31 +1,48 @@
-#!/bin/bash -x 
+#!/bin/bash -x
 # ./run "Custom hex color" "#ffcc00"
-rm -rf media
 
 folder=${folder:-none}
+rm -rf /home/node/tts/$folder/media
 
-colors=(red blue green purple cyan magenta yellow orange)
+colors=(orange)
 COLOR_DEFAULT="${colors[RANDOM % ${#colors[@]}]}"
+cp -a simple.py /home/node/tts/$folder/
 
-docker run -it --rm \
-  -v "$(pwd)":/manim \
+  #-v "$(pwd)":/manim \
+docker run --rm \
+  -v "/home/node/tts/$folder":/manim \
   -u "$(id -u)":"$(id -g)" \
   -e TEXT="${1:-Hello 1from Manim!}" \
   -e COLOR="${2:-$COLOR_DEFAULT}" \
   manimcommunity/manim \
-   manim -ql -t -o text_alpha.webm ./text_scene.py TextScene
+   manim -ql -t -o text_alpha.webm ./simple.py TextScene
 #  manim -ql ./text_scene.py TextScene
 
 
   ffmpeg1(){
 
-  cd media/videos/text_scene/480p15
-  pwd
-  ffmpeg -i /home/node/tts/background/back-45.mp4 -i text_alpha.webm.mov \
-  -filter_complex "[1:v]scale=1920:-1[fg];[0:v][fg]overlay=0:0:format=auto" \
-  -c:v libx264 -pix_fmt yuv420p -c:a copy back-for-before.mp4 -y
-  cp -a back-for-before.mp4 /home/node/tts/$folder/
+  #cd media/videos/text_scene/480p15
+  cd /home/node/tts/$folder
+ cd media/videos/simple/480p15
+
+# ffmpeg -i /home/node/tts/$folder/back-for-before.mp4 -i text_alpha.webm.mov \
+#  -filter_complex "[1:v]scale=1920:-1[fg];[0:v][fg]overlay=0:0:format=auto" \
+#  -c:v libx264 -pix_fmt yuv420p -c:a copy back-for-beforez.mp4 -y
+#  cp -a back-for-beforez.mp4 /home/node/tts/$folder/
+
+seconds=5
+  #ffmpeg -i /home/node/tts/$folder/back-for-before_m0.mp4 \
+  #-itsoffset $seconds -i text_alpha.webm.mov \
+  #-filter_complex "[1:v]scale=1920:-1[fg];[0:v][fg]overlay=0:H-h-110:format=auto:shortest=1" \
+ # -c:v libx264 -pix_fmt yuv420p -c:a copy back-for-beforez.mp4 -y
+ # cp -a back-for-beforez.mp4 /home/node/tts/$folder/
+
+ffmpeg -i /home/node/tts/$folder/back-for-before_m0.mp4 \
+  -itsoffset $seconds -i text_alpha.webm.mov \
+  -filter_complex "[1:v]scale=1920:-1[fg];[0:v][fg]overlay=0:80:format=auto:eof_action=pass" \
+  -map 0:v -map 0:a? -c:v libx264 -pix_fmt yuv420p -c:a copy back-for-beforez.mp4 -y
+  cp -a back-for-beforez.mp4 /home/node/tts/$folder/
+
 
   }
   ffmpeg1
-

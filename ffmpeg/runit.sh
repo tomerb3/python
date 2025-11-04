@@ -124,8 +124,7 @@ cmd_create_example(){
 
     else 
         
-      #testing before section 
-      
+#BEFORE
       ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
       #${home}/ffmpeg-run.sh one_mp3 ${output_folder}/back-for-before.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
 
@@ -136,6 +135,7 @@ cmd_create_example(){
       if [ -e ${output_folder}/output-code.mp4 ];then 
         echo . 
       else 
+#CODE
         _code
       fi 
       
@@ -143,7 +143,8 @@ cmd_create_example(){
       if [ -e ${output_folder}/frozen-code-60s.mp4 ];then 
         echo .
       else 
-      ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/output-code.mp4 60 ${output_folder}/frozen-code-60s.mp4
+#CODE FREEZE
+        ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/output-code.mp4 60 ${output_folder}/frozen-code-60s.mp4
       fi 
 
 
@@ -159,6 +160,7 @@ cmd_create_example(){
       if [ -e ${output_folder}/running-code-demo.mp4 ];then 
         echo .
       else 
+#RUN CODE
         code_run_vera
       fi 
       
@@ -167,11 +169,11 @@ cmd_create_example(){
       if [ -e ${output_folder}/frozen-run-60s.mp4 ];then 
         echo .
       else 
-      set -x 
-        ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4 > line143_frozen-run-60s.txt 2>&1
+#RUN CODE FREEZE
+        ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4
       fi 
 
-      #after 
+
       if [ -e ${output_folder}/after.mp4 ];then 
         echo .
       else 
@@ -185,6 +187,7 @@ cmd_create_example(){
          start=${seconds2} kind=scanlines in_file=frozen-run-60s.mp4 output_file=frozen-run-60s-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
          ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s-v2.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
        else 
+#AFTER
          echo "not equal"
          ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
        fi
@@ -194,17 +197,17 @@ cmd_create_example(){
 
       fi
 
-      #check combine 
 fi
 
 
-if [ -e ${output_folder}/master.mp4 ];then 
-  echo . 
-else 
-  ${home}/ffmpeg-run.sh concat "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
-fi 
+  if [ -e ${output_folder}/master.mp4 ];then 
+    echo . 
+  else 
+#MASTER
+    ${home}/ffmpeg-run.sh concat "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
+  fi 
 
-#good  testing
+
 }
 
 

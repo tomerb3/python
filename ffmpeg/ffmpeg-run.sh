@@ -327,6 +327,21 @@ filter_script_v2() {
     -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
     -c:a aac -b:a 192k \
     "$out_mp4"
+  ff_status=$?
+  if [ $ff_status -eq 0 ]; then
+    # derive fps from input video and compute last frame index and duration
+    fps_raw=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$in_mp4" 2>/dev/null)
+    if [ -n "$fps_raw" ]; then
+      fps=$(awk -F'/' '{ if (NF==2 && $2+0>0) printf "%.6f", $1/$2; else printf "%.6f", $1 }' <<<"$fps_raw")
+    else
+      fps=30
+    fi
+    last_frame=$(awk -v f="$fps" -v t="$target" 'BEGIN{ printf "%d\n", int(f*t) }')
+    {
+      echo "last_frame=$last_frame"
+      echo "duration_seconds=$target"
+    } > /home/node/tts/filter1_info.txt 2>/dev/null || true
+  fi
   rm -f "$key_track" || true
 }
 
