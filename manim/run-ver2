@@ -14,7 +14,10 @@ docker run --rm \
   -v "/home/node/tts/$folder":/manim \
   -u "$(id -u)":"$(id -g)" \
   -e TEXT="${1:-Hello 1from Manim!}" \
-  -e COLOR="${2:-$COLOR_DEFAULT}" \
+  -e COLOR="$COLOR_DEFAULT" \
+  -e FONT_SIZE="${2:-37}" \
+  -e SHIFT_X="${3:-0.0}" \
+  -e SHIFT_Y="${4:-0.0}" \
   manimcommunity/manim \
    manim -ql -t -o text_alpha.webm ./text_scene.py TextScene
 #  manim -ql ./text_scene.py TextScene
@@ -32,3 +35,8 @@ docker run --rm \
 
   }
   ffmpeg1
+
+  if [ -e /home/node/tts/debug/back-for-before.mp4 ]; then
+    cp -a /home/node/tts/$folder/back-for-before.mp4 /mnt/c/ffmpeg/c/
+    sleep 3
+  fi

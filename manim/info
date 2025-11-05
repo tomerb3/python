@@ -1,0 +1,4 @@
+folder=debug ./run "one two three four five siz seven height nine ten ten aa" 34
+
+
+folder=debug ./run-ver2 aabbb bbbbbb one two three tomer baum hello worlds 25 0.2 0.2
