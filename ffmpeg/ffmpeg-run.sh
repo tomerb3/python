@@ -240,25 +240,24 @@ filter_script_v4() {
 
 filter_script_v3() {
   local in_mp4="$1"; local script="$2"; local out_mp4="$3"; local target="${4:-}"
-  local fchain esc
+  local fchain dt_prefix esc_prefix
   fchain=$(tr -d '\n' < "$script")
   fchain="${fchain%,}"
   fchain="${fchain%.}"
+  dt_prefix="ft_load_flags=force_autohint"
   if [ -n "${RC_FONTFILE:-}" ]; then
-    esc=$(printf %s "$RC_FONTFILE" | sed -e "s/[\\\/&]/\\&/g")
-    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontfile='${esc}':/g")
+    dt_prefix+=":fontfile='${RC_FONTFILE}'"
   elif [ -n "${RC_FONT:-}" ]; then
-    esc=$(printf %s "$RC_FONT" | sed -e "s/[\\\/&]/\\&/g")
-    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=font='${esc}':/g")
+    dt_prefix+=":font='${RC_FONT}'"
   fi
   if [ -n "${RC_FONTSIZE:-}" ]; then
-    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontsize=${RC_FONTSIZE}:/g")
+    dt_prefix+=":fontsize=${RC_FONTSIZE}"
   fi
   if [ -n "${RC_FONTCOLOR:-}" ]; then
-    esc=$(printf %s "$RC_FONTCOLOR" | sed -e "s/[\\\/&]/\\&/g")
-    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontcolor=${esc}:/g")
+    dt_prefix+=":fontcolor=${RC_FONTCOLOR}"
   fi
-  fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=ft_load_flags=force_autohint:/g")
+  esc_prefix=$(printf %s "$dt_prefix" | sed -e "s/[\/&]/\\&/g")
+  fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=${esc_prefix}:/g")
   if [ -z "$target" ]; then
     local anim_end
     anim_end=$(awk '{
@@ -424,26 +423,25 @@ filter_script_v2() {
   # final target duration = max(voice_total, key_total) + tail_pad seconds
   local target
   target=$(awk -v v="$v_total" -v k="$k_total" -v t="$tail_pad" 'BEGIN{ m=(v>k?v:k); if (t<0) t=0; printf "%.3f\n", m + t }')
-  # build video filter chain from script (reuse logic)
-  local fchain esc
+  # build video filter chain from script with a single robust drawtext prefix injection
+  local fchain dt_prefix esc_prefix
   fchain=$(tr -d '\n' < "$script")
   fchain="${fchain%,}"
   fchain="${fchain%.}"
+  dt_prefix="ft_load_flags=force_autohint"
   if [ -n "${RC_FONTFILE:-}" ]; then
-    esc=$(printf %s "$RC_FONTFILE" | sed -e "s/[\\\/&]/\\\\&/g")
-    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontfile='${esc}':/g")
+    dt_prefix+=":fontfile='${RC_FONTFILE}'"
   elif [ -n "${RC_FONT:-}" ]; then
-    esc=$(printf %s "$RC_FONT" | sed -e "s/[\\\/&]/\\\\&/g")
-    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=font='${esc}':/g")
+    dt_prefix+=":font='${RC_FONT}'"
   fi
   if [ -n "${RC_FONTSIZE:-}" ]; then
-    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontsize=${RC_FONTSIZE}:/g")
+    dt_prefix+=":fontsize=${RC_FONTSIZE}"
   fi
   if [ -n "${RC_FONTCOLOR:-}" ]; then
-    esc=$(printf %s "$RC_FONTCOLOR" | sed -e "s/[\\\\\/&]/\\\\&/g")
-    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontcolor=${esc}:/g")
+    dt_prefix+=":fontcolor=${RC_FONTCOLOR}"
   fi
-  fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=ft_load_flags=force_autohint:/g")
+  esc_prefix=$(printf %s "$dt_prefix" | sed -e "s/[\\\\/&]/\\\\&/g")
+  fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=${esc_prefix}:/g")
   # build combined filter_complex for final render
   local fc
   fc="[0:v]format=rgb24,${fchain},format=yuv444p[vout];"
