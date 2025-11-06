@@ -18,66 +18,56 @@ good(){
 }
 
 code_run_verb(){
-${home}/ffmpeg-run.sh running_code \
-  ${output_folder}/frozen-7s.mp4 \
-  ${output_folder}/code_run.txt \
-  50 1200 \
-  3 \
-  1.2 \
-  ${output_folder}/running-code-demo.mp4 \
-  '' \
- ${output_folder}/coderun.mp3 
+    ${home}/ffmpeg-run.sh running_code \
+      ${output_folder}/frozen-7s.mp4 \
+      ${output_folder}/code_run.txt \
+      50 1200 \
+      3 \
+      1.2 \
+      ${output_folder}/running-code-demo.mp4 \
+      '' \
+    ${output_folder}/coderun.mp3 
 }
 
-
 filter1() { 
-#  num_lines=$(
-#    awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' ${output_folder}/code_show.txt
-#  )
+    #  num_lines=$(
+    #    awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' ${output_folder}/code_show.txt
+    #  )
 
-#num_lines=$(( $(awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' "${output_folder}/code_show.txt")   ))
-#num_lines=$(( $(awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' "${output_folder}/code_show.txt") + 1 ))
+    #num_lines=$(( $(awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' "${output_folder}/code_show.txt")   ))
+    #num_lines=$(( $(awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' "${output_folder}/code_show.txt") + 1 ))
 
- # Build voice track with 1s silence tail
- #ffmpeg -y \
-  # -i "${output_folder}/code.mp3" \
-  # -i "${backup_folder}/silence-3s.mp3" \
-  # -filter_complex "[0:a]aformat=channel_layouts=stereo:sample_rates=48000[a0];[1:a]aformat=channel_layouts=stereo:sample_rates=48000[a1];[a0][a1]concat=n=2:v=0:a=1[a]" \
-  # -map "[a]" "${output_folder}/code_with_tail.mp3"
+    # Build voice track with 1s silence tail
+    #ffmpeg -y \
+      # -i "${output_folder}/code.mp3" \
+      # -i "${backup_folder}/silence-3s.mp3" \
+      # -filter_complex "[0:a]aformat=channel_layouts=stereo:sample_rates=48000[a0];[1:a]aformat=channel_layouts=stereo:sample_rates=48000[a1];[a0][a1]concat=n=2:v=0:a=1[a]" \
+      # -map "[a]" "${output_folder}/code_with_tail.mp3"
 
- #${home}/ffmpeg-run.sh filter_script \
- # ${output_folder}/${back_45_video} \
- # ${output_folder}/files/filters.txt \
- # ${output_folder}/code.mp3 \
- # ${backup_folder}/key-2s.wav \
- # $num_lines \
- # ${output_folder}/output-code.mp4
-echo "new555 start"
-words_for_each_loop=2
-not_empty_lines=$(grep -cve '^[[:space:]]*$' ${output_folder}/code_show.txt)
-calc=$((2 * $not_empty_lines - 1))
-words_in_code=$(( $(wc -w < ${output_folder}/code_show.txt) + $calc ))
-echo "${words_in_code}" > code_to_show_words_for_click_auto
-code_to_show_words_for_click=$(cat ${output_folder}/code_to_show_words_for_click)
-if [ ${code_to_show_words_for_click} -eq 0 ];then 
-  echo .
-else 
-  words_in_code=${code_to_show_words_for_click}
-fi 
+    #${home}/ffmpeg-run.sh filter_script \
+    # ${output_folder}/${back_45_video} \
+    # ${output_folder}/files/filters.txt \
+    # ${output_folder}/code.mp3 \
+    # ${backup_folder}/key-2s.wav \
+    # $num_lines \
+    # ${output_folder}/output-code.mp4
+    echo "new555 start"
+    words_for_each_loop=2
+    not_empty_lines=$(grep -cve '^[[:space:]]*$' ${output_folder}/code_show.txt)
+    calc=$((2 * $not_empty_lines - 1))
+    words_in_code=$(( $(wc -w < ${output_folder}/code_show.txt) + $calc ))
+    echo "${words_in_code}" > code_to_show_words_for_click_auto
+    code_to_show_words_for_click=$(cat ${output_folder}/code_to_show_words_for_click)
+    if [ ${code_to_show_words_for_click} -eq 0 ];then 
+      echo .
+    else 
+      words_in_code=${code_to_show_words_for_click}
+    fi 
 
-
-
-
-
-sleep 1
-${home}/ffmpeg-run.sh filter_script_v2 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code.mp3 ${backup_folder}/keys_dir $words_in_code $words_for_each_loop ${output_folder}/output-code.mp4
-
-
-
-#kind=loops in_file=output-code.mp4 output_file=output-code-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
-echo "new555 end" 
-
-
+    sleep 1
+    ${home}/ffmpeg-run.sh filter_script_v2 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code.mp3 ${backup_folder}/keys_dir $words_in_code $words_for_each_loop ${output_folder}/output-code.mp4
+    #kind=loops in_file=output-code.mp4 output_file=output-code-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
+    echo "new555 end" 
 }
 
 code_run_vera(){
@@ -92,12 +82,7 @@ ${home}/ffmpeg-run.sh running_code \
  ${output_folder}/coderun.mp3 
 }
 
-
-
-
-
-
-
+# type code - need the clicks sound to be 100% with the text animation !!!!!!!!!!
 _code(){
       export RC_FONTFILE="${font_folder}/DejaVuSans.ttf"
       export RC_FONTSIZE=66
@@ -111,8 +96,6 @@ _code(){
       #A2
       filter1
 }
-
-
 
 cmd_create_example(){
 
