@@ -11,6 +11,7 @@ usage() {
   echo "Commands:" >&2
   echo "  one_mp3 <in_mp4> <mp3> <out_mp4>" >&2
   echo "  two_mp3 <in_mp4> <mp3_primary> <mp3_secondary> <offset_seconds> <out_mp4>" >&2
+  echo "  mix_talk <in_mp4> <talk.mp3> <out_mp4> [talk_vol=0.7] [orig_vol=0.3] [pad_after_s=4]" >&2
   echo "  concat <out_mp4> <in1.mp4> [in2.mp4 ...]" >&2
   echo "didnt test yet"
 
@@ -319,6 +320,39 @@ two_mp3() {
     -c:a aac -b:a 192k \
     -t "$target" \
     "$out_mp4"
+}
+
+mix_talk() {
+  local in_mp4="$1"; local talk_mp3="$2"; local out_mp4="$3"; local talk_vol="${4:-0.7}"; local orig_vol="${5:-0.3}"; local pad_after="${6:-4.0}"
+  if [ ! -f "$in_mp4" ]; then echo "input video not found: $in_mp4" >&2; exit 1; fi
+  if [ ! -f "$talk_mp3" ]; then echo "talk mp3 not found: $talk_mp3" >&2; exit 1; fi
+  local has_audio=0
+  if ffprobe -v error -select_streams a:0 -show_entries stream=index -of csv=p=0 "$in_mp4" >/dev/null 2>&1; then
+    if [ -n "$(ffprobe -v error -select_streams a:0 -show_entries stream=index -of csv=p=0 "$in_mp4" 2>/dev/null)" ]; then
+      has_audio=1
+    fi
+  fi
+  # Determine "end of speech" in talk track and trim output 2 seconds after that
+  local t_base t_rem speech_end target
+  t_base=$(dur "$talk_mp3")
+  t_rem=$(trailing_silence_remain "$talk_mp3")
+  speech_end=$(awk -v b="$t_base" -v r="$t_rem" 'BEGIN{ s=b-r; if (s<0) s=0; printf "%.3f\n", s }')
+  target=$(awk -v s="$speech_end" -v p="$pad_after" 'BEGIN{ printf "%.3f\n", s + 0.0 + p }')
+  if [ "$has_audio" -eq 1 ]; then
+    ffmpeg -y -i "$in_mp4" -i "$talk_mp3" \
+      -filter_complex "[0:a]aformat=channel_layouts=stereo:sample_rates=48000,asetpts=PTS-STARTPTS,volume=${orig_vol}[va];[1:a]aformat=channel_layouts=stereo:sample_rates=48000,asetpts=PTS-STARTPTS,volume=${talk_vol}[ta];[va][ta]amix=inputs=2:duration=first:dropout_transition=0[a]" \
+      -map 0:v:0 -map "[a]" -t "$target" \
+      -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
+      -c:a aac -b:a 192k \
+      "$out_mp4"
+  else
+    ffmpeg -y -i "$in_mp4" -i "$talk_mp3" \
+      -filter_complex "[1:a]aformat=channel_layouts=stereo:sample_rates=48000,asetpts=PTS-STARTPTS,volume=${talk_vol}[a]" \
+      -map 0:v:0 -map "[a]" -t "$target" \
+      -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
+      -c:a aac -b:a 192k \
+      "$out_mp4"
+  fi
 }
 
 filter_script() {
@@ -644,6 +678,13 @@ case "$cmd" in
   one_mp3)
     [ "$#" -eq 3 ] || usage
     one_mp3 "$1" "$2" "$3"
+    ;;
+  mix_talk)
+    if [ "$#" -ge 3 ] && [ "$#" -le 6 ]; then
+      mix_talk "$1" "$2" "$3" "${4:-}" "${5:-}" "${6:-}"
+    else
+      usage
+    fi
     ;;
   filter_script_v4)
     if [ "$#" -ge 3 ] && [ "$#" -le 4 ]; then

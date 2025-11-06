@@ -225,51 +225,38 @@ cmd_merge_examples_to_chapter(){
 
 
 cmd_debug(){
- # filter1
-
 rm -f ${output_folder}/a.mp4 
    ${home}/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/a.mp4 
-cp -a $HOME/a/a.mp4 /mnt/c/ffmpeg/c/
-
- 
-  
-cd 
-cd a 
-
-N=$(ffprobe -v error -select_streams v:0 -count_frames \
+   cd ${output_folder}
+   N=$(ffprobe -v error -select_streams v:0 -count_frames \
      -show_entries stream=nb_read_frames -of default=nw=1:nk=1 a.mp4)
-DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 a.mp4 | awk '{printf "%.6f\n",$1}')
-
-ffmpeg -y -i b.mp4 \
+    DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 a.mp4 | awk '{printf "%.6f\n",$1}')
+    ffmpeg -y -i a.mp4 \
   -vf "trim=end_frame=${N},setpts=PTS-STARTPTS" \
   -af "atrim=0:${DUR},asetpts=PTS-STARTPTS" \
   -c:v libx264 -preset veryfast -crf 20 -c:a aac -b:a 192k \
   b_trim.mp4
- cp -a $HOME/a/b_trim.mp4 /mnt/c/ffmpeg/c/
-
-
 
   ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/b_trim.mp4 60 ${output_folder}/frozen-code-60s.mp4
-
-
 D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/frozen-code-60s.mp4" | awk '{printf "%.6f\n",$1}')
 ffmpeg -y -i "${output_folder}/frozen-code-60s.mp4" \
   -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
   -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
   "${output_folder}/frozen-code-60s-a.mp4"
- cp -a $HOME/a/frozen-code-60s-a.mp4 /mnt/c/ffmpeg/c/
+${home}/ffmpeg-run.sh concat "${output_folder}/master0.mp4" "${output_folder}/b_trim.mp4" "${output_folder}/frozen-code-60s-a.mp4" 
 
-ffprobe $HOME/a/frozen-code-60s-a.mp4 > /mnt/c/ffmpeg/c/frozen-code-60s-a.mp4.txt  2>&1
-ffprobe $HOME/a/b_trim.mp4 > /mnt/c/ffmpeg/c/b_trim.mp4.txt  2>&1
+rm -f ${output_folder}/master.mp4
+#                                                                                                             seconds after silense
+${home}/ffmpeg-run.sh mix_talk /home/baum/a/master0.mp4 /home/baum/a/code.mp3 /home/baum/a/master.mp4 0.8 0.2 6
 
-  ${home}/ffmpeg-run.sh concat "${output_folder}/master.mp4" "${output_folder}/b_trim.mp4" "${output_folder}/frozen-code-60s-a.mp4" > /mnt/c/ffmpeg/c/concat-master.log 2>&1
-
-#${home}/ffmpeg-run.sh filter_script_v4 ${output_folder}/output-code.mp4 ${output_folder}/keys_dir ${output_folder}/1.mp4 30
-
+rm -f /mnt/c/ffmpeg/c/master.mp4
+sleep 1
  cp -a $HOME/a/master.mp4 /mnt/c/ffmpeg/c/
-  #cp -a $HOME/a/output-code.mp4 /mnt/c/ffmpeg/c/
 
 }
+
+
+
 
 cmd_back_left_video(){
   cd $folder
