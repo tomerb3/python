@@ -202,7 +202,7 @@ fi
     echo . 
   else 
 #MASTER
-    ${home}/ffmpeg-run.sh concat2 "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
+    ${home}/ffmpeg-run.sh concat_v2 "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
   fi 
 
 
