@@ -686,6 +686,60 @@ overlay_pip_right_bottom() {
     "$out"
 }
 
+
+
+
+
+
+
+concat_v2() {
+  local out_mp4="$1"; shift
+  local inputs=("$@")
+  local n=${#inputs[@]}
+  #if [ "$n" -lt 2 ]; then echo "concat requires at least 2 inputs" >&2; exit 1; fi
+  # Validate files
+  local f
+  for f in "${inputs[@]}"; do
+    if [ ! -f "$f" ]; then echo "concat input missing: $f" >&2; exit 1; fi
+  done
+  local fc="" 
+  local idx
+  for idx in $(seq 0 $((n-1))); do
+    fc+="[$idx:v]fps=30,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v$idx];"
+    fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000[a$idx];"
+  done
+  local concat_inputs=""
+  for idx in $(seq 0 $((n-1))); do
+    concat_inputs+="[v$idx][a$idx]"
+ done
+  fc+="${concat_inputs}concat=n=$n:v=1:a=1[vcat][acat];[acat]aformat=channel_layouts=stereo:sample_rates=48000,loudnorm=I=-14:TP=-1.0:LRA=11[aout]"
+  # Build args array to avoid eval and preserve spaces
+  local args=( -y )
+  for f in "${inputs[@]}"; do args+=( -i "$f" ); done
+  args+=( -filter_complex "$fc" -map "[vcat]" -map "[aout]" -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4" )
+  ffmpeg "${args[@]}"
+}
+
+# Create a silent video by freezing the last frame for a given number of seconds
+freeze_last_frame() {
+  local in_mp4="$1"; local seconds="$2"; local out_mp4="$3"
+  if [ ! -f "$in_mp4" ]; then echo "input not found: $in_mp4" >&2; exit 1; fi
+  if [ -z "${seconds}" ]; then echo "seconds is required" >&2; exit 1; fi
+  # extract last frame (seek from end) to a temp image
+  local tmpimg
+rm -f /tmp/lastfram1.jpg
+touch /tmp/lastfram1.jpg
+  tmpimg=/tmp/lastfram1.jpg
+  ffmpeg -y -sseof -0.05 -i "$in_mp4" -frames:v 1 -q:v 2 "$tmpimg"
+  # build a constant video from the still image
+  ffmpeg -y -loop 1 -i "$tmpimg" -t "$seconds" -r 30 \
+    -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -an "$out_mp4"
+  rm -f "$tmpimg"
+}
+
+
+
+
 cmd="$1"; shift || true
 case "$cmd" in
   one_mp3)
@@ -732,6 +786,11 @@ case "$cmd" in
     [ "$#" -ge 3 ] || usage
     out="$1"; shift
     concat_v "$out" "$@"
+    ;;
+  concat_v2)
+    [ "$#" -ge 3 ] || usage
+    out="$1"; shift
+    concat_v2 "$out" "$@"
     ;;
   freeze_last_frame)
     [ "$#" -eq 3 ] || usage
