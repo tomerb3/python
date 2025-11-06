@@ -17,6 +17,7 @@ usage() {
   echo "  filter_script <in_mp4> <filters.txt> <voice.mp3> <key.mp3> <lines_count> <out_mp4> [halfkey.mp3]" >&2
   echo "  filter_script_v2 <in_mp4> <filters.txt> <voice.mp3> <keys_dir> <words> <calc> <out_mp4> [key_volume] [tail_pad_s]" >&2
   echo "  filter_script_v3 <in_mp4> <filters.txt> <out_mp4> [target_seconds]" >&2
+  echo "  filter_script_v4 <in_mp4> <keys_dir> <out_mp4> [key_volume]" >&2
   echo "  freeze_last_frame <in_mp4> <seconds> <out_mp4>" >&2
   echo "  running_code <in_mp4> <textfile> <x> <y> <seconds> <start_delay> <out_mp4> [sfx.mp3] [explain.mp3]" >&2
   exit 1
@@ -194,42 +195,79 @@ encode_video_filter_script() {
   fi
 }
 
+filter_script_v4() {
+  local in_mp4="$1"; local keys_dir="$2"; local out_mp4="$3"; local key_vol="${4:-0.3}"
+  if [ ! -f "$in_mp4" ]; then echo "input not found: $in_mp4" >&2; exit 1; fi
+  if [ ! -d "$keys_dir" ]; then echo "keys_dir not found: $keys_dir" >&2; exit 1; fi
+  local target nb_frames fps_raw fps
+  target=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$in_mp4" | awk '{printf "%.6f\n", $1}')
+  nb_frames=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of default=nw=1:nk=1 "$in_mp4" 2>/dev/null | tr -d '\r')
+  fps_raw=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$in_mp4" 2>/dev/null)
+  if [ -n "$fps_raw" ]; then
+    fps=$(awk -F'/' '{ if (NF==2 && $2+0>0) printf "%.6f", $1/$2; else printf "%.6f", $1 }' <<<"$fps_raw")
+  fi
+  if [ -z "$nb_frames" ] || [ "$nb_frames" = "N/A" ]; then
+    if [ -n "$fps" ]; then
+      nb_frames=$(awk -v t="$target" -v f="$fps" 'BEGIN{ printf "%d\n", int(f*t+0.5) }')
+    fi
+  fi
+  local files=() sel=() n_files
+  while IFS= read -r -d '' f; do files+=("$f"); done < <(find "$keys_dir" -maxdepth 1 -type f \( -iname "*.mp3" -o -iname "*.wav" -o -iname "*.m4a" \) -print0 | sort -z)
+  n_files=${#files[@]}
+  if [ "$n_files" -eq 0 ]; then echo "no audio files in $keys_dir" >&2; exit 1; fi
+  mapfile -t idxs < <(printf '%s\n' "${!files[@]}" | shuf)
+  local key_track tmp_dir; tmp_dir=${TMPDIR:-/tmp}
+  key_track="${tmp_dir}/key_track_$$-$(date +%s%N 2>/dev/null || date +%s)-$RANDOM.wav"
+  : > "$key_track"
+  local args=( -y ); local fc=""; local j n k ins=""
+  n=$n_files
+  for j in $(seq 0 $((n-1))); do args+=( -i "${files[${idxs[$j]}]}" ); done
+  for k in $(seq 0 $((n-1))); do fc+="[$k:a]aformat=channel_layouts=stereo:sample_rates=48000[a$k];"; done
+  for k in $(seq 0 $((n-1))); do ins+="[a$k]"; done
+  fc+="${ins}concat=n=$n:v=0:a=1,apad=pad_dur=${target},atrim=0:${target},asetpts=PTS-STARTPTS[aout]"
+  args+=( -filter_complex "$fc" -map "[aout]" -c:a pcm_s16le "$key_track" )
+  ffmpeg "${args[@]}" >/dev/null 2>&1
+  if [ -n "$nb_frames" ] && [ "$nb_frames" != "N/A" ]; then
+    ffmpeg -y -i "$in_mp4" -i "$key_track" -filter_complex "[1:a]volume=${key_vol}[ka]" -map 0:v:0 -map "[ka]" -c:v copy -frames:v "$nb_frames" -c:a aac -b:a 192k "$out_mp4"
+  else
+    ffmpeg -y -i "$in_mp4" -i "$key_track" -filter_complex "[1:a]volume=${key_vol}[ka]" -map 0:v:0 -map "[ka]" -c:v copy -c:a aac -b:a 192k -shortest "$out_mp4"
+  fi
+  local status=$?
+  rm -f "$key_track" || true
+  return $status
+}
+
 filter_script_v3() {
   local in_mp4="$1"; local script="$2"; local out_mp4="$3"; local target="${4:-}"
-  # Build video filter chain from script (same defaults as v2), but no audio at all
   local fchain esc
   fchain=$(tr -d '\n' < "$script")
   fchain="${fchain%,}"
   fchain="${fchain%.}"
   if [ -n "${RC_FONTFILE:-}" ]; then
-    esc=$(printf %s "$RC_FONTFILE" | sed -e "s/[\\\/&]/\\\\&/g")
+    esc=$(printf %s "$RC_FONTFILE" | sed -e "s/[\\\/&]/\\&/g")
     fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontfile='${esc}':/g")
   elif [ -n "${RC_FONT:-}" ]; then
-    esc=$(printf %s "$RC_FONT" | sed -e "s/[\\\/&]/\\\\&/g")
+    esc=$(printf %s "$RC_FONT" | sed -e "s/[\\\/&]/\\&/g")
     fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=font='${esc}':/g")
   fi
   if [ -n "${RC_FONTSIZE:-}" ]; then
     fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontsize=${RC_FONTSIZE}:/g")
   fi
   if [ -n "${RC_FONTCOLOR:-}" ]; then
-    esc=$(printf %s "$RC_FONTCOLOR" | sed -e "s/[\\\\\/&]/\\\\&/g")
+    esc=$(printf %s "$RC_FONTCOLOR" | sed -e "s/[\\\/&]/\\&/g")
     fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontcolor=${esc}:/g")
   fi
-  # Improve text sharpness
   fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=ft_load_flags=force_autohint:/g")
-  # If no explicit target given, try to derive animation end from timing expressions in filters.txt
   if [ -z "$target" ]; then
     local anim_end
     anim_end=$(awk '{
       line=$0;
       while (match(line, /between\(t, *([0-9.]+) *, *([0-9.]+) *\)/, a)) {
-        val=a[2]+0; if (val>m) m=val; 
-        line=substr(line, RSTART+RLENGTH);
+        val=a[2]+0; if (val>m) m=val; line=substr(line, RSTART+RLENGTH);
       }
       line=$0;
       while (match(line, /gte\(t, *([0-9.]+) *\)/, b)) {
-        val=b[1]+0; if (val>m) m=val;
-        line=substr(line, RSTART+RLENGTH);
+        val=b[1]+0; if (val>m) m=val; line=substr(line, RSTART+RLENGTH);
       }
     } END { if (m>0) printf "%.3f\n", m }' "$script")
     if [ -n "$anim_end" ]; then
@@ -418,7 +456,6 @@ concat_v() {
   for f in "${inputs[@]}"; do
     if [ ! -f "$f" ]; then echo "concat input missing: $f" >&2; exit 1; fi
   done
-  # Detect if any input has audio
   local has_audio=0
   for f in "${inputs[@]}"; do
     if ffprobe -v error -select_streams a:0 -show_entries stream=index -of csv=p=0 "$f" >/dev/null 2>&1; then
@@ -427,28 +464,60 @@ concat_v() {
       fi
     fi
   done
+  # Check if all inputs share same width/height/SAR and frame rate
+  local base_w base_h base_sar base_fps same_dim=1 same_fps=1
+  base_w=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "${inputs[0]}")
+  base_h=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "${inputs[0]}")
+  base_sar=$(ffprobe -v error -select_streams v:0 -show_entries stream=sample_aspect_ratio -of csv=p=0 "${inputs[0]}")
+  base_fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "${inputs[0]}")
+  for f in "${inputs[@]}"; do
+    local w h sar fps
+    w=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$f")
+    h=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$f")
+    sar=$(ffprobe -v error -select_streams v:0 -show_entries stream=sample_aspect_ratio -of csv=p=0 "$f")
+    fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$f")
+    [ "$w" = "$base_w" ] || same_dim=0
+    [ "$h" = "$base_h" ] || same_dim=0
+    [ "$sar" = "$base_sar" ] || same_dim=0
+    [ "$fps" = "$base_fps" ] || same_fps=0
+  done
   local fc=""
   local idx
   if [ "$has_audio" -eq 1 ]; then
-    for idx in $(seq 0 $((n-1))); do
-      fc+="[$idx:v]fps=30,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v$idx];"
-      fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000[a$idx];"
-    done
+    if [ $same_dim -eq 1 ] && [ $same_fps -eq 1 ]; then
+      for idx in $(seq 0 $((n-1))); do
+        fc+="[$idx:v]setsar=1,setpts=PTS-STARTPTS[v$idx];"
+        fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000,asetpts=PTS-STARTPTS[a$idx];"
+      done
+    else
+      for idx in $(seq 0 $((n-1))); do
+        fc+="[$idx:v]fps=30,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v$idx];"
+        fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000[a$idx];"
+      done
+    fi
     local concat_inputs=""
     for idx in $(seq 0 $((n-1))); do
       concat_inputs+="[v$idx][a$idx]"
     done
     fc+="${concat_inputs}concat=n=$n:v=1:a=1[vcat][acat];[acat]aformat=channel_layouts=stereo:sample_rates=48000,loudnorm=I=-14:TP=-1.0:LRA=11[aout]"
-    # Build args array to avoid eval and preserve spaces
     local args=( -y )
     for f in "${inputs[@]}"; do args+=( -i "$f" ); done
-    args+=( -filter_complex "$fc" -map "[vcat]" -map "[aout]" -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4" )
+    if [ $same_dim -eq 1 ] && [ $same_fps -eq 1 ]; then
+      args+=( -filter_complex "$fc" -map "[vcat]" -map "[aout]" -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4" )
+    else
+      args+=( -filter_complex "$fc" -map "[vcat]" -map "[aout]" -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4" )
+    fi
     ffmpeg "${args[@]}"
   else
-    # Video-only concat
-    for idx in $(seq 0 $((n-1))); do
-      fc+="[$idx:v]fps=30,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v$idx];"
-    done
+    if [ $same_dim -eq 1 ] && [ $same_fps -eq 1 ]; then
+      for idx in $(seq 0 $((n-1))); do
+        fc+="[$idx:v]setsar=1,setpts=PTS-STARTPTS[v$idx];"
+      done
+    else
+      for idx in $(seq 0 $((n-1))); do
+        fc+="[$idx:v]fps=30,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v$idx];"
+      done
+    fi
     local concat_inputs=""
     for idx in $(seq 0 $((n-1))); do
       concat_inputs+="[v$idx]"
@@ -456,7 +525,11 @@ concat_v() {
     fc+="${concat_inputs}concat=n=$n:v=1:a=0[vcat]"
     local args=( -y )
     for f in "${inputs[@]}"; do args+=( -i "$f" ); done
-    args+=( -filter_complex "$fc" -map "[vcat]" -an -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p "$out_mp4" )
+    if [ $same_dim -eq 1 ] && [ $same_fps -eq 1 ]; then
+      args+=( -filter_complex "$fc" -map "[vcat]" -an -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p "$out_mp4" )
+    else
+      args+=( -filter_complex "$fc" -map "[vcat]" -an -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p "$out_mp4" )
+    fi
     ffmpeg "${args[@]}"
   fi
 }
@@ -571,6 +644,13 @@ case "$cmd" in
   one_mp3)
     [ "$#" -eq 3 ] || usage
     one_mp3 "$1" "$2" "$3"
+    ;;
+  filter_script_v4)
+    if [ "$#" -ge 3 ] && [ "$#" -le 4 ]; then
+      filter_script_v4 "$1" "$2" "$3" "${4:-}"
+    else
+      usage
+    fi
     ;;
   filter_script_v3)
     if [ "$#" -eq 3 ]; then
