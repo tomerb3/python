@@ -54,7 +54,7 @@ filter1() {
    N=$(ffprobe -v error -select_streams v:0 -count_frames \
      -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
 
-    DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 a.mp4 | awk '{printf "%.6f\n",$1}')
+    DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 code_a.mp4 | awk '{printf "%.6f\n",$1}')
     ffmpeg -y -i code_a.mp4 \
   -vf "trim=end_frame=${N},setpts=PTS-STARTPTS" \
   -af "atrim=0:${DUR},asetpts=PTS-STARTPTS" \
