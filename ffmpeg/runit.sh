@@ -228,9 +228,8 @@ cmd_debug(){
  # filter1
    "${home}/ffmpeg-run.sh" filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/output-code.mp4 
 
-
-
-
+   ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/output-code.mp4 60 ${output_folder}/frozen-code-60s.mp4
+   ${home}/ffmpeg-run.sh concat "${output_folder}/master.mp4" "${output_folder}/output-code.mp4" "${output_folder}/frozen-code-60s.mp4"
   
   
   cp -a $HOME/a/output-code.mp4 /mnt/c/ffmpeg/c/

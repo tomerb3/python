@@ -418,22 +418,47 @@ concat_v() {
   for f in "${inputs[@]}"; do
     if [ ! -f "$f" ]; then echo "concat input missing: $f" >&2; exit 1; fi
   done
+  # Detect if any input has audio
+  local has_audio=0
+  for f in "${inputs[@]}"; do
+    if ffprobe -v error -select_streams a:0 -show_entries stream=index -of csv=p=0 "$f" >/dev/null 2>&1; then
+      if [ -n "$(ffprobe -v error -select_streams a:0 -show_entries stream=index -of csv=p=0 "$f" 2>/dev/null)" ]; then
+        has_audio=1; break
+      fi
+    fi
+  done
   local fc=""
   local idx
-  for idx in $(seq 0 $((n-1))); do
-    fc+="[$idx:v]fps=30,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v$idx];"
-    fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000[a$idx];"
-  done
-  local concat_inputs=""
-  for idx in $(seq 0 $((n-1))); do
-    concat_inputs+="[v$idx][a$idx]"
-  done
-  fc+="${concat_inputs}concat=n=$n:v=1:a=1[vcat][acat];[acat]aformat=channel_layouts=stereo:sample_rates=48000,loudnorm=I=-14:TP=-1.0:LRA=11[aout]"
-  # Build args array to avoid eval and preserve spaces
-  local args=( -y )
-  for f in "${inputs[@]}"; do args+=( -i "$f" ); done
-  args+=( -filter_complex "$fc" -map "[vcat]" -map "[aout]" -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4" )
-  ffmpeg "${args[@]}"
+  if [ "$has_audio" -eq 1 ]; then
+    for idx in $(seq 0 $((n-1))); do
+      fc+="[$idx:v]fps=30,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v$idx];"
+      fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000[a$idx];"
+    done
+    local concat_inputs=""
+    for idx in $(seq 0 $((n-1))); do
+      concat_inputs+="[v$idx][a$idx]"
+    done
+    fc+="${concat_inputs}concat=n=$n:v=1:a=1[vcat][acat];[acat]aformat=channel_layouts=stereo:sample_rates=48000,loudnorm=I=-14:TP=-1.0:LRA=11[aout]"
+    # Build args array to avoid eval and preserve spaces
+    local args=( -y )
+    for f in "${inputs[@]}"; do args+=( -i "$f" ); done
+    args+=( -filter_complex "$fc" -map "[vcat]" -map "[aout]" -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p -c:a aac -b:a 192k "$out_mp4" )
+    ffmpeg "${args[@]}"
+  else
+    # Video-only concat
+    for idx in $(seq 0 $((n-1))); do
+      fc+="[$idx:v]fps=30,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v$idx];"
+    done
+    local concat_inputs=""
+    for idx in $(seq 0 $((n-1))); do
+      concat_inputs+="[v$idx]"
+    done
+    fc+="${concat_inputs}concat=n=$n:v=1:a=0[vcat]"
+    local args=( -y )
+    for f in "${inputs[@]}"; do args+=( -i "$f" ); done
+    args+=( -filter_complex "$fc" -map "[vcat]" -an -c:v libx264 -preset veryfast -crf 20 -r 30 -pix_fmt yuv420p "$out_mp4" )
+    ffmpeg "${args[@]}"
+  fi
 }
 
 # Create a silent video by freezing the last frame for a given number of seconds
