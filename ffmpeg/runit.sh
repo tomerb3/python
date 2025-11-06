@@ -32,54 +32,62 @@ code_run_verb(){
 }
 
 filter1() { 
-    #  num_lines=$(
-    #    awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' ${output_folder}/code_show.txt
-    #  )
+  
+    # echo "new555 start"
+    # words_for_each_loop=2
+    # not_empty_lines=$(grep -cve '^[[:space:]]*$' ${output_folder}/code_show.txt)
+    # calc=$((2 * $not_empty_lines - 1))
+    # words_in_code=$(( $(wc -w < ${output_folder}/code_show.txt) + $calc ))
+    # echo "${words_in_code}" > code_to_show_words_for_click_auto
+    # code_to_show_words_for_click=$(cat ${output_folder}/code_to_show_words_for_click)
+    # if [ ${code_to_show_words_for_click} -eq 0 ];then 
+    #   echo .
+    # else 
+    #   words_in_code=${code_to_show_words_for_click}
+    # fi 
+    # ${home}/ffmpeg-run.sh filter_script_v2 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code.mp3 ${backup_folder}/keys_dir $words_in_code $words_for_each_loop ${output_folder}/output-code.mp4
+                                    # #kind=loops in_file=output-code.mp4 output_file=output-code-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
 
-    #num_lines=$(( $(awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' "${output_folder}/code_show.txt")   ))
-    #num_lines=$(( $(awk '{gsub(/[^[:alnum:]_]+/," ")} NF>=3{c++} (NF==1||NF==2){s=1} END{print c + (s?1:0)}' "${output_folder}/code_show.txt") + 1 ))
 
-    # Build voice track with 1s silence tail
-    #ffmpeg -y \
-      # -i "${output_folder}/code.mp3" \
-      # -i "${backup_folder}/silence-3s.mp3" \
-      # -filter_complex "[0:a]aformat=channel_layouts=stereo:sample_rates=48000[a0];[1:a]aformat=channel_layouts=stereo:sample_rates=48000[a1];[a0][a1]concat=n=2:v=0:a=1[a]" \
-      # -map "[a]" "${output_folder}/code_with_tail.mp3"
+   ${home}/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
+   cd ${output_folder}
+   N=$(ffprobe -v error -select_streams v:0 -count_frames \
+     -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
 
-    #${home}/ffmpeg-run.sh filter_script \
-    # ${output_folder}/${back_45_video} \
-    # ${output_folder}/files/filters.txt \
-    # ${output_folder}/code.mp3 \
-    # ${backup_folder}/key-2s.wav \
-    # $num_lines \
-    # ${output_folder}/output-code.mp4
-    echo "new555 start"
-    words_for_each_loop=2
-    not_empty_lines=$(grep -cve '^[[:space:]]*$' ${output_folder}/code_show.txt)
-    calc=$((2 * $not_empty_lines - 1))
-    words_in_code=$(( $(wc -w < ${output_folder}/code_show.txt) + $calc ))
-    echo "${words_in_code}" > code_to_show_words_for_click_auto
-    code_to_show_words_for_click=$(cat ${output_folder}/code_to_show_words_for_click)
-    if [ ${code_to_show_words_for_click} -eq 0 ];then 
-      echo .
-    else 
-      words_in_code=${code_to_show_words_for_click}
-    fi 
+    DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 a.mp4 | awk '{printf "%.6f\n",$1}')
+    ffmpeg -y -i code_a.mp4 \
+  -vf "trim=end_frame=${N},setpts=PTS-STARTPTS" \
+  -af "atrim=0:${DUR},asetpts=PTS-STARTPTS" \
+  -c:v libx264 -preset veryfast -crf 20 -c:a aac -b:a 192k \
+  code_b.mp4
 
-    sleep 1
-    ${home}/ffmpeg-run.sh filter_script_v2 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code.mp3 ${backup_folder}/keys_dir $words_in_code $words_for_each_loop ${output_folder}/output-code.mp4
-    #kind=loops in_file=output-code.mp4 output_file=output-code-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
+  ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/frozen-code-60s.mp4
+D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/frozen-code-60s.mp4" | awk '{printf "%.6f\n",$1}')
+ffmpeg -y -i "${output_folder}/frozen-code-60s.mp4" \
+  -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
+  -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
+  "${output_folder}/frozen-code-60s-a.mp4"
+${home}/ffmpeg-run.sh concat "${output_folder}/master0.mp4" "${output_folder}/code_b.mp4" "${output_folder}/frozen-code-60s-a.mp4" 
+
+#                                                                                                             seconds after silense
+${home}/ffmpeg-run.sh mix_talk ${output_folder}/master0.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 0.8 0.2 6
+
+
+ 
+
+
+
     echo "new555 end" 
 }
 
 code_run_vera(){
 ${home}/ffmpeg-run.sh running_code \
-  ${output_folder}/frozen-code-60s.mp4 \
+  ${output_folder}/frozen-code-60s-a.mp4 \
   ${output_folder}/code_run_to_video.txt \
   50 1200 \
   3 \
   0.2 \
-  ${output_folder}/running-code-demo.mp4 \
+  ${output_folder}/running-code-demo.mp4 \ 
   ${backup_folder}/gong.mp3 \
  ${output_folder}/coderun.mp3 
 }
@@ -125,12 +133,17 @@ cmd_create_example(){
       fi 
       
       #A3
-      if [ -e ${output_folder}/frozen-code-60s.mp4 ];then 
-        echo .
-      else 
+#      if [ -e ${output_folder}/frozen-code-60s.mp4 ];then 
+ #       echo .
+  #    else 
 #CODE FREEZE
-        ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/output-code.mp4 60 ${output_folder}/frozen-code-60s.mp4
-      fi 
+   #     ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/output-code.mp4 60 ${output_folder}/frozen-code-60s.mp4
+    #  fi 
+
+
+
+
+
 
 
       export RC_FONTFILE="${font_folder}/DejaVuSans.ttf"
