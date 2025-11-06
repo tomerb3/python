@@ -489,12 +489,19 @@ concat_v() {
     if [ ! -f "$f" ]; then echo "concat input missing: $f" >&2; exit 1; fi
   done
   local has_audio=0
+  # Per-input audio presence and duration arrays
+  local -a has_a durations
+  local idx_tmp=0
   for f in "${inputs[@]}"; do
+    local ha=0
     if ffprobe -v error -select_streams a:0 -show_entries stream=index -of csv=p=0 "$f" >/dev/null 2>&1; then
       if [ -n "$(ffprobe -v error -select_streams a:0 -show_entries stream=index -of csv=p=0 "$f" 2>/dev/null)" ]; then
-        has_audio=1; break
+        ha=1; has_audio=1
       fi
     fi
+    has_a[$idx_tmp]=$ha
+    durations[$idx_tmp]=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$f" | awk '{printf "%.6f\n",$1}')
+    idx_tmp=$((idx_tmp+1))
   done
   # Check if all inputs share same width/height/SAR and frame rate
   local base_w base_h base_sar base_fps same_dim=1 same_fps=1
@@ -519,12 +526,20 @@ concat_v() {
     if [ $same_dim -eq 1 ] && [ $same_fps -eq 1 ]; then
       for idx in $(seq 0 $((n-1))); do
         fc+="[$idx:v]setsar=1,setpts=PTS-STARTPTS[v$idx];"
-        fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000,asetpts=PTS-STARTPTS[a$idx];"
+        if [ "${has_a[$idx]:-0}" -eq 1 ]; then
+          fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000,asetpts=PTS-STARTPTS[a$idx];"
+        else
+          fc+="anullsrc=r=48000:cl=stereo:d=${durations[$idx]},asetpts=PTS-STARTPTS[a$idx];"
+        fi
       done
     else
       for idx in $(seq 0 $((n-1))); do
         fc+="[$idx:v]fps=30,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v$idx];"
-        fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000[a$idx];"
+        if [ "${has_a[$idx]:-0}" -eq 1 ]; then
+          fc+="[$idx:a]aformat=channel_layouts=stereo:sample_rates=48000[a$idx];"
+        else
+          fc+="anullsrc=r=48000:cl=stereo:d=${durations[$idx]}[a$idx];"
+        fi
       done
     fi
     local concat_inputs=""
