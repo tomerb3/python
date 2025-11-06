@@ -16,6 +16,7 @@ usage() {
 
   echo "  filter_script <in_mp4> <filters.txt> <voice.mp3> <key.mp3> <lines_count> <out_mp4> [halfkey.mp3]" >&2
   echo "  filter_script_v2 <in_mp4> <filters.txt> <voice.mp3> <keys_dir> <words> <calc> <out_mp4> [key_volume] [tail_pad_s]" >&2
+  echo "  filter_script_v3 <in_mp4> <filters.txt> <out_mp4> [target_seconds]" >&2
   echo "  freeze_last_frame <in_mp4> <seconds> <out_mp4>" >&2
   echo "  running_code <in_mp4> <textfile> <x> <y> <seconds> <start_delay> <out_mp4> [sfx.mp3] [explain.mp3]" >&2
   exit 1
@@ -189,6 +190,68 @@ encode_video_filter_script() {
       -map "[vout]" -map "[aout]" \
       -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
       -c:a aac -b:a 192k \
+      "$out_mp4"
+  fi
+}
+
+filter_script_v3() {
+  local in_mp4="$1"; local script="$2"; local out_mp4="$3"; local target="${4:-}"
+  # Build video filter chain from script (same defaults as v2), but no audio at all
+  local fchain esc
+  fchain=$(tr -d '\n' < "$script")
+  fchain="${fchain%,}"
+  fchain="${fchain%.}"
+  if [ -n "${RC_FONTFILE:-}" ]; then
+    esc=$(printf %s "$RC_FONTFILE" | sed -e "s/[\\\/&]/\\\\&/g")
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontfile='${esc}':/g")
+  elif [ -n "${RC_FONT:-}" ]; then
+    esc=$(printf %s "$RC_FONT" | sed -e "s/[\\\/&]/\\\\&/g")
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=font='${esc}':/g")
+  fi
+  if [ -n "${RC_FONTSIZE:-}" ]; then
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontsize=${RC_FONTSIZE}:/g")
+  fi
+  if [ -n "${RC_FONTCOLOR:-}" ]; then
+    esc=$(printf %s "$RC_FONTCOLOR" | sed -e "s/[\\\\\/&]/\\\\&/g")
+    fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=fontcolor=${esc}:/g")
+  fi
+  # Improve text sharpness
+  fchain=$(printf %s "$fchain" | sed -E "s/drawtext=/drawtext=ft_load_flags=force_autohint:/g")
+  # If no explicit target given, try to derive animation end from timing expressions in filters.txt
+  if [ -z "$target" ]; then
+    local anim_end
+    anim_end=$(awk '{
+      line=$0;
+      while (match(line, /between\(t, *([0-9.]+) *, *([0-9.]+) *\)/, a)) {
+        val=a[2]+0; if (val>m) m=val; 
+        line=substr(line, RSTART+RLENGTH);
+      }
+      line=$0;
+      while (match(line, /gte\(t, *([0-9.]+) *\)/, b)) {
+        val=b[1]+0; if (val>m) m=val;
+        line=substr(line, RSTART+RLENGTH);
+      }
+    } END { if (m>0) printf "%.3f\n", m }' "$script")
+    if [ -n "$anim_end" ]; then
+      target="$anim_end"
+    fi
+  fi
+  local fc
+  fc="[0:v]format=rgb24,${fchain},format=yuv444p[vout]"
+  if [ -n "$target" ]; then
+    ffmpeg -y \
+      -i "$in_mp4" \
+      -t "$target" \
+      -filter_complex "$fc" \
+      -map "[vout]" \
+      -an -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
+      "$out_mp4"
+  else
+    ffmpeg -y \
+      -i "$in_mp4" \
+      -filter_complex "$fc" \
+      -map "[vout]" \
+      -an -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
       "$out_mp4"
   fi
 }
@@ -483,6 +546,15 @@ case "$cmd" in
   one_mp3)
     [ "$#" -eq 3 ] || usage
     one_mp3 "$1" "$2" "$3"
+    ;;
+  filter_script_v3)
+    if [ "$#" -eq 3 ]; then
+      filter_script_v3 "$1" "$2" "$3"
+    elif [ "$#" -eq 4 ]; then
+      filter_script_v3 "$1" "$2" "$3" "$4"
+    else
+      usage
+    fi
     ;;
   two_mp3)
     [ "$#" -eq 5 ] || usage

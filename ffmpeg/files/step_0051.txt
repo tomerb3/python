@@ -1,2 +1,3 @@
-def greet(name, age):
-    return fHello, {name}! Yo
+#example4
+user_name = input("Enter your name: ")
+pr

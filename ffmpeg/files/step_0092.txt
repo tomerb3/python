@@ -1,4 +1,0 @@
-def greet(name, age):
-    return fHello, {name}! You are {age} years old.
-
-message = greet(A

@@ -1,14 +1,16 @@
 #!/bin/bash -x
 
-output_folder=${output_folder:-/mnt/c/ffmpeg}
-backup_folder=${backup_folder:-/tmp/a}
-font_folder=${font_folder:-/tmp/a/fonts}
+output_folder=${output_folder:-$HOME/a}
+backup_folder=${backup_folder:-$HOME/a}
+font_folder=${font_folder:-$HOME/a/fonts}
 back_before_video=${back_before_video:-none}
 back_45_video=${back_45_video:-back-45_m0.mp4}
 if [ -e /home/node/tts/scripts/ffmpeg ];then 
   home=/home/node/tts/scripts/ffmpeg
 else
   home=/home/baum/src/python/ffmpeg
+  rm -rf /home/baum/src/python/ffmpeg/files
+  cp -a $HOME/a/files /home/baum/src/python/ffmpeg/
 fi
 
 good(){
@@ -223,7 +225,16 @@ cmd_merge_examples_to_chapter(){
 
 
 cmd_debug(){
-  filter1
+ # filter1
+   "${home}/ffmpeg-run.sh" filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/output-code.mp4 
+
+
+
+
+  
+  
+  cp -a $HOME/a/output-code.mp4 /mnt/c/ffmpeg/c/
+
 }
 
 cmd_back_left_video(){
