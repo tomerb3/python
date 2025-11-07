@@ -119,8 +119,30 @@ _code(){
 _code_v2(){
   sed -i.bak 's#/home/node/tts/fonts/#/data/fonts/#g' ${output_folder}/files/filters.txt
   sed -i.bak "s#'files/step#'/data/files/step#g" ${output_folder}/files/filters.txt
+  sed -i.bak "/step_9999.txt/d" ${output_folder}/files/filters.txt
   #rm -f ${output_folder}/output_code.mp4
   docker run --rm \
+  --user "$(id -u)":"$(id -g)" \
+  -e HOME=/tmp -e XDG_CACHE_HOME=/tmp/.cache \
+  -v ${home}:/app \
+  -v ${output_folder}:/data \
+  -v ${font_folder}:/data/fonts \
+  -v ${backup_folder}:/data/back \
+  -e output_folder=/data \
+  -e backup_folder=/data/back \
+  -e font_folder=/data/fonts \
+  ffmpeg-scripts:latest \
+    bash -lc 'mkdir -p /tmp/.cache/fontconfig && bash -x /app/runit.sh filter1_v2'
+}
+
+cmd_debug_code_wsl(){
+  output_folder=$HOME/a
+  backup_folder=$HOME/a/back
+  font_folder=$HOME/a/fonts
+  sed -i.bak 's#/home/node/tts/fonts/#/data/fonts/#g' ${output_folder}/files/filters.txt
+  sed -i.bak "s#'files/step#'/data/files/step#g" ${output_folder}/files/filters.txt
+  #rm -f ${output_folder}/output_code.mp4
+  docker run -ti --rm \
   --user "$(id -u)":"$(id -g)" \
   -e HOME=/tmp -e XDG_CACHE_HOME=/tmp/.cache \
   -v ${home}:/app \

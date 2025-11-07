@@ -291,9 +291,10 @@ filter_script_v3() {
   local fc
   fc="[0:v]format=rgb24,${fchain},format=yuv444p[vout]"
   if [ -n "$target" ]; then
+    # Apply precise cut inside the filter graph to avoid muxer rounding
+    fc="[0:v]format=rgb24,${fchain},trim=end=${target},setpts=PTS-STARTPTS,format=yuv444p[vout]"
     ffmpeg -y \
       -i "$in_mp4" \
-      -t "$target" \
       -filter_complex "$fc" \
       -map "[vout]" \
       -an -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \
