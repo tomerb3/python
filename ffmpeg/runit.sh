@@ -53,15 +53,15 @@ cmd_filter1_v2(){
    #3 freeze last frame to 60 second video   code_c_freeze.mp4
      /app/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/code_c_freeze.mp4
 
-  #4 merge code effeect with clicks with frozen 60 sec together - call it        code_c_freeze_a.mp4
+  #4 merge code effeect with clicks with frozen 60 sec together - call it       frozen-code-60s-a.mp4
   D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/code_c_freeze.mp4" | awk '{printf "%.6f\n",$1}')
   ffmpeg -y -i "${output_folder}/code_c_freeze.mp4" \
     -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
     -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
-     "${output_folder}/code_c_freeze_a.mp4"
+     "${output_folder}/frozen-code-60s-a.mp4"
   sleep 2
   #5 concat and create code_d.mp4
-  /app/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/code_c_freeze_a.mp4" 
+  /app/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/frozen-code-60s-a.mp4" 
     sleep 2
   cd "${output_folder}"
   MP3="code.mp3"
@@ -87,121 +87,6 @@ echo seconds to wait after mp3 voice end $seconds1
   #6 add voice sound  output_code.mp4     put 5 seconds after code talk  need to check if this work                                                                                      seconds after silense 
   /app/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 $seconds1
   sleep 2
-}
-
-
-
-
-
-
-cmd_debug_filter1(){
-  
-  
-   #1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
-   ${home}/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
-   cd ${output_folder}
-   N=$(ffprobe -v error -select_streams v:0 -count_frames \
-     -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
-     cp -a $HOME/a/code_a.mp4 /mnt/c/ffmpeg/c/
-
-  #2 add key clicks random   call it code_b.mp4 
-     $home/ffmpeg-run.sh filter_script_v4 ${output_folder}/code_a.mp4 ${backup_folder}/keys_dir ${output_folder}/code_b.mp4 0.5
-      cp -a $HOME/a/code_b.mp4 /mnt/c/ffmpeg/c/
-
-  #3 freeze last frame to 60 second video 
-    ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/code_c_freeze.mp4
-    cp -a $HOME/a/code_c_freeze.mp4 /mnt/c/ffmpeg/c/
-
-    #4 merge code effeect with clicks with frozen 60 sec together - call it code_d.mp4
-  D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/code_c_freeze.mp4" | awk '{printf "%.6f\n",$1}')
-  ffmpeg -y -i "${output_folder}/code_c_freeze.mp4" \
-    -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
-    -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
-     "${output_folder}/code_c_freeze_a.mp4"
-
-     ${home}/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/code_c_freeze_a.mp4" 
-     cp -a $HOME/a/code_d.mp4 /mnt/c/ffmpeg/c/
-
-#5 add voice sound                                                                                                               seconds after silense
-${home}/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/code_e.mp4 1.8 0.5 5
- cp -a $HOME/a/code_e.mp4 /mnt/c/ffmpeg/c/
-
-}
-
- 
-
-filter1() { 
-  echo "code-start" 
-
-
-    #dockerfile info         
-    # docker build -t ffmpeg-scripts .   
-
-    # docker run -ti --rm \
-    #--user "$(id -u)":"$(id -g)" \
-  #-v /path/to/repo:/app \
-  #-v /path/to/media:/data \
-  #-e output_folder=/data \
-  #-e backup_folder=/data/backup \
-  #-e font_folder=/data/fonts \
-  #ffmpeg-scripts:latest \
-  # bash -lc 'bash -x /app/runit.sh cmd_create_example'
-
-
-
-
-
-    # echo "new555 start"
-    # words_for_each_loop=2
-    # not_empty_lines=$(grep -cve '^[[:space:]]*$' ${output_folder}/code_show.txt)
-    # calc=$((2 * $not_empty_lines - 1))
-    # words_in_code=$(( $(wc -w < ${output_folder}/code_show.txt) + $calc ))
-    # echo "${words_in_code}" > code_to_show_words_for_click_auto
-    # code_to_show_words_for_click=$(cat ${output_folder}/code_to_show_words_for_click)
-    # if [ ${code_to_show_words_for_click} -eq 0 ];then 
-    #   echo .
-    # else 
-    #   words_in_code=${code_to_show_words_for_click}
-    # fi 
-    # ${home}/ffmpeg-run.sh filter_script_v2 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code.mp3 ${backup_folder}/keys_dir $words_in_code $words_for_each_loop ${output_folder}/output-code.mp4
-                                    # #kind=loops in_file=output-code.mp4 output_file=output-code-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
-
- 
-   #1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
-   ${home}/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
-   cd ${output_folder}
-   N=$(ffprobe -v error -select_streams v:0 -count_frames \
-     -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
-    # cp -a $HOME/a/code_a.mp4 /mnt/c/ffmpeg/c/
-
-  #2 add key clicks random   call it code_b.mp4 
-     $home/ffmpeg-run.sh filter_script_v4 ${output_folder}/code_a.mp4 ${backup_folder}/keys_dir ${output_folder}/code_b.mp4 0.5
-    #  cp -a $HOME/a/code_b.mp4 /mnt/c/ffmpeg/c/
-
-  #3 freeze last frame to 60 second video 
-    ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/code_c_freeze.mp4
-   # cp -a $HOME/a/code_c_freeze.mp4 /mnt/c/ffmpeg/c/
-
-    #4 merge code effeect with clicks with frozen 60 sec together - call it code_d.mp4
-  D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/code_c_freeze.mp4" | awk '{printf "%.6f\n",$1}')
-  ffmpeg -y -i "${output_folder}/code_c_freeze.mp4" \
-    -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
-    -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
-     "${output_folder}/code_c_freeze_a.mp4"
-
-     ${home}/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/code_c_freeze_a.mp4" 
-  #   cp -a $HOME/a/code_d.mp4 /mnt/c/ffmpeg/c/
-
-  #5 add voice sound                                                                                                               seconds after silense
-  ${home}/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 5
- 
- 
-
- 
-
-
-
-    echo "code-end" 
 }
 
 code_run_vera(){
