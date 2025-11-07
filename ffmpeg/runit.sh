@@ -129,7 +129,7 @@ cmd_create_example(){
         echo . 
       else 
 #CODE
-        _code
+        _code > ${output_folder}/code_log.log 2>&1
       fi 
       
       #A3
