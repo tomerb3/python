@@ -1,0 +1,49 @@
+
+# docker build -t ffmpeg-scripts .
+
+
+#fix filters.txt to work inside docker 
+sed -i.bak 's#/home/node/tts/fonts/#/data/fonts/#g' $HOME/a/files/filters.txt
+sed -i.bak "s#'files/step#'/data/files/step#g" $HOME/a/files/filters.txt
+
+rm -f "$HOME/a/output_code.mp4"
+
+ a(){
+# docker run -ti --rm \
+#     --user "$(id -u)":"$(id -g)" \
+#      -v /home/baum/src/python/ffmpeg:/app \
+#      -v $HOME/a:/data \
+#      -v $HOME/a/fonts:/data/fonts \
+#      -v $HOME/a/background:/data/back \
+#      -e output_folder=/data \
+#      -e backup_folder=/data/back \
+#      -e font_folder=/data/fonts \
+#      ffmpeg-scripts:latest \
+#     bash -lc 'bash -x /app/runit.sh debug3'
+
+    docker run -ti --rm \
+  --user "$(id -u)":"$(id -g)" \
+  -e HOME=/tmp -e XDG_CACHE_HOME=/tmp/.cache \
+  -v /home/baum/src/python/ffmpeg:/app \
+  -v $HOME/a:/data \
+  -v $HOME/a/fonts:/data/fonts \
+  -v $HOME/a/background:/data/back \
+  -e output_folder=/data \
+  -e backup_folder=/data/back \
+  -e font_folder=/data/fonts \
+  ffmpeg-scripts:latest \
+  bash -lc 'mkdir -p /tmp/.cache/fontconfig && bash -x /app/runit.sh debug3'
+ }
+ a
+
+b(){
+rm -f /mnt/c/ffmpeg/c/$1
+ cp -a $HOME/a/$1 /mnt/c/ffmpeg/c/
+}
+
+b code_a.mp4
+b code_b.mp4
+b code_c_freeze.mp4
+b code_c_freeze_a.mp4
+b code_d.mp4
+b output_code.mp4

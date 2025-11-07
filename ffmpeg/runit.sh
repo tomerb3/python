@@ -9,10 +9,13 @@ if [ -e /home/node/tts/scripts/ffmpeg ];then
   home=/home/node/tts/scripts/ffmpeg
 else
   home=/home/baum/src/python/ffmpeg
-  cp -a /mnt/c/share/d/* $HOME/a/
-  rm -rf /home/baum/src/python/ffmpeg/files
-  cp -a $HOME/a/files /home/baum/src/python/ffmpeg/
+#  cp -a /mnt/c/share/d/* $HOME/a/
+#  rm -rf /home/baum/src/python/ffmpeg/files
+#  cp -a $HOME/a/files /home/baum/src/python/ffmpeg/
 fi
+  home=/data
+
+
 
 good(){
   # mp3 mp4 and key.mp3 
@@ -30,6 +33,45 @@ code_run_verb(){
       ${output_folder}/running-code-demo.mp4 \
       '' \
     ${output_folder}/coderun.mp3 
+}
+
+cmd_debug3(){
+ echo from debug3 code !!
+
+   #1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
+   /app/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
+   cd ${output_folder}
+   pwd
+   N=$(ffprobe -v error -select_streams v:0 -count_frames \
+     -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
+     echo $N 
+#     cp -a $HOME/a/code_a.mp4 /mnt/c/ffmpeg/c/
+
+  #2 add key clicks random   call it code_b.mp4 
+     /app/ffmpeg-run.sh filter_script_v4 ${output_folder}/code_a.mp4 ${backup_folder}/keys_dir ${output_folder}/code_b.mp4 0.5
+      
+
+  #3 freeze last frame to 60 second video   code_c_freeze.mp4
+     /app/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/code_c_freeze.mp4
+
+ #4 merge code effeect with clicks with frozen 60 sec together - call it        code_c_freeze_a.mp4
+  D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/code_c_freeze.mp4" | awk '{printf "%.6f\n",$1}')
+  ffmpeg -y -i "${output_folder}/code_c_freeze.mp4" \
+    -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
+    -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
+     "${output_folder}/code_c_freeze_a.mp4"
+sleep 2
+#5 concat and create code_d.mp4
+  /app/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/code_c_freeze_a.mp4" 
+    sleep 2
+
+#6 add voice sound  output_code.mp4                                                                                        seconds after silense 
+/app/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output_code.mp4 1.8 0.5 5
+sleep 2
+ 
+
+
+
 }
 
 
@@ -72,6 +114,25 @@ ${home}/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code
 
 filter1() { 
   echo "code-start" 
+
+
+    #dockerfile info         
+    # docker build -t ffmpeg-scripts .   
+
+    # docker run -ti --rm \
+    #--user "$(id -u)":"$(id -g)" \
+  #-v /path/to/repo:/app \
+  #-v /path/to/media:/data \
+  #-e output_folder=/data \
+  #-e backup_folder=/data/backup \
+  #-e font_folder=/data/fonts \
+  #ffmpeg-scripts:latest \
+  # bash -lc 'bash -x /app/runit.sh cmd_create_example'
+
+
+
+
+
     # echo "new555 start"
     # words_for_each_loop=2
     # not_empty_lines=$(grep -cve '^[[:space:]]*$' ${output_folder}/code_show.txt)
@@ -285,6 +346,7 @@ cmd_merge_examples_to_chapter(){
      "${home}/ffmpeg-run.sh" concat "${chapter_name[@]}" 
   fi 
 }
+
 
 
 cmd_debug(){
