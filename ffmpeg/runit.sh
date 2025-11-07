@@ -35,7 +35,7 @@ code_run_verb(){
     ${output_folder}/coderun.mp3 
 }
 
-cmd_debug3(){
+cmd_filter1_v2(){
  echo from debug3 code !!
 
    #1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
