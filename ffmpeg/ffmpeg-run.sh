@@ -216,16 +216,30 @@ filter_script_v4() {
   while IFS= read -r -d '' f; do files+=("$f"); done < <(find "$keys_dir" -maxdepth 1 -type f \( -iname "*.mp3" -o -iname "*.wav" -o -iname "*.m4a" \) -print0 | sort -z)
   n_files=${#files[@]}
   if [ "$n_files" -eq 0 ]; then echo "no audio files in $keys_dir" >&2; exit 1; fi
-  mapfile -t idxs < <(printf '%s\n' "${!files[@]}" | shuf)
+  # Compute total duration of one shuffled pass; repeat enough times to cover target
+  local pass_dur=0 d file
+  for file in "${files[@]}"; do
+    d=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$file" | awk '{printf "%.6f\n", $1}')
+    pass_dur=$(awk -v a="$pass_dur" -v b="${d:-0}" 'BEGIN{printf "%.6f\n", a+b}')
+  done
+  if awk -v pd="$pass_dur" 'BEGIN{exit (pd>0)?0:1}'; then :; else echo "keys_dir audio total duration is zero" >&2; exit 1; fi
+  # cycles = ceil(target / pass_dur), ensure at least 1
+  local cycles
+  cycles=$(awk -v t="$target" -v pd="$pass_dur" 'BEGIN{ if (pd<=0) pd=1; printf "%d\n", (t/pd==int(t/pd))? int(t/pd) : int(t/pd)+1 }')
+  if [ "$cycles" -lt 1 ]; then cycles=1; fi
+  # Build concat with repeated shuffled lists until >= target, then trim to target
   local key_track tmp_dir; tmp_dir=${TMPDIR:-/tmp}
   key_track="${tmp_dir}/key_track_$$-$(date +%s%N 2>/dev/null || date +%s)-$RANDOM.wav"
   : > "$key_track"
-  local args=( -y ); local fc=""; local j n k ins=""
-  n=$n_files
-  for j in $(seq 0 $((n-1))); do args+=( -i "${files[${idxs[$j]}]}" ); done
-  for k in $(seq 0 $((n-1))); do fc+="[$k:a]aformat=channel_layouts=stereo:sample_rates=48000[a$k];"; done
-  for k in $(seq 0 $((n-1))); do ins+="[a$k]"; done
-  fc+="${ins}concat=n=$n:v=0:a=1,apad=pad_dur=${target},atrim=0:${target},asetpts=PTS-STARTPTS[aout]"
+  local args=( -y ); local fc=""; local total_inputs=0; local c j k idxs ins=""
+  for c in $(seq 1 "$cycles"); do
+    mapfile -t idxs < <(printf '%s\n' "${!files[@]}" | shuf)
+    for j in $(seq 0 $((n_files-1))); do args+=( -i "${files[${idxs[$j]}]}" ); done
+  done
+  total_inputs=$(( n_files * cycles ))
+  for k in $(seq 0 $((total_inputs-1))); do fc+="[$k:a]aformat=channel_layouts=stereo:sample_rates=48000[a$k];"; done
+  for k in $(seq 0 $((total_inputs-1))); do ins+="[a$k]"; done
+  fc+="${ins}concat=n=${total_inputs}:v=0:a=1,asetpts=PTS-STARTPTS,atrim=0:${target},apad=pad_dur=${target}[aout]"
   args+=( -filter_complex "$fc" -map "[aout]" -c:a pcm_s16le "$key_track" )
   ffmpeg "${args[@]}" >/dev/null 2>&1
   if [ -n "$nb_frames" ] && [ "$nb_frames" != "N/A" ]; then
