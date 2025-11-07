@@ -49,27 +49,32 @@ filter1() {
                                     # #kind=loops in_file=output-code.mp4 output_file=output-code-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
 
 
+#1. create code_a with text cod eeffect 
    ${home}/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
    cd ${output_folder}
    N=$(ffprobe -v error -select_streams v:0 -count_frames \
      -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
 
+#2. create code_b.mp4 with trim
     DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 code_a.mp4 | awk '{printf "%.6f\n",$1}')
-    ffmpeg -y -i code_a.mp4 \
-  -vf "trim=end_frame=${N},setpts=PTS-STARTPTS" \
-  -af "atrim=0:${DUR},asetpts=PTS-STARTPTS" \
-  -c:v libx264 -preset veryfast -crf 20 -c:a aac -b:a 192k \
-  code_b.mp4
+     ffmpeg -y -i code_a.mp4 \
+       -vf "trim=end_frame=${N},setpts=PTS-STARTPTS" \
+       -af "atrim=0:${DUR},asetpts=PTS-STARTPTS" \
+       -c:v libx264 -preset veryfast -crf 20 -c:a aac -b:a 192k \
+       code_b.mp4
 
+#3 create frozen code pic to mp4 
   ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/frozen-code-60s.mp4
 D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/frozen-code-60s.mp4" | awk '{printf "%.6f\n",$1}')
+
+#4 create frozen code pic to mp4 with audio 
 ffmpeg -y -i "${output_folder}/frozen-code-60s.mp4" \
   -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
   -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
   "${output_folder}/frozen-code-60s-a.mp4"
 ${home}/ffmpeg-run.sh concat "${output_folder}/master0.mp4" "${output_folder}/code_b.mp4" "${output_folder}/frozen-code-60s-a.mp4" 
 
-#                                                                                                             seconds after silense
+#5. add voice sound                                                                                                               seconds after silense
 ${home}/ffmpeg-run.sh mix_talk ${output_folder}/master0.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 7
 
 
