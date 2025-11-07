@@ -70,7 +70,7 @@ ffmpeg -y -i "${output_folder}/frozen-code-60s.mp4" \
 ${home}/ffmpeg-run.sh concat "${output_folder}/master0.mp4" "${output_folder}/code_b.mp4" "${output_folder}/frozen-code-60s-a.mp4" 
 
 #                                                                                                             seconds after silense
-${home}/ffmpeg-run.sh mix_talk ${output_folder}/master0.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 0.8 0.2 6
+${home}/ffmpeg-run.sh mix_talk ${output_folder}/master0.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 7
 
 
  
