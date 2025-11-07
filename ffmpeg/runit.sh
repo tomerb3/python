@@ -227,11 +227,6 @@ fi
 
 
 
-
-
-
-
-
 cmd_merge_examples_to_chapter(){
   cd /home/node/tts
   if [ -e chapter-${folder} ];then 
@@ -282,6 +277,20 @@ sleep 1
  cp -a $HOME/a/master.mp4 /mnt/c/ffmpeg/c/
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
