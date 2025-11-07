@@ -63,9 +63,29 @@ cmd_filter1_v2(){
   #5 concat and create code_d.mp4
   /app/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/code_c_freeze_a.mp4" 
     sleep 2
+  cd "${output_folder}
+  MP3="code.mp3"
+  MP4="code_b.mp4"
+  OUT="durations.txt"
+ {
+   echo "mp3_seconds=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$MP3" | awk '{printf "%.3f\n",$1}')"
+   echo "mp4_seconds=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$MP4" | awk '{printf "%.3f\n",$1}')"
+ } > "$OUT"
+max=$(cat durations.txt  |cut -d "=" -f2 |sort -n |tail -1 |cut -d "." -f1)
+mp3=$(cat durations.txt  |grep mp3 |cut -d "=" -f2 |cut -d "." -f1)
+
+if [ $max -gt $mp3 ]; then
+  delta=$(( $max - $mp3 ))
+else
+  delta=0
+fi
+
+seconds1=$(( $mp3 + $delta ))
+echo seconds to wait after mp3 voice end $seconds1
+
 
   #6 add voice sound  output_code.mp4     put 5 seconds after code talk  need to check if this work                                                                                      seconds after silense 
-  /app/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 5
+  /app/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 $seconds1
   sleep 2
 }
 
