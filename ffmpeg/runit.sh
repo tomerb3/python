@@ -65,7 +65,7 @@ cmd_filter1_v2(){
     sleep 2
 
   #6 add voice sound  output_code.mp4                                                                                        seconds after silense 
-  /app/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output_code.mp4 1.8 0.5 5
+  /app/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 5
   sleep 2
 }
 
