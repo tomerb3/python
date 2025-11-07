@@ -301,7 +301,8 @@ cmd_create_example(){
       if [ -e ${output_folder}/running-code-demo.mp4 ];then 
         echo .
       else 
-#RUN CODE
+      echo . > ${output_folder}/running-code-demo-start-304.txt
+      #RUN CODE
         #code_run_vera
 
    bash -x /home/node/tts/scripts/ffmpeg/ffmpeg-run.sh running_code \
@@ -321,6 +322,7 @@ cmd_create_example(){
         echo .
       else 
 #RUN CODE FREEZE
+     echo . > ${output_folder}/frozen0run-60s-start-325.txt
         ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4
       fi 
 
@@ -328,6 +330,7 @@ cmd_create_example(){
       if [ -e ${output_folder}/after.mp4 ];then 
         echo .
       else 
+      echo . > ${output_folder}/after-started-333.txt
        #check seconds for frozen-run-60s.mp4
 
        s=$(basename -- "${output_folder}" |cut -d '-' -f1)
@@ -354,6 +357,7 @@ fi
   if [ -e ${output_folder}/master.mp4 ];then 
     echo . 
   else 
+  echo . > ${output_folder}/master-started-360.txt
 #MASTER
     ${home}/ffmpeg-run.sh concat_v2 "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
   fi 
