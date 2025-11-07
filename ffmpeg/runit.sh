@@ -64,10 +64,13 @@ cmd_filter1_v2(){
   /app/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/code_c_freeze_a.mp4" 
     sleep 2
 
-  #6 add voice sound  output_code.mp4                                                                                        seconds after silense 
+  #6 add voice sound  output_code.mp4     put 5 seconds after code talk  need to check if this work                                                                                      seconds after silense 
   /app/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 5
   sleep 2
 }
+
+
+
 
 
 
