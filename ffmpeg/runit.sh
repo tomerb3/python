@@ -216,9 +216,9 @@ _code_v2(){
   --user "$(id -u)":"$(id -g)" \
   -e HOME=/tmp -e XDG_CACHE_HOME=/tmp/.cache \
   -v ${home}:/app \
-  -v ${output_folder}/data \
-  -v ${font_folder}/data/fonts \
-  -v ${backup_folder}/data/back \
+  -v ${output_folder}:/data \
+  -v ${font_folder}:/data/fonts \
+  -v ${backup_folder}:/data/back \
   -e output_folder=/data \
   -e backup_folder=/data/back \
   -e font_folder=/data/fonts \
