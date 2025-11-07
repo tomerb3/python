@@ -1,2 +1,1 @@
-#example4
-user_name = inp
+# This program prints a g

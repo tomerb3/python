@@ -1,2 +1,1 @@
-#example4
-user_name = in
+# This program prints a 

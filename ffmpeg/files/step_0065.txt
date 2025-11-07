@@ -1,3 +1,2 @@
-#example4
-user_name = input("Enter your name: ")
-print("Welcome,"
+# This program prints a greeting message
+print("Hello again!")  #

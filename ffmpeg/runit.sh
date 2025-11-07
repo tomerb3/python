@@ -9,6 +9,7 @@ if [ -e /home/node/tts/scripts/ffmpeg ];then
   home=/home/node/tts/scripts/ffmpeg
 else
   home=/home/baum/src/python/ffmpeg
+  cp -a /mnt/c/share/d/* $HOME/a/
   rm -rf /home/baum/src/python/ffmpeg/files
   cp -a $HOME/a/files /home/baum/src/python/ffmpeg/
 fi
@@ -67,17 +68,10 @@ ${home}/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code
 
 }
 
-cmd_debug_filter2(){
-
-#5 add voice sound                                                                                                               seconds after silense
-${home}/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/code_e.mp4 1.8 0.5 5
- cp -a $HOME/a/code_e.mp4 /mnt/c/ffmpeg/c/
-
-
-}
+ 
 
 filter1() { 
-  
+  echo "code-start" 
     # echo "new555 start"
     # words_for_each_loop=2
     # not_empty_lines=$(grep -cve '^[[:space:]]*$' ${output_folder}/code_show.txt)
@@ -128,7 +122,7 @@ filter1() {
 
 
 
-    echo "new555 end" 
+    echo "code-end" 
 }
 
 code_run_vera(){

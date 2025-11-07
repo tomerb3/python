@@ -1,2 +1,1 @@
-#example4
-user_name = inpu
+# This program prints a gr

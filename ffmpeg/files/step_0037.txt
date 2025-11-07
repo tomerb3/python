@@ -1,2 +1,1 @@
-#example4
-user_name = input("Enter yo
+# This program prints a greeting mess
