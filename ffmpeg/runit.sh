@@ -13,7 +13,7 @@ else
 #  rm -rf /home/baum/src/python/ffmpeg/files
 #  cp -a $HOME/a/files /home/baum/src/python/ffmpeg/
 fi
-  home=/data
+ # home=/data
 
 
 
@@ -36,7 +36,7 @@ code_run_verb(){
 }
 
 cmd_filter1_v2(){
- echo from debug3 code !!
+ echo "from cmd_filter1_v2 code !"
 
    #1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
    /app/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
@@ -47,31 +47,26 @@ cmd_filter1_v2(){
      echo $N 
 #     cp -a $HOME/a/code_a.mp4 /mnt/c/ffmpeg/c/
 
-  #2 add key clicks random   call it code_b.mp4 
+    #2 add key clicks random   call it code_b.mp4 
      /app/ffmpeg-run.sh filter_script_v4 ${output_folder}/code_a.mp4 ${backup_folder}/keys_dir ${output_folder}/code_b.mp4 0.5
       
-
-  #3 freeze last frame to 60 second video   code_c_freeze.mp4
+   #3 freeze last frame to 60 second video   code_c_freeze.mp4
      /app/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/code_c_freeze.mp4
 
- #4 merge code effeect with clicks with frozen 60 sec together - call it        code_c_freeze_a.mp4
+  #4 merge code effeect with clicks with frozen 60 sec together - call it        code_c_freeze_a.mp4
   D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/code_c_freeze.mp4" | awk '{printf "%.6f\n",$1}')
   ffmpeg -y -i "${output_folder}/code_c_freeze.mp4" \
     -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
     -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
      "${output_folder}/code_c_freeze_a.mp4"
-sleep 2
-#5 concat and create code_d.mp4
+  sleep 2
+  #5 concat and create code_d.mp4
   /app/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/code_c_freeze_a.mp4" 
     sleep 2
 
-#6 add voice sound  output_code.mp4                                                                                        seconds after silense 
-/app/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output_code.mp4 1.8 0.5 5
-sleep 2
- 
-
-
-
+  #6 add voice sound  output_code.mp4                                                                                        seconds after silense 
+  /app/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output_code.mp4 1.8 0.5 5
+  sleep 2
 }
 
 
@@ -213,6 +208,24 @@ _code(){
       sed -E -i "s/:enable='/:reload=1:enable='/g" ${output_folder}/files/filters.txt
 }
 
+_code_v2(){
+  sed -i.bak 's#/home/node/tts/fonts/#/data/fonts/#g' ${output_folder}/files/filters.txt
+  sed -i.bak "s#'files/step#'/data/files/step#g" ${output_folder}/files/filters.txt
+  #rm -f ${output_folder}/output_code.mp4
+  docker run --rm \
+  --user "$(id -u)":"$(id -g)" \
+  -e HOME=/tmp -e XDG_CACHE_HOME=/tmp/.cache \
+  -v ${home}:/app \
+  -v ${output_folder}/data \
+  -v ${font_folder}/data/fonts \
+  -v ${backup_folder}/data/back \
+  -e output_folder=/data \
+  -e backup_folder=/data/back \
+  -e font_folder=/data/fonts \
+  ffmpeg-scripts:latest \
+    bash -lc 'mkdir -p /tmp/.cache/fontconfig && bash -x /app/runit.sh filter1_v2'
+}
+
 cmd_create_example(){
 
   if [ -e "${output_folder}/master.mp4" ];then 
@@ -235,7 +248,8 @@ cmd_create_example(){
         echo . 
       else 
 #CODE
-        _code > ${output_folder}/code_log.log 2>&1
+     #   _code > ${output_folder}/code_log.log 2>&1
+     _code_v2
       fi 
       
       #A3
