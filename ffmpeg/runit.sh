@@ -87,9 +87,9 @@ ${home}/ffmpeg-run.sh running_code \
   50 1200 \
   3 \
   0.2 \
-  ${output_folder}/running-code-demo.mp4 \ 
+  ${output_folder}/running-code-demo.mp4 \
   ${backup_folder}/gong.mp3 \
- ${output_folder}/coderun.mp3 
+  ${output_folder}/coderun.mp3 
 }
 
 # type code - need the clicks sound to be 100% with the text animation !!!!!!!!!!
@@ -159,7 +159,17 @@ cmd_create_example(){
         echo .
       else 
 #RUN CODE
-        code_run_vera
+        #code_run_vera
+
+   bash -x /home/node/tts/scripts/ffmpeg/ffmpeg-run.sh running_code \
+  ${output_folder}/frozen-code-60s-a.mp4 \
+  ${output_folder}/code_run_to_video.txt \
+  50 1200 3 0.2 \
+  ${output_folder}/running-code-demo.mp4 \
+  ${backup_folder}/gong.mp3 \
+  ${output_folder}/coderun.mp3
+
+
       fi 
       
       
