@@ -63,7 +63,7 @@ cmd_filter1_v2(){
   #5 concat and create code_d.mp4
   /app/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/code_c_freeze_a.mp4" 
     sleep 2
-  cd "${output_folder}
+  cd "${output_folder}"
   MP3="code.mp3"
   MP4="code_b.mp4"
   OUT="durations.txt"
