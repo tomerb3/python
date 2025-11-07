@@ -31,6 +31,51 @@ code_run_verb(){
     ${output_folder}/coderun.mp3 
 }
 
+
+
+cmd_debug_filter1(){
+  
+  
+   #1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
+   ${home}/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
+   cd ${output_folder}
+   N=$(ffprobe -v error -select_streams v:0 -count_frames \
+     -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
+     cp -a $HOME/a/code_a.mp4 /mnt/c/ffmpeg/c/
+
+  #2 add key clicks random   call it code_b.mp4 
+     $home/ffmpeg-run.sh filter_script_v4 ${output_folder}/code_a.mp4 ${backup_folder}/keys_dir ${output_folder}/code_b.mp4 0.5
+      cp -a $HOME/a/code_b.mp4 /mnt/c/ffmpeg/c/
+
+  #3 freeze last frame to 60 second video 
+    ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/code_c_freeze.mp4
+    cp -a $HOME/a/code_c_freeze.mp4 /mnt/c/ffmpeg/c/
+
+    #4 merge code effeect with clicks with frozen 60 sec together - call it code_d.mp4
+  D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/code_c_freeze.mp4" | awk '{printf "%.6f\n",$1}')
+  ffmpeg -y -i "${output_folder}/code_c_freeze.mp4" \
+    -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
+    -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
+     "${output_folder}/code_c_freeze_a.mp4"
+
+     ${home}/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/code_c_freeze_a.mp4" 
+     cp -a $HOME/a/code_d.mp4 /mnt/c/ffmpeg/c/
+
+#5 add voice sound                                                                                                               seconds after silense
+${home}/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/code_e.mp4 1.8 0.5 5
+ cp -a $HOME/a/code_e.mp4 /mnt/c/ffmpeg/c/
+
+}
+
+cmd_debug_filter2(){
+
+#5 add voice sound                                                                                                               seconds after silense
+${home}/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/code_e.mp4 1.8 0.5 5
+ cp -a $HOME/a/code_e.mp4 /mnt/c/ffmpeg/c/
+
+
+}
+
 filter1() { 
   
     # echo "new555 start"
@@ -48,35 +93,36 @@ filter1() {
     # ${home}/ffmpeg-run.sh filter_script_v2 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code.mp3 ${backup_folder}/keys_dir $words_in_code $words_for_each_loop ${output_folder}/output-code.mp4
                                     # #kind=loops in_file=output-code.mp4 output_file=output-code-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
 
-
-#1. create code_a with text cod eeffect 
+ 
+   #1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
    ${home}/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
    cd ${output_folder}
    N=$(ffprobe -v error -select_streams v:0 -count_frames \
      -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
+    # cp -a $HOME/a/code_a.mp4 /mnt/c/ffmpeg/c/
 
-#2. create code_b.mp4 with trim
-    DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 code_a.mp4 | awk '{printf "%.6f\n",$1}')
-     ffmpeg -y -i code_a.mp4 \
-       -vf "trim=end_frame=${N},setpts=PTS-STARTPTS" \
-       -af "atrim=0:${DUR},asetpts=PTS-STARTPTS" \
-       -c:v libx264 -preset veryfast -crf 20 -c:a aac -b:a 192k \
-       code_b.mp4
+  #2 add key clicks random   call it code_b.mp4 
+     $home/ffmpeg-run.sh filter_script_v4 ${output_folder}/code_a.mp4 ${backup_folder}/keys_dir ${output_folder}/code_b.mp4 0.5
+    #  cp -a $HOME/a/code_b.mp4 /mnt/c/ffmpeg/c/
 
-#3 create frozen code pic to mp4 
-  ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/frozen-code-60s.mp4
-D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/frozen-code-60s.mp4" | awk '{printf "%.6f\n",$1}')
+  #3 freeze last frame to 60 second video 
+    ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/code_c_freeze.mp4
+   # cp -a $HOME/a/code_c_freeze.mp4 /mnt/c/ffmpeg/c/
 
-#4 create frozen code pic to mp4 with audio 
-ffmpeg -y -i "${output_folder}/frozen-code-60s.mp4" \
-  -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
-  -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
-  "${output_folder}/frozen-code-60s-a.mp4"
-${home}/ffmpeg-run.sh concat "${output_folder}/master0.mp4" "${output_folder}/code_b.mp4" "${output_folder}/frozen-code-60s-a.mp4" 
+    #4 merge code effeect with clicks with frozen 60 sec together - call it code_d.mp4
+  D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/code_c_freeze.mp4" | awk '{printf "%.6f\n",$1}')
+  ffmpeg -y -i "${output_folder}/code_c_freeze.mp4" \
+    -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
+    -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
+     "${output_folder}/code_c_freeze_a.mp4"
 
-#5. add voice sound                                                                                                               seconds after silense
-${home}/ffmpeg-run.sh mix_talk ${output_folder}/master0.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 7
+     ${home}/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/code_c_freeze_a.mp4" 
+  #   cp -a $HOME/a/code_d.mp4 /mnt/c/ffmpeg/c/
 
+  #5 add voice sound                                                                                                               seconds after silense
+  ${home}/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 5
+ 
+ 
 
  
 
@@ -104,12 +150,12 @@ _code(){
       #https://www.colorhexa.com/27d3f5
       export RC_FONTCOLOR="#27d3f5"
       #code 
+      #A2
+      filter1
       # 1) Persist text from its start time (remove end-boundary gaps)
       sed -E -i "s/enable='between\(t,([0-9.]+),([0-9.]+)\)'/enable='gte(t,\1)'/g" ${output_folder}/files/filters.txt
       # 2) Make sure drawtext reloads the text files (prevents stale/bad frames)
       sed -E -i "s/:enable='/:reload=1:enable='/g" ${output_folder}/files/filters.txt
-      #A2
-      filter1
 }
 
 cmd_create_example(){
