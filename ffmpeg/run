@@ -13,7 +13,7 @@ rm -f /mnt/c/ffmpeg/c/$1
 
 a
  b code_a.mp4
- b code_b.mp4
+ #b code_b.mp4
 # b code_c_freeze.mp4
 # b code_c_freeze_a.mp4
 # b code_d.mp4

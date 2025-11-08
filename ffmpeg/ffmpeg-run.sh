@@ -276,14 +276,20 @@ filter_script_v3() {
     local anim_end
     anim_end=$(awk '{
       line=$0;
+      if (line ~ /step_9999\.txt/) next;
+      # Track max end from between()
       while (match(line, /between\(t, *([0-9.]+) *, *([0-9.]+) *\)/, a)) {
-        val=a[2]+0; if (val>m) m=val; line=substr(line, RSTART+RLENGTH);
+        vb=a[2]+0; if (vb>mb) mb=vb; line=substr(line, RSTART+RLENGTH);
       }
       line=$0;
+      if (line ~ /step_9999\.txt/) next;
+      # Track latest start from gte() (fallback only)
       while (match(line, /gte\(t, *([0-9.]+) *\)/, b)) {
-        val=b[1]+0; if (val>m) m=val; line=substr(line, RSTART+RLENGTH);
+        vg=b[1]+0; if (vg>mg) mg=vg; line=substr(line, RSTART+RLENGTH);
       }
-    } END { if (m>0) printf "%.3f\n", m }' "$script")
+    } END {
+      if (mb>0) printf "%.3f\n", mb; else if (mg>0) printf "%.3f\n", mg;
+    }' "$script")
     if [ -n "$anim_end" ]; then
       target="$anim_end"
     fi

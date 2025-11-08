@@ -35,27 +35,41 @@ code_run_verb(){
     ${output_folder}/coderun.mp3 
 }
 
+cmd_filter1_v2_debug(){
+
+ echo "only code_a line39 from runit.sh cmd_filter1_v2_debug   call  ffmpeg-run.sh filter_script_v3"
+ sleep 3
+ #1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
+     /app/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
+     cd ${output_folder}
+     pwd
+     N=$(ffprobe -v error -select_streams v:0 -count_frames \
+       -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
+       echo $N 
+}
+
 cmd_filter1_v2(){
- echo "from cmd_filter1_v2 code !"
+ echo "line39 from runit.sh cmd_filter1_v2   call  ffmpeg-run.sh filter_script_v3"
 
-   #1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
-   /app/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
-   cd ${output_folder}
-   pwd
-   N=$(ffprobe -v error -select_streams v:0 -count_frames \
-     -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
-     echo $N 
-#     cp -a $HOME/a/code_a.mp4 /mnt/c/ffmpeg/c/
+#1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
+     /app/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
+     cd ${output_folder}
+     pwd
+     N=$(ffprobe -v error -select_streams v:0 -count_frames \
+       -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
+       echo $N 
 
-    #2 add key clicks random   call it code_b.mp4 
+
+
+#2 add key clicks random   call it code_b.mp4 
      /app/ffmpeg-run.sh filter_script_v4 ${output_folder}/code_a.mp4 ${backup_folder}/keys_dir ${output_folder}/code_b.mp4 0.5
       
-   #3 freeze last frame to 60 second video   code_c_freeze.mp4
+#3 freeze last frame to 60 second video   code_c_freeze.mp4
      /app/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/code_c_freeze.mp4
 
-  #4 merge code effeect with clicks with frozen 60 sec together - call it       frozen-code-60s-a.mp4
-  D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/code_c_freeze.mp4" | awk '{printf "%.6f\n",$1}')
-  ffmpeg -y -i "${output_folder}/code_c_freeze.mp4" \
+#4 merge code effeect with clicks with frozen 60 sec together - call it       frozen-code-60s-a.mp4
+    D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/code_c_freeze.mp4" | awk '{printf "%.6f\n",$1}')
+    ffmpeg -y -i "${output_folder}/code_c_freeze.mp4" \
     -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
     -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
      "${output_folder}/frozen-code-60s-a.mp4"
@@ -136,6 +150,8 @@ _code_v2(){
 }
 
 cmd_debug_code_wsl(){
+  echo home $home 
+  sleep 1
   output_folder=$HOME/a
   backup_folder=$HOME/a/back
   font_folder=$HOME/a/fonts
@@ -153,7 +169,7 @@ cmd_debug_code_wsl(){
   -e backup_folder=/data/back \
   -e font_folder=/data/fonts \
   ffmpeg-scripts:latest \
-    bash -lc 'mkdir -p /tmp/.cache/fontconfig && bash -x /app/runit.sh filter1_v2'
+    bash -lc 'mkdir -p /tmp/.cache/fontconfig && bash -x /app/runit.sh filter1_v2_debug'
 }
 
 cmd_create_example(){
