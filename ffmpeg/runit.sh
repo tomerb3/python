@@ -94,7 +94,7 @@ else
   delta=0
 fi
 
-seconds1=$(( $mp3 + $delta ))
+seconds1=$(( 4 + $delta ))
 echo seconds to wait after mp3 voice end $seconds1
 
 
