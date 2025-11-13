@@ -1,3 +1,7 @@
+docker build -t text2image:3.10.14 .
+
+
+
 install pyenv if not exist
 
 curl https://pyenv.run | bash
@@ -19,4 +23,38 @@ source .venv-ti/bin/activate
 pip install --upgrade pip
 pip install --upgrade huggingface_hub pillow
 python -c "import sys, huggingface_hub as h; print(sys.version); print(h.__version__)"
+
+
+
+export HF_API_KEY=your_hf_key
+
+docker run --rm \
+  -e HF_API_KEY \
+  -v "$(pwd)/out:/out" \
+  text2image:3.10.14 \
+  1.py --prompt "Astronaut riding a horse holding a sign 'Hello World'" \
+  --output /out/out.png
+
+
+  docker run --rm \
+  -e HF_API_KEY \
+  -v "$(pwd)/out:/out" \
+  text2image:3.10.14 \
+  2.py --prompt "little kid running at sea holding a sign 'AVIV'" \
+  --output-image /out/out.png \
+  --output-video /out/out.mp4 \
+  --duration 16 --fps 30 --zoom 3.25
+
+
+
+docker run --rm \
+  -e HF_API_KEY \
+  -v "$(pwd)/out:/out" \
+  text2image:3.10.14 \
+  2.py --prompt "little kid running at sea holding a sign 'AVIV'" \
+  --output-image /out/out.png \
+  --output-video /out/out.mp4 \
+  --duration 16 --fps 30 --zoom 3.25 --smooth
+
+
 

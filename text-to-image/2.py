@@ -22,6 +22,7 @@ def main() -> None:
     parser.add_argument("--output-video", default="out.mp4")
     parser.add_argument("--duration", type=float, default=5.0, help="Seconds")
     parser.add_argument("--fps", type=int, default=30)
+    parser.add_argument("--smooth", action="store_true", help="Enable motion interpolation to 60fps for smoother animation")
     parser.add_argument("--zoom", type=float, default=1.2, help="Final zoom factor (>1)")
     args = parser.parse_args()
 
@@ -41,26 +42,35 @@ def main() -> None:
         w, h = im.size
 
     # Build ffmpeg zoompan expression
-    # Generate exactly total_frames, zooming linearly from 1.0 to args.zoom.
+    # Generate exactly total_frames with exponential easing from 1.0 -> args.zoom.
     total_frames = max(1, int(args.duration * args.fps))
-    inc = (args.zoom - 1.0) / max(1, total_frames - 1)
-    # Initialize zoom to 1 on first frame, then increase linearly, clamp to final zoom
-    z_expr = f"if(eq(on,1),1,min(1+({inc:.10f})*(on-1),{args.zoom}))"
+    # Exponential easing: z = exp(log(final_zoom) * t), t in [0,1]
+    z_expr = f"if(eq(on,1),1,min(exp(log({args.zoom})*(on-1)/{max(1, total_frames-1)}),{args.zoom}))"
     x_expr = "iw/2-(iw/zoom/2)"
     y_expr = "ih/2-(ih/zoom/2)"
     s_expr = f"{w}x{h}"
 
-    vf = f"zoompan=z='{z_expr}':d=1:x='{x_expr}':y='{y_expr}':s={s_expr},fps={args.fps}"
+    # Add a high-quality scaler after zoompan to reduce aliasing/jitter
+    vf = (
+        f"zoompan=z='{z_expr}':d=1:x='{x_expr}':y='{y_expr}':s={s_expr},"
+        f"fps={args.fps},scale={w}:{h}:flags=lanczos"
+    )
+    if args.smooth:
+        vf += ",minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1"
 
     # Create video
+    # Determine output frames (if smoothing, final fps is 60)
+    output_frames = max(1, int(args.duration * (60 if args.smooth else args.fps)))
+
     cmd = [
         "ffmpeg",
         "-y",
         "-loop", "1",
         "-i", args.output_image,
         "-vf", vf,
-        "-frames:v", str(total_frames),
+        "-frames:v", str(output_frames),
         "-c:v", "libx264",
+        "-crf", "18",
         "-preset", "veryfast",
         "-pix_fmt", "yuv420p",
         args.output_video,

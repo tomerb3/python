@@ -1,0 +1,9 @@
+text="$1"
+docker run --rm \
+  -e HF_API_KEY \
+  -v "$(pwd)/out:/out" \
+  text2image:3.10.14 \
+  2.py --prompt "teacher stand at school holding a sign \"${text}\"" \
+  --output-image /out/out.png \
+  --output-video /out/out.mp4 \
+  --duration 6 --fps 30 --zoom 3.25 --smooth

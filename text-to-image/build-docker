@@ -1,0 +1,1 @@
+docker build -t text2image:3.10.14 .
