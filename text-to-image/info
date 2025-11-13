@@ -1,0 +1,22 @@
+install pyenv if not exist
+
+curl https://pyenv.run | bash
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+
+#restart your shell
+
+pyenv install 3.10.14
+cd /home/baum/src/python/text-to-image
+pyenv local 3.10.14
+python -V
+
+#create local venv folder hidden . 
+
+python -m venv .venv-ti
+source .venv-ti/bin/activate
+pip install --upgrade pip
+pip install --upgrade huggingface_hub pillow
+python -c "import sys, huggingface_hub as h; print(sys.version); print(h.__version__)"
+
