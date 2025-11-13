@@ -1,0 +1,2 @@
+python 2.py --prompt "Astronaut riding a horse holding a sign 'Hello World'" \
+  --output-image out.png --output-video out.mp4 --duration 16 --fps 30 --zoom 3.25
