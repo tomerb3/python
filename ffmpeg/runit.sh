@@ -239,30 +239,33 @@ cmd_create_example(){
         #code_run_vera
 
    # if side video exit - lets add it to the right side of ${output_folder}/frozen-code-60s-a.mp4 
+   baserun="${output_folder}/frozen-code-60s-a.mp4"
    if [ -e ${output_folder}/out/out.mp4 ];then 
-    
-      # Offsets and delay
-      X=50        # pixels from the right edge
-      Y=50        # pixels from the top
-      Z=3         # seconds after start to show side video
-
-      base="${output_folder}/frozen-code-60s-a.mp4"
-      side="${output_folder}/out/out.mp4"
-      out="${output_folder}/frozen-code-60s-a.with-side.mp4"
-
-      # Overlay side video at right side with offsets X,Y; enable after Z seconds
-      ffmpeg -y \
-        -i "$base" -i "$side" \
-        -filter_complex "[1:v]setpts=PTS-STARTPTS[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='gte(t,${Z})'[vout]" \
-        -map "[vout]" -map 0:a? \
-        -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
-        "$out"
-        
+                  # Offsets, appearance delay, and fade timing
+          X=50        # pixels from the right edge
+          Y=50        # pixels from the top
+          Z=3         # seconds after start to show side video
+          K=10        # seconds on the main timeline to start fading out
+          D=1         # fade-out duration in seconds
+          base="${output_folder}/frozen-code-60s-a.mp4"
+          side="${output_folder}/out/out.mp4"
+          out="${output_folder}/frozen-code-60s-a.with-side.mp4"
+          # Compute fade start relative to the overlay stream’s timeline (overlay starts at Z)
+          ST=$(( K - Z ))
+          if [ $ST -lt 0 ]; then ST=0; fi
+          # Overlay side video at right side with offsets X,Y; enable after Z seconds
+          # Apply alpha fade-out on the overlay stream starting at ST seconds for D seconds
+        ffmpeg -y \
+          -i "$base" -i "$side" \
+          -filter_complex "[1:v]setpts=PTS-STARTPTS,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
+          -map "[vout]" -map 0:a? \
+          -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
+          "$out"
+          baserun="${output_folder}/frozen-code-60s-a.with-side.mp4"
    fi 
-
-
+   
    bash -x /home/node/tts/scripts/ffmpeg/ffmpeg-run.sh running_code \
-  ${output_folder}/frozen-code-60s-a.mp4 \
+  ${baserun} \
   ${output_folder}/code_run_to_video.txt \
   50 1200 3 0.2 \
   ${output_folder}/running-code-demo.mp4 \
