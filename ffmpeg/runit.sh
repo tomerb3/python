@@ -103,6 +103,16 @@ echo seconds to wait after mp3 voice end $seconds1
   sleep 2
 }
 
+
+
+
+
+
+
+
+
+
+
 code_run_vera(){
 ${home}/ffmpeg-run.sh running_code \
   ${output_folder}/frozen-code-60s-a.mp4 \
@@ -227,6 +237,29 @@ cmd_create_example(){
       echo . > ${output_folder}/running-code-demo-start-304.txt
       #RUN CODE
         #code_run_vera
+
+   # if side video exit - lets add it to the right side of ${output_folder}/frozen-code-60s-a.mp4 
+   if [ -e ${output_folder}/out/out.mp4 ];then 
+    
+      # Offsets and delay
+      X=50        # pixels from the right edge
+      Y=50        # pixels from the top
+      Z=3         # seconds after start to show side video
+
+      base="${output_folder}/frozen-code-60s-a.mp4"
+      side="${output_folder}/out/out.mp4"
+      out="${output_folder}/frozen-code-60s-a.with-side.mp4"
+
+      # Overlay side video at right side with offsets X,Y; enable after Z seconds
+      ffmpeg -y \
+        -i "$base" -i "$side" \
+        -filter_complex "[1:v]setpts=PTS-STARTPTS[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='gte(t,${Z})'[vout]" \
+        -map "[vout]" -map 0:a? \
+        -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
+        "$out"
+        
+   fi 
+
 
    bash -x /home/node/tts/scripts/ffmpeg/ffmpeg-run.sh running_code \
   ${output_folder}/frozen-code-60s-a.mp4 \

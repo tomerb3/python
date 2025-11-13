@@ -1,7 +1,10 @@
+
+
 text="$1"
+path="$2"
 docker run --rm \
   -e HF_API_KEY \
-  -v "$(pwd)/out:/out" \
+  -v "$path/out:/out" \
   text2image:3.10.14 \
   2.py --prompt "teacher stand at school holding a sign \"${text}\"" \
   --output-image /out/out.png \
