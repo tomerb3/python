@@ -15,7 +15,7 @@ docker run --rm \
   -u "$(id -u)":"$(id -g)" \
   -e TEXT="${1:-Hello 1from Manim!}" \
   -e COLOR="$COLOR_DEFAULT" \
-  -e FONT_SIZE="${2:-37}" \
+  -e FONT_SIZE="${2:-50}" \
   -e SHIFT_X="${3:-0.0}" \
   -e SHIFT_Y="${4:-0.0}" \
   manimcommunity/manim \

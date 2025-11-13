@@ -8,9 +8,9 @@ class TextScene(Scene):
         color_input = os.getenv("COLOR", "red")
         base_color = getattr(m, str(color_input).upper(), color_input)
         try:
-            font_size = int(float(os.getenv("FONT_SIZE", "48")))
+            font_size = int(float(os.getenv("FONT_SIZE", "50")))
         except Exception:
-            font_size = 48
+            font_size = 50
         try:
             shift_x = float(os.getenv("SHIFT_X", "0.0"))
         except Exception:

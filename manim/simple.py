@@ -11,7 +11,7 @@ class TextScene(Scene):
         color_input = os.getenv("COLOR", "red")
         color_value = getattr(m, str(color_input).upper(), color_input)
         try:
-            font_size = int(float(os.getenv("FONT_SIZE", "40")))
+            font_size = int(float(os.getenv("FONT_SIZE", "50")))
         except Exception:
             font_size = 40
         try:
