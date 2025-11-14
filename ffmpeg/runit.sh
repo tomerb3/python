@@ -241,9 +241,12 @@ cmd_create_example(){
    # if side video exit - lets add it to the right side of ${output_folder}/frozen-code-60s-a.mp4 
    baserun="${output_folder}/frozen-code-60s-a.mp4"
    if [ -e ${output_folder}/out/out.mp4 ];then 
+      if [ -e ${output_folder}/frozen-code-60s-a.with-side.mp4 ];then 
+        echo . 
+      else 
                   # Offsets, appearance delay, and fade timing
-          X=50        # pixels from the right edge
-          Y=50        # pixels from the top
+          X=150        # pixels from the right edge
+          Y=150        # pixels from the top
           Z=3         # seconds after start to show side video
           K=10        # seconds on the main timeline to start fading out
           D=1         # fade-out duration in seconds
@@ -262,6 +265,7 @@ cmd_create_example(){
           -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
           "$out"
           baserun="${output_folder}/frozen-code-60s-a.with-side.mp4"
+      fi
    fi 
    
    bash -x /home/node/tts/scripts/ffmpeg/ffmpeg-run.sh running_code \
