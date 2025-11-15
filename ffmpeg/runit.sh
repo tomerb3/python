@@ -193,7 +193,39 @@ cmd_create_example(){
     else 
         
 #BEFORE
-      ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
+
+   # put in right area the out/out/out.mp4 video 
+     # the file out/out/out.mp4 is created before 
+   if [ -e ${output_folder}/out/out/out.mp4 ];then 
+      if [ -e ${output_folder}/v-${back_before_video} ];then 
+        echo . 
+      else 
+          # Offsets, appearance delay, and fade timing
+          X=150        # pixels from the right edge
+          Y=150        # pixels from the top
+          Z=1         # seconds after start to show side video
+          K=13        # seconds on the main timeline to start fading out
+          D=1         # fade-out duration in seconds
+          base="${output_folder}/${back_before_video}"
+          side="${output_folder}/out/out/out.mp4"
+          out="${output_folder}/v-${back_before_video}"
+          # Compute fade start relative to the overlay stream’s timeline (overlay starts at Z)
+          ST=$(( K - Z ))
+          if [ $ST -lt 0 ]; then ST=0; fi
+          # Overlay side video at right side with offsets X,Y; enable after Z seconds
+          # Apply alpha fade-out on the overlay stream starting at ST seconds for D seconds
+        ffmpeg -y \
+          -i "$base" -i "$side" \
+          -filter_complex "[1:v]setpts=PTS-STARTPTS,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
+          -map "[vout]" -map 0:a? \
+          -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
+          "$out"
+          baserun="${output_folder}/v-${back_before_video}"
+      fi
+   fi 
+
+
+      ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/v-${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
       #${home}/ffmpeg-run.sh one_mp3 ${output_folder}/back-for-before.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
 
       #${home}/ffmpeg-run.sh one_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
@@ -238,13 +270,18 @@ cmd_create_example(){
       #RUN CODE
         #code_run_vera
 
-   # if side video exit - lets add it to the right side of ${output_folder}/frozen-code-60s-a.mp4 
+   
+   
+   
+   
+   # if side video exit - lets add it to the right side of ${output_folder}/frozen-code-60s-a.mp4  so we will show it in after code run section 
    baserun="${output_folder}/frozen-code-60s-a.mp4"
+     # the file out/out.mp4 is created in the left side of project2-p3 exec node with video.sh script in n8n folder 
    if [ -e ${output_folder}/out/out.mp4 ];then 
       if [ -e ${output_folder}/frozen-code-60s-a.with-side.mp4 ];then 
         echo . 
       else 
-                  # Offsets, appearance delay, and fade timing
+          # Offsets, appearance delay, and fade timing
           X=150        # pixels from the right edge
           Y=150        # pixels from the top
           Z=3         # seconds after start to show side video
@@ -268,6 +305,13 @@ cmd_create_example(){
       fi
    fi 
    
+
+
+
+
+
+
+
    bash -x /home/node/tts/scripts/ffmpeg/ffmpeg-run.sh running_code \
   ${baserun} \
   ${output_folder}/code_run_to_video.txt \
@@ -285,7 +329,7 @@ cmd_create_example(){
         echo .
       else 
 #RUN CODE FREEZE
-     echo . > ${output_folder}/frozen0run-60s-start-325.txt
+   #  echo . > ${output_folder}/frozen0run-60s-start-325.txt
         ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4
       fi 
 
@@ -293,7 +337,7 @@ cmd_create_example(){
       if [ -e ${output_folder}/after.mp4 ];then 
         echo .
       else 
-      echo . > ${output_folder}/after-started-333.txt
+   #   echo . > ${output_folder}/after-started-333.txt
        #check seconds for frozen-run-60s.mp4
 
        s=$(basename -- "${output_folder}" |cut -d '-' -f1)
