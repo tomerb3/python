@@ -1,5 +1,7 @@
 #!/bin/bash -x
 
+# create the out/out/out.mp4  that will be in the right side of before back video 
+
 # ./rundockerlaptop /mnt/c/ffmpeg/c/ 5
 
 folder=${folder:-none} 
@@ -60,5 +62,10 @@ docker run --rm \
   --duration 20 --fps 30 --zoom 0.25 --smooth \
   --background-video /out/$backpic
 
+sleep 60
+if [ -e "$path/out/out.mp4" ];then 
+  sleep 10
+  sudo chown baum:root -R "$path"
+fi
 
 #ffmpeg -y -i out/out.mp4 -vf scale=512:512 -c:v libx264 -crf 18 -preset veryfast out/out_small.mp4
