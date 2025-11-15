@@ -12,7 +12,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copy scripts into the image
-COPY 1.py 2.py /app/
+COPY 1.py 2.py 3.py /app/
 
 # Install Python deps used by the scripts
 RUN pip install --no-cache-dir --upgrade pip && \

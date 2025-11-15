@@ -1,0 +1,95 @@
+import os
+import argparse
+import json
+import pathlib
+import sys
+from typing import List
+
+import urllib.request
+import urllib.error
+import urllib.parse
+
+
+def fetch_json(url: str, api_key: str) -> dict:
+    req = urllib.request.Request(url)
+    req.add_header("Authorization", api_key)
+    try:
+        with urllib.request.urlopen(req) as resp:
+            data = resp.read().decode("utf-8")
+    except urllib.error.HTTPError as e:
+        print(f"HTTP error from Pexels: {e.code} {e.reason}", file=sys.stderr)
+        raise
+    except urllib.error.URLError as e:
+        print(f"Network error talking to Pexels: {e.reason}", file=sys.stderr)
+        raise
+
+    try:
+        return json.loads(data)
+    except json.JSONDecodeError:
+        print("Failed to parse JSON response from Pexels", file=sys.stderr)
+        raise
+
+
+def download_file(url: str, dest: pathlib.Path) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    print(f"Downloading {url} -> {dest}")
+    urllib.request.urlretrieve(url, str(dest))
+
+
+def download_photos(api_key: str, query: str, count: int, out_dir: pathlib.Path) -> None:
+    url = f"https://api.pexels.com/v1/search?query={urllib.parse.quote(query)}&per_page={count}"
+    data = fetch_json(url, api_key)
+    photos = data.get("photos", [])
+    for i, photo in enumerate(photos, start=1):
+        src = photo.get("src", {})
+        file_url = src.get("original") or src.get("large") or src.get("medium")
+        if not file_url:
+            continue
+        ext = pathlib.Path(file_url.split("?")[0]).suffix or ".jpg"
+        dest = out_dir / f"photo_{i}{ext}"
+        download_file(file_url, dest)
+
+
+def download_videos(api_key: str, query: str, count: int, out_dir: pathlib.Path) -> None:
+    url = f"https://api.pexels.com/videos/search?query={urllib.parse.quote(query)}&per_page={count}"
+    data = fetch_json(url, api_key)
+    videos = data.get("videos", [])
+    for i, video in enumerate(videos, start=1):
+        video_files: List[dict] = video.get("video_files", [])
+        if not video_files:
+            continue
+        # Pick highest resolution mp4 if possible
+        candidates = [vf for vf in video_files if vf.get("file_type") == "video/mp4"] or video_files
+        best = max(candidates, key=lambda vf: (vf.get("width") or 0, vf.get("height") or 0))
+        file_url = best.get("link")
+        if not file_url:
+            continue
+        ext = pathlib.Path(file_url.split("?")[0]).suffix or ".mp4"
+        dest = out_dir / f"video_{i}{ext}"
+        download_file(file_url, dest)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Download photos or videos from Pexels")
+    parser.add_argument("--type", choices=["photo", "video"], required=True, help="What to download")
+    parser.add_argument("--query", required=True, help="Search term, e.g. 'sea' or 'forest'")
+    parser.add_argument("--count", type=int, default=8, help="How many items to request (max 80 per Pexels docs)")
+    parser.add_argument("--out", required=True, help="Output directory path")
+    args = parser.parse_args()
+
+    api_key = os.environ.get("PEXELS_API_KEY")
+    if not api_key:
+        print("PEXELS_API_KEY environment variable is not set", file=sys.stderr)
+        sys.exit(1)
+
+    out_dir = pathlib.Path(args.out)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.type == "photo":
+        download_photos(api_key, args.query, args.count, out_dir)
+    else:
+        download_videos(api_key, args.query, args.count, out_dir)
+
+
+if __name__ == "__main__":
+    main()

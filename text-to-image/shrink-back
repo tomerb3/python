@@ -1,0 +1,32 @@
+#!/bin/bash
+set -euo pipefail
+
+# Usage:
+#   ./shrink-back [input_video] [reference_image] [output_video]
+# Defaults:
+#   input_video     = back.mp4
+#   reference_image = out.png
+#   output_video    = back-shrink.mp4
+
+in_video=${1:-back.mp4}
+ref_image=${2:-out.png}
+out_video=${3:-back-shrink.mp4}
+
+# Get reference resolution (WIDTHxHEIGHT) from the image
+size=$(ffprobe -v error -select_streams v:0 \
+  -show_entries stream=width,height \
+  -of csv=p=0:s=x "$ref_image")
+
+width=${size%x*}
+height=${size#*x}
+
+if [[ -z "$width" || -z "$height" ]]; then
+  echo "Failed to detect resolution from $ref_image" >&2
+  exit 1
+fi
+
+ffmpeg -y \
+  -i "$in_video" \
+  -vf "scale=${width}:${height},setsar=1" \
+  -c:v libx264 -crf 18 -preset veryfast \
+  "$out_video"
