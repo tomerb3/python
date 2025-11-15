@@ -23,7 +23,7 @@ cp -a /home/node/tts/background/back-shrink4.mp4 .
 cp -a /home/node/tts/background/back-shrink5.mp4 .
 
 number=$(echo $check1 |cut -d "-" -f1 |cut -d "#" -f1 )
-path=${folder}/out
+path="/home/node/tts/${folder}/out"
 
 case "$number" in
   0) number_word="zero" ;;
