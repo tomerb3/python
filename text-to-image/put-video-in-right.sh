@@ -3,6 +3,7 @@
 # ./rundockerlaptop /mnt/c/ffmpeg/c/ 5
 
 folder=${folder:-none} 
+cd /home/node/tts 
 cd $folder
 check1=${PWD##*/}
 
