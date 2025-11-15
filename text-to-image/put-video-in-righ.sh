@@ -11,11 +11,11 @@ cd out
 mkdir -p out
 cd out 
 
-cp -a /home/node/tts/backgrounds/back-shrink1.mp4 .
-cp -a /home/node/tts/backgrounds/back-shrink2.mp4 .
-cp -a /home/node/tts/backgrounds/back-shrink3.mp4 .
-cp -a /home/node/tts/backgrounds/back-shrink4.mp4 .
-cp -a /home/node/tts/backgrounds/back-shrink5.mp4 .
+cp -a /home/node/tts/background/back-shrink1.mp4 .
+cp -a /home/node/tts/background/back-shrink2.mp4 .
+cp -a /home/node/tts/background/back-shrink3.mp4 .
+cp -a /home/node/tts/background/back-shrink4.mp4 .
+cp -a /home/node/tts/background/back-shrink5.mp4 .
 
 number=$(echo $check1 |cut -d "-" -f1 |cut -d "#" -f1 )
 path=${folder}/out
