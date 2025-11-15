@@ -378,9 +378,9 @@ rm -f ${output_folder}/master.mp4
 #                                                                                                             seconds after silense
 ${home}/ffmpeg-run.sh mix_talk /home/baum/a/master0.mp4 /home/baum/a/code.mp3 /home/baum/a/master.mp4 0.8 0.2 6
 
-rm -f /mnt/c/ffmpeg/c/master.mp4
+rm -f /mnt/c/ffmpeg/c
 sleep 1
- cp -a $HOME/a/master.mp4 /mnt/c/ffmpeg/c/
+ #cp -a $HOME/a/master.mp4 /mnt/c/ffmpeg/c/
 
 }
 
