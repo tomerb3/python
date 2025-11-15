@@ -5,6 +5,10 @@
 folder=${folder:-none} 
 cd /home/node/tts 
 cd $folder
+if [ -e out ];then 
+  sudo chown baum:root -R out
+fi
+
 check1=${PWD##*/}
 
 mkdir -p out
