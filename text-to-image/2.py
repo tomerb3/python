@@ -24,20 +24,22 @@ def main() -> None:
     parser.add_argument("--fps", type=int, default=30)
     parser.add_argument("--smooth", action="store_true", help="Enable motion interpolation to 60fps for smoother animation")
     parser.add_argument("--zoom", type=float, default=1.2, help="Final zoom factor (>1)")
+    parser.add_argument("--video-only", action="store_true", help="Skip image generation and only run ffmpeg on an existing output image")
     args = parser.parse_args()
 
-    api_key = os.environ.get("HF_API_KEY")
-    if not api_key:
-        raise RuntimeError("Missing HF_API_KEY environment variable")
+    if not args.video_only:
+        api_key = os.environ.get("HF_API_KEY")
+        if not api_key:
+            raise RuntimeError("Missing HF_API_KEY environment variable")
 
-    client = InferenceClient(provider="nebius", api_key=api_key)
+        client = InferenceClient(provider="nebius", api_key=api_key)
 
-    # Generate image
-    img: Image.Image = client.text_to_image(args.prompt, model=args.model)
-    img.save(args.output_image)
-    print(f"Saved image: {args.output_image}")
+        # Generate image
+        img: Image.Image = client.text_to_image(args.prompt, model=args.model)
+        img.save(args.output_image)
+        print(f"Saved image: {args.output_image}")
 
-    # Inspect size for ffmpeg output resolution
+    # Inspect size for ffmpeg output resolution (works for both generated and existing image)
     with Image.open(args.output_image) as im:
         w, h = im.size
 
