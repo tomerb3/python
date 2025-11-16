@@ -234,7 +234,7 @@ cmd_create_example(){
           if [ -e out/out.mp4 ];then 
           echo . 
           else 
-            all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
+            all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder}/pic-before "no"
             sleep 30
           fi 
        #2 merge it with v-${back_before_video}
@@ -258,7 +258,7 @@ cmd_create_example(){
             baserun="${output_folder}/v-${back_before_video}"
       fi
       sleep 10
-     # ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/v-${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
+      ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/v-${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
       #A1
     ##################################################################
 
