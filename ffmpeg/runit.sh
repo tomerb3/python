@@ -224,6 +224,21 @@ cmd_create_example(){
               }" | \
            jq -r '.images[0]' | base64 -d > "$OUTFILE"
         echo "Saved image to $OUTFILE"
+
+        num=$(basename -- "${output_folder}" |cut -d '-' -f1 |cut -d "#" -f1)
+
+        ffmpeg -i out.png -vf \
+         "drawtext=text=\"Example $num\":\
+         fontfile=/home/node/tts/fonts/Peace-Sanst.ttf:\
+         fontcolor=black:\
+         fontsize=50:\
+         bordercolor=white:\
+         borderw=3:\
+          x=100:y=200" \
+             out2.jpg -y
+        #cp -a output2.jpg /mnt/c/ffmpeg/
+
+
      fi 
       if [ -e ${output_folder}/v-${back_before_video} ];then 
         echo .233
@@ -242,8 +257,8 @@ cmd_create_example(){
           X=150        # pixels from the right edge
           Y=150        # pixels from the top
           Z=1         # seconds after start to show side video
-          K=13        # seconds on the main timeline to start fading out
-          D=1         # fade-out duration in seconds
+          K=8        # seconds on the main timeline to start fading out
+          D=2         # fade-out duration in seconds
           base="${output_folder}/${back_before_video}"
           side="${output_folder}/pic-before/out/out.mp4"
           out="${output_folder}/v-${back_before_video}"
