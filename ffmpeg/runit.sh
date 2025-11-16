@@ -185,20 +185,20 @@ cmd_debug_code_wsl(){
 cmd_create_example(){
 
   if [ -e "${output_folder}/master.mp4" ];then 
-     echo .
+     echo .188
 
 
 
 
     else 
         
-#BEFORE
-
+#BEFORE ##################################################################
    # put in right area the out/out/out.mp4 video  in the before section 
      # need to stop this -   the file out/out/out.mp4 is created before  !!!!!!!!!!!!!!!!!!!!!
-   if [ -e ${output_folder}/pic-before/file.png ];then 
-      echo . 
+   if [ -e ${output_folder}/pic-before/out/out.png ];then 
+      echo .200
    else
+     echo .202
      places=("museum" "church" "pool" "sea" "garden" "forest" "mountain" "desert" "city" "village" "new york" "las vegas" "tokyo" "beach")
      colors=("blue" "red" "yellow" "purple" "orange" "pink" "black" "white" "gold" "silver")
      #backpics=("back-shrink1.mp4" "back-shrink2.mp4" "back-shrink3.mp4" "back-shrink4.mp4" "back-shrink5.mp4")
@@ -208,12 +208,11 @@ cmd_create_example(){
     eqp="${eqps[$RANDOM % ${#eqps[@]}]}"
     #backpic="${backpics[$RANDOM % ${#backpics[@]}]}"
     PROMPT="$color $eqp in a $place"
-
     mkdir -P ${output_folder}/pic-before
-    cd ${output_folder}/pic-before/
+    mkdir -P ${output_folder}/pic-before/out
+    cd ${output_folder}/pic-before/out
     HOST="192.168.0.128:7860"
-    
-    OUTFILE="file.png"
+    OUTFILE="out.png"
      path1=$(pwd)
       curl -s -X POST "http://$HOST/sdapi/v1/txt2img" \
         -H "Content-Type: application/json" \
@@ -225,49 +224,45 @@ cmd_create_example(){
               }" | \
            jq -r '.images[0]' | base64 -d > "$OUTFILE"
         echo "Saved image to $OUTFILE"
-          #cp -a output.png /mnt/c/ffmpeg/
      fi 
-
-
       if [ -e ${output_folder}/v-${back_before_video} ];then 
-        echo . 
+        echo .233
       else 
-      echo .
-          # Offsets, appearance delay, and fade timing
-        #   X=150        # pixels from the right edge
-        #   Y=150        # pixels from the top
-        #   Z=1         # seconds after start to show side video
-        #   K=13        # seconds on the main timeline to start fading out
-        #   D=1         # fade-out duration in seconds
-        #   base="${output_folder}/${back_before_video}"
-        #   side="${output_folder}/out/out/out.mp4"
-        #   out="${output_folder}/v-${back_before_video}"
-        #   # Compute fade start relative to the overlay stream’s timeline (overlay starts at Z)
-        #   ST=$(( K - Z ))
-        #   if [ $ST -lt 0 ]; then ST=0; fi
-        #   # Overlay side video at right side with offsets X,Y; enable after Z seconds
-        #   # Apply alpha fade-out on the overlay stream starting at ST seconds for D seconds
-        # ffmpeg -y \
-        #   -i "$base" -i "$side" \
-        #   -filter_complex "[1:v]setpts=PTS-STARTPTS,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
-        #   -map "[vout]" -map 0:a? \
-        #   -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
-        #   "$out"
-        #   baserun="${output_folder}/v-${back_before_video}"
+      echo .235
+       # 1. compilie   ${output_folder}/pic-before/out/out.mp4
+          cd ${output_folder}/pic-before
+          all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
+          sleep 20
+       #2 merge it with v-${back_before_video}
+          Offsets, appearance delay, and fade timing
+          X=150        # pixels from the right edge
+          Y=150        # pixels from the top
+          Z=1         # seconds after start to show side video
+          K=13        # seconds on the main timeline to start fading out
+          D=1         # fade-out duration in seconds
+          base="${output_folder}/${back_before_video}"
+          side="${output_folder}/pic-before/out/out.mp4"
+          out="${output_folder}/v-${back_before_video}"
+          ST=$(( K - Z ))
+          if [ $ST -lt 0 ]; then ST=0; fi
+          ffmpeg -y \
+            -i "$base" -i "$side" \
+            -filter_complex "[1:v]setpts=PTS-STARTPTS,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
+            -map "[vout]" -map 0:a? \
+            -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
+            "$out"
+            baserun="${output_folder}/v-${back_before_video}"
       fi
-    
-
-
-
-
-
       ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/v-${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
-      #${home}/ffmpeg-run.sh one_mp3 ${output_folder}/back-for-before.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
-
-      #${home}/ffmpeg-run.sh one_mp3 ${backup_folder}/back-45.mp4 ${output_folder}/before.mp3 ${output_folder}/before.mp4
-      # testing is good !
       #A1
-      
+    ##################################################################
+
+
+
+
+
+
+
       if [ -e ${output_folder}/output-code.mp4 ];then 
         echo . 
       else 
