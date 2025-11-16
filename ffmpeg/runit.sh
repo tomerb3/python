@@ -235,7 +235,11 @@ cmd_create_example(){
          bordercolor=white:\
          borderw=3:\
           x=100:y=200" \
-             out2.jpg -y
+             out2.png -y
+         rm -f 1out.png 
+         mv out.png 1out.png 
+         mv out2.png out.png
+
         #cp -a output2.jpg /mnt/c/ffmpeg/
 
 
