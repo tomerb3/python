@@ -228,7 +228,7 @@ cmd_create_example(){
         num=$(basename -- "${output_folder}" |cut -d '-' -f1 |cut -d "#" -f1)
 
         ffmpeg -i out.png -vf \
-         "drawtext=text=\"Example $num\":\
+         "drawtext=text=Example $num:\
          fontfile=/home/node/tts/fonts/Peace-Sanst.ttf:\
          fontcolor=black:\
          fontsize=50:\
