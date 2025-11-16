@@ -208,8 +208,8 @@ cmd_create_example(){
     eqp="${eqps[$RANDOM % ${#eqps[@]}]}"
     #backpic="${backpics[$RANDOM % ${#backpics[@]}]}"
     PROMPT="$color $eqp in a $place"
-    mkdir -P ${output_folder}/pic-before
-    mkdir -P ${output_folder}/pic-before/out
+    mkdir -p ${output_folder}/pic-before
+    mkdir -p ${output_folder}/pic-before/out
     cd ${output_folder}/pic-before/out
     HOST="192.168.0.128:7860"
     OUTFILE="out.png"
