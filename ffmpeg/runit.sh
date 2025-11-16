@@ -231,8 +231,12 @@ cmd_create_example(){
       echo .235
        # 1. compilie   ${output_folder}/pic-before/out/out.mp4
           cd ${output_folder}/pic-before
-          all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
-          sleep 20
+          if [ -e out/out.mp4 ];then 
+          echo . 
+          else 
+            all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
+            sleep 30
+          fi 
        #2 merge it with v-${back_before_video}
           Offsets, appearance delay, and fade timing
           X=150        # pixels from the right edge
@@ -253,7 +257,8 @@ cmd_create_example(){
             "$out"
             baserun="${output_folder}/v-${back_before_video}"
       fi
-      ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/v-${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
+      sleep 10
+     # ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/v-${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
       #A1
     ##################################################################
 
