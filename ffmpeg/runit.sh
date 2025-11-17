@@ -227,10 +227,12 @@ cmd_create_example(){
 
         num=$(basename -- "${output_folder}" |cut -d '-' -f1 |cut -d "#" -f1)
 
+        colorfont="${colors[$RANDOM % ${#colors[@]}]}"
+
         ffmpeg -i out.png -vf \
          "drawtext=text=Example $num:\
          fontfile=/home/node/tts/fonts/Peace-Sanst.ttf:\
-         fontcolor=black:\
+         fontcolor=$colorfont:\
          fontsize=50:\
          bordercolor=white:\
          borderw=3:\
