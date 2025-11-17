@@ -236,7 +236,7 @@ cmd_create_example(){
          fontsize=50:\
          bordercolor=white:\
          borderw=3:\
-          x=100:y=200" \
+          x=120:y=250" \
              out2.png -y
          rm -f 1out.png 
          mv out.png 1out.png 
