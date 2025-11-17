@@ -226,7 +226,7 @@ cmd_create_example(){
         echo "Saved image to $OUTFILE"
 
         num=$(basename -- "${output_folder}" |cut -d '-' -f1 |cut -d "#" -f1)
-
+        colors=("blue" "red" "black" "purple")
         colorfont="${colors[$RANDOM % ${#colors[@]}]}"
 
         ffmpeg -i out.png -vf \
