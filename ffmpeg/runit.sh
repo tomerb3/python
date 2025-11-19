@@ -218,7 +218,7 @@ cmd_create_video_right_to_run(){
     echo $file 
       rm -f out.png 
       cp -a $file out.png
-      all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder}/out "no"
+      all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
 
       if [ -e out.mp4 ];then 
       echo . 
