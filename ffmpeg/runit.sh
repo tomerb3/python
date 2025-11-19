@@ -1,7 +1,6 @@
 #!/bin/bash -x
 
-#ver13 cmd_create_video_right_to_run
-export ver=ver13
+export ver=ver14
 # how to debug in n8n terminal 
 #   create_video_right_to_run
 
@@ -12,15 +11,8 @@ export ver=ver13
 
 
 
-
-
-
-
-
 # info base example-id
 #cd /home/node/tts/; ls -1tr |grep mhzc19hv_fzd1m7hb |while read d;do echo "== $d ==";ls -1 "$d"/master.mp4 2>/dev/null ; ls -1 "$d"/mhzc19hv_fzd1m7hb.mp4 2>/dev/null ;echo "===";done
-
-
 
 
 output_folder=${output_folder:-$HOME/a}
@@ -72,9 +64,10 @@ cmd_filter1_v2_debug(){
        echo $N 
 }
 
+############################################# cmd_filter1_v2
+
 cmd_filter1_v2(){
  echo "line39 from runit.sh cmd_filter1_v2   call  ffmpeg-run.sh filter_script_v3"
-
 #1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
      /app/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
      cd ${output_folder}
@@ -82,15 +75,10 @@ cmd_filter1_v2(){
      N=$(ffprobe -v error -select_streams v:0 -count_frames \
        -show_entries stream=nb_read_frames -of default=nw=1:nk=1 code_a.mp4)
        echo $N 
-
-
-
 #2 add key clicks random   call it code_b.mp4 
      /app/ffmpeg-run.sh filter_script_v4 ${output_folder}/code_a.mp4 ${backup_folder}/keys_dir ${output_folder}/code_b.mp4 0.5
-      
 #3 freeze last frame to 60 second video   code_c_freeze.mp4
      /app/ffmpeg-run.sh freeze_last_frame ${output_folder}/code_b.mp4 60 ${output_folder}/code_c_freeze.mp4
-
 #4 merge code effeect with clicks with frozen 60 sec together - call it       frozen-code-60s-a.mp4
     D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${output_folder}/code_c_freeze.mp4" | awk '{printf "%.6f\n",$1}')
     ffmpeg -y -i "${output_folder}/code_c_freeze.mp4" \
@@ -111,21 +99,18 @@ cmd_filter1_v2(){
  } > "$OUT"
 max=$(cat durations.txt  |cut -d "=" -f2 |sort -n |tail -1 |cut -d "." -f1)
 mp3=$(cat durations.txt  |grep mp3 |cut -d "=" -f2 |cut -d "." -f1)
-
 if [ $max -gt $mp3 ]; then
   delta=$(( $max - $mp3 ))
 else
   delta=0
 fi
-
 seconds1=$(( 4 + $delta ))
 echo seconds to wait after mp3 voice end $seconds1
-
-
   #6 add voice sound  output_code.mp4     put 5 seconds after code talk  need to check if this work                                                                                      seconds after silense 
   /app/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 $seconds1
   sleep 2
 }
+########################################################  end of cmd_filter1_v2 
 
 
 
@@ -135,8 +120,7 @@ echo seconds to wait after mp3 voice end $seconds1
 
 
 
-
-
+########################################################
 code_run_vera(){
 ${home}/ffmpeg-run.sh running_code \
   ${output_folder}/frozen-code-60s-a.mp4 \
@@ -148,7 +132,9 @@ ${home}/ffmpeg-run.sh running_code \
   ${backup_folder}/gong.mp3 \
   ${output_folder}/coderun.mp3 
 }
+########################################################  end of code_run_vera
 
+########################################################
 # type code - need the clicks sound to be 100% with the text animation !!!!!!!!!!
 _code(){
       export RC_FONTFILE="${font_folder}/DejaVuSans.ttf"
@@ -163,7 +149,9 @@ _code(){
       # 2) Make sure drawtext reloads the text files (prevents stale/bad frames)
       sed -E -i "s/:enable='/:reload=1:enable='/g" ${output_folder}/files/filters.txt
 }
+########################################################  end of _code
 
+########################################################
 _code_v2(){
   sed -i.bak 's#/home/node/tts/fonts/#/data/fonts/#g' ${output_folder}/files/filters.txt
   sed -i.bak "s#'files/step#'/data/files/step#g" ${output_folder}/files/filters.txt
@@ -182,7 +170,9 @@ _code_v2(){
   ffmpeg-scripts:latest \
     bash -lc 'mkdir -p /tmp/.cache/fontconfig && bash -x /app/runit.sh filter1_v2'
 }
+########################################################  end of _code_v2
 
+########################################################
 cmd_debug_code_wsl(){
   echo home $home 
   sleep 1
@@ -205,8 +195,9 @@ cmd_debug_code_wsl(){
   ffmpeg-scripts:latest \
     bash -lc 'mkdir -p /tmp/.cache/fontconfig && bash -x /app/runit.sh filter1_v2_debug'
 }
+########################################################  end of cmd_debug_code_wsl
 
-
+########################################################
 cmd_create_video_right_to_run(){
 
 # 1. create the picture form comfiui in wsl2 - 
@@ -252,19 +243,27 @@ cmd_create_video_right_to_run(){
     fi
    
 
-
 }
+########################################################  end of cmd_create_video_right_to_run
 
+
+
+
+
+
+
+
+
+########################################################################################################### example
+########################################################################################################### example
+########################################################################################################### example
+########################################################################################################### example
+########################################################################################################### example
 cmd_create_example(){
 
   if [ -e "${output_folder}/master.mp4" ];then 
      echo .188
-
-
-
-
     else 
-        
 #BEFORE ##################################################################
    # put in right area the out/out/out.mp4 video  in the before section 
      # need to stop this -   the file out/out/out.mp4 is created before  !!!!!!!!!!!!!!!!!!!!!
@@ -317,7 +316,6 @@ cmd_create_example(){
 
         #cp -a output2.jpg /mnt/c/ffmpeg/
 
-
      fi 
       if [ -e ${output_folder}/v-${back_before_video} ];then 
         echo .233
@@ -357,11 +355,6 @@ cmd_create_example(){
     ##################################################################
 
 
-
-
-
-
-
       if [ -e ${output_folder}/output-code.mp4 ];then 
         echo . 
       else 
@@ -377,11 +370,6 @@ cmd_create_example(){
 #CODE FREEZE
    #     ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/output-code.mp4 60 ${output_folder}/frozen-code-60s.mp4
     #  fi 
-
-
-
-
-
 
 
       export RC_FONTFILE="${font_folder}/DejaVuSans.ttf"
@@ -401,15 +389,10 @@ cmd_create_example(){
         #code_run_vera
 
    
-   
-   
-   
    # if side video exit - lets add it to the right side of ${output_folder}/frozen-code-60s-a.mp4  so we will show it in after code run section 
    baserun="${output_folder}/frozen-code-60s-a.mp4"
      # the file out/out.mp4 is created in the left side of project2-p3 exec node with video.sh script in n8n folder 
-   
-
-   
+      
      # make frozen-code-60s-a.with-side.mp4  and set it in ${baserun}
      cmd_create_video_right_to_run
 
@@ -421,9 +404,7 @@ cmd_create_example(){
   ${backup_folder}/gong.mp3 \
   ${output_folder}/coderun.mp3
 
-
-      fi 
-      
+      fi       
       
       #A4
       if [ -e ${output_folder}/frozen-run-60s.mp4 ];then 
@@ -455,12 +436,8 @@ cmd_create_example(){
        fi
 
 
-        
-
       fi
-
 fi
-
 
   if [ -e ${output_folder}/master.mp4 ];then 
     echo . 
@@ -469,9 +446,16 @@ fi
 #MASTER
     ${home}/ffmpeg-run.sh concat_v2 "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
   fi 
-
-
 }
+########################################################################################################### example
+########################################################################################################### example
+########################################################################################################### example
+########################################################################################################### example
+########################################################################################################### example
+
+
+
+
 
 
 
