@@ -210,13 +210,16 @@ cmd_create_video_right_to_run(){
     echo $file 
       rm -f out.png 
       cp -a $file out.png
-      all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
 
       if [ -e out.mp4 ];then 
-      echo . 
+         echo .line215 
       else 
+         #lets create out.m4 
+         all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
+      fi
+      
       if [ -e ${output_folder}/frozen-code-60s-a.with-side.mp4 ];then 
-        echo . 
+        echo ...line222
       else 
           # Offsets, appearance delay, and fade timing
           X=150        # pixels from the right edge
@@ -240,7 +243,7 @@ cmd_create_video_right_to_run(){
           "$out"
           baserun="${output_folder}/frozen-code-60s-a.with-side.mp4"
       fi
-    fi
+    
    
 
 }
