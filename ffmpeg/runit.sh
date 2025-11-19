@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
-#ver12 cmd_create_video_right_to_run
-
+#ver13 cmd_create_video_right_to_run
+export ver=ver13
 # how to debug in n8n terminal 
 #   create_video_right_to_run
 
@@ -38,7 +38,8 @@ else
 fi
  # home=/data
 
-
+cd ${output_folder}/
+touch $ver
 
 good(){
   # mp3 mp4 and key.mp3 
@@ -211,7 +212,7 @@ cmd_create_video_right_to_run(){
 # 1. create the picture form comfiui in wsl2 - 
     mkdir -p ${output_folder}/out
     cd ${output_folder}/out
-    touch line-214-ver12
+    touch line-214-ver13
     pwd
     cp -a /home/node/tts/scripts/text-to-image-comfi/* . 
     docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "a man with red hair stand in new york with blonde hair"
