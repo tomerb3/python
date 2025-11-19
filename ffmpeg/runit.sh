@@ -431,14 +431,8 @@ fi
 
 
 
-
-
-cmd_merge_examples_to_chapter(){
-  cd /home/node/tts
-  if [ -e chapter-${folder} ];then 
-      echo . 
-  else 
-      folder=${folder:-none}
+_merge1(){
+   folder=${folder:-none}
       #check=$(echo $folder |cut -d '-' -f2)
       rm -rf "chapter-${folder}" 
       ls -1tr |grep $folder |sort -n > list.txt
@@ -449,6 +443,20 @@ cmd_merge_examples_to_chapter(){
       for x in "${d[@]}"; do chapter_name+=( "$x/master.mp4" ); done
      #  echo "${home}/ffmpeg-run.sh" concat "${chapter_name[@]}" 
      "${home}/ffmpeg-run.sh" concat "${chapter_name[@]}" 
+}
+
+cmd_merge_examples_to_chapter(){
+  cd /home/node/tts
+  if [ -e chapter-${folder} ];then 
+      echo . 
+      if [ $(ls -ltr chapter-${folder}/*.mp4 |wc -l) -gt 0 ];then 
+        echo "no need  "
+      else 
+        _merge1
+      fi 
+
+  else 
+     _merge1
   fi 
 }
 
