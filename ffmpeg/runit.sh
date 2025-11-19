@@ -1,5 +1,14 @@
 #!/bin/bash -x
 
+#ver11 cmd_create_video_right_to_run
+
+
+# info base example-id
+#cd /home/node/tts/; ls -1tr |grep mhzc19hv_fzd1m7hb |while read d;do echo "== $d ==";ls -1 "$d"/master.mp4 2>/dev/null ; ls -1 "$d"/mhzc19hv_fzd1m7hb.mp4 2>/dev/null ;echo "===";done
+
+
+
+
 output_folder=${output_folder:-$HOME/a}
 backup_folder=${backup_folder:-$HOME/a}
 font_folder=${font_folder:-$HOME/a/fonts}
@@ -182,6 +191,17 @@ cmd_debug_code_wsl(){
     bash -lc 'mkdir -p /tmp/.cache/fontconfig && bash -x /app/runit.sh filter1_v2_debug'
 }
 
+
+cmd_create_video_right_to_run(){
+
+# 1. create the picture form comfiui in wsl2 - 
+    mkdir -p ${output_folder}/out
+    cd ${output_folder}/out
+    docker run --rm -v ${output_folder}/out:/app out comfi1-3.10 python comfi.py --prompt "a man with red hair stand in new york with blonde hair"
+
+
+}
+
 cmd_create_example(){
 
   if [ -e "${output_folder}/master.mp4" ];then 
@@ -334,6 +354,12 @@ cmd_create_example(){
    # if side video exit - lets add it to the right side of ${output_folder}/frozen-code-60s-a.mp4  so we will show it in after code run section 
    baserun="${output_folder}/frozen-code-60s-a.mp4"
      # the file out/out.mp4 is created in the left side of project2-p3 exec node with video.sh script in n8n folder 
+   
+
+   
+
+   cmd_create_video_right_to_run
+
    if [ -e ${output_folder}/out/out.mp4 ];then 
       if [ -e ${output_folder}/frozen-code-60s-a.with-side.mp4 ];then 
         echo . 
