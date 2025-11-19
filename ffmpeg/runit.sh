@@ -212,7 +212,7 @@ cmd_create_video_right_to_run(){
     mkdir -p ${output_folder}/out
     cd ${output_folder}/out
     pwd
-    docker run --rm -v ${output_folder}/out:/app out comfi1-3.10 python comfi.py --prompt "a man with red hair stand in new york with blonde hair"
+    docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "a man with red hair stand in new york with blonde hair"
     file=$(ls -1tr *.png |tail -1)
     echo $file 
       rm -f out.png 
