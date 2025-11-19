@@ -197,7 +197,44 @@ cmd_create_video_right_to_run(){
 # 1. create the picture form comfiui in wsl2 - 
     mkdir -p ${output_folder}/out
     cd ${output_folder}/out
+    pwd
     docker run --rm -v ${output_folder}/out:/app out comfi1-3.10 python comfi.py --prompt "a man with red hair stand in new york with blonde hair"
+    file=$(ls -1tr *.png |tail -1)
+    echo $file 
+      rm -f out.png 
+      cp -a $file out.png
+      all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder}/out "no"
+
+      if [ -e out.mp4 ];then 
+      echo . 
+      else 
+      if [ -e ${output_folder}/frozen-code-60s-a.with-side.mp4 ];then 
+        echo . 
+      else 
+          # Offsets, appearance delay, and fade timing
+          X=150        # pixels from the right edge
+          Y=150        # pixels from the top
+          Z=3         # seconds after start to show side video
+          K=10        # seconds on the main timeline to start fading out
+          D=1         # fade-out duration in seconds
+          base="${output_folder}/frozen-code-60s-a.mp4"
+          side="${output_folder}/out/out.mp4"
+          out="${output_folder}/frozen-code-60s-a.with-side.mp4"
+          # Compute fade start relative to the overlay stream’s timeline (overlay starts at Z)
+          ST=$(( K - Z ))
+          if [ $ST -lt 0 ]; then ST=0; fi
+          # Overlay side video at right side with offsets X,Y; enable after Z seconds
+          # Apply alpha fade-out on the overlay stream starting at ST seconds for D seconds
+        ffmpeg -y \
+          -i "$base" -i "$side" \
+          -filter_complex "[1:v]setpts=PTS-STARTPTS,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
+          -map "[vout]" -map 0:a? \
+          -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
+          "$out"
+          baserun="${output_folder}/frozen-code-60s-a.with-side.mp4"
+      fi
+    fi
+   
 
 
 }
@@ -357,43 +394,8 @@ cmd_create_example(){
    
 
    
-
-   cmd_create_video_right_to_run
-
-   if [ -e ${output_folder}/out/out.mp4 ];then 
-      if [ -e ${output_folder}/frozen-code-60s-a.with-side.mp4 ];then 
-        echo . 
-      else 
-          # Offsets, appearance delay, and fade timing
-          X=150        # pixels from the right edge
-          Y=150        # pixels from the top
-          Z=3         # seconds after start to show side video
-          K=10        # seconds on the main timeline to start fading out
-          D=1         # fade-out duration in seconds
-          base="${output_folder}/frozen-code-60s-a.mp4"
-          side="${output_folder}/out/out.mp4"
-          out="${output_folder}/frozen-code-60s-a.with-side.mp4"
-          # Compute fade start relative to the overlay stream’s timeline (overlay starts at Z)
-          ST=$(( K - Z ))
-          if [ $ST -lt 0 ]; then ST=0; fi
-          # Overlay side video at right side with offsets X,Y; enable after Z seconds
-          # Apply alpha fade-out on the overlay stream starting at ST seconds for D seconds
-        ffmpeg -y \
-          -i "$base" -i "$side" \
-          -filter_complex "[1:v]setpts=PTS-STARTPTS,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
-          -map "[vout]" -map 0:a? \
-          -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
-          "$out"
-          baserun="${output_folder}/frozen-code-60s-a.with-side.mp4"
-      fi
-   fi 
-   
-
-
-
-
-
-
+     # make frozen-code-60s-a.with-side.mp4  and set it in ${baserun}
+     cmd_create_video_right_to_run
 
    bash -x /home/node/tts/scripts/ffmpeg/ffmpeg-run.sh running_code \
   ${baserun} \
