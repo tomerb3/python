@@ -2,6 +2,20 @@
 
 #ver11 cmd_create_video_right_to_run
 
+# how to debug in n8n terminal 
+#   create_video_right_to_run
+
+
+#  cd /home/node/tts/$folder
+# folder=name1 
+# back_45_video=back11.mp4 back_before_video=back222.mp4 output_folder=/home/node/tts/$folder backup_folder=/home/node/tts/background font_folder=/home/node/tts/fonts/ /home/node/tts/scripts/ffmpeg/runit.sh create_video_right_to_run
+
+
+
+
+
+
+
 
 # info base example-id
 #cd /home/node/tts/; ls -1tr |grep mhzc19hv_fzd1m7hb |while read d;do echo "== $d ==";ls -1 "$d"/master.mp4 2>/dev/null ; ls -1 "$d"/mhzc19hv_fzd1m7hb.mp4 2>/dev/null ;echo "===";done
