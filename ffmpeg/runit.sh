@@ -263,7 +263,7 @@ cmd_create_example(){
           X=150        # pixels from the right edge
           Y=150        # pixels from the top
           Z=1         # seconds after start to show side video
-          K=8        # seconds on the main timeline to start fading out
+          K=13        # seconds on the main timeline to start fading out
           D=2         # fade-out duration in seconds
           base="${output_folder}/${back_before_video}"
           side="${output_folder}/pic-before/out/out.mp4"
