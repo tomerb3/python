@@ -242,7 +242,7 @@ cmd_create_video_right_to_run(){
           -map "[vout]" -map 0:a? \
           -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
           "$out"
-          baserun="${output_folder}/frozen-code-60s-a.with-side.mp4"
+          export baserun="${output_folder}/frozen-code-60s-a.with-side.mp4"
       fi
     
    
