@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-export ver=ver15
+export ver=ver16
 echo $ver;sleep 3
 # how to debug in n8n terminal 
 #   create_video_right_to_run
@@ -15,7 +15,7 @@ echo $ver;sleep 3
 # info base example-id
 #cd /home/node/tts/; ls -1tr |grep mhzc19hv_fzd1m7hb |while read d;do echo "== $d ==";ls -1 "$d"/master.mp4 2>/dev/null ; ls -1 "$d"/mhzc19hv_fzd1m7hb.mp4 2>/dev/null ;echo "===";done
 
-
+video_text=${video_text:-a}
 output_folder=${output_folder:-$HOME/a}
 backup_folder=${backup_folder:-$HOME/a}
 font_folder=${font_folder:-$HOME/a/fonts}
@@ -206,7 +206,14 @@ cmd_create_video_right_to_run(){
     cd ${output_folder}/out
     pwd
     cp -a /home/node/tts/scripts/text-to-image-comfi/* . 
-    docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "a man with red hair stand in new york with blonde hair"
+
+
+    if [ $(echo $video_text|wc -c) -gt 3 ];then 
+       echo .
+       param1=$(shuf -n 1 /home/node/tts/scripts/text-to-image-comfi/random_line1)
+       param2="$param1 \" $video_text \" "
+
+       docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "$param2"
     file=$(ls -1tr *.png |tail -1)
     echo $file 
       rm -f out.png 
@@ -244,6 +251,11 @@ cmd_create_video_right_to_run(){
           "$out"
           export baserun="${output_folder}/frozen-code-60s-a.with-side.mp4"
       fi
+
+    else
+       echo ..noneed-253
+    fi 
+    
     
    
 
