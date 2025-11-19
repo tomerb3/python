@@ -1,6 +1,7 @@
 #!/bin/bash -x
 
-export ver=ver14
+export ver=ver15
+echo $ver;sleep 3
 # how to debug in n8n terminal 
 #   create_video_right_to_run
 
