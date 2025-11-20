@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
-export ver=ver21
-# smaller to 300 300 video2 run  
+export ver=ver22
+# disable stuff
 echo $ver;sleep 3
 
 
@@ -276,24 +276,8 @@ cmd_create_video_right_to_run(){
 
 
 
-
-
-
-
-
-########################################################################################################### example
-########################################################################################################### example
-########################################################################################################### example
-########################################################################################################### example
-########################################################################################################### example
-cmd_create_example(){
-
-  if [ -e "${output_folder}/master.mp4" ];then 
-     echo .188
-    else 
-#BEFORE ##################################################################
-   # put in right area the out/out/out.mp4 video  in the before section 
-     # need to stop this -   the file out/out/out.mp4 is created before  !!!!!!!!!!!!!!!!!!!!!
+cmd_before(){
+    echo "cmd_before"
    if [ -e ${output_folder}/pic-before ];then 
       echo .200 no-need pib-before
    else
@@ -393,25 +377,60 @@ cmd_create_example(){
          ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/v-${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
          echo end of out.mp4 before.line379
       fi 
-      #A1
+}
+
+cmd_after(){
+          s=$(basename -- "${output_folder}" |cut -d '-' -f1)
+                if [ "${s%%#*}" -eq "${s##*#}" ]; then 
+                  echo "equal"
+                  seconds=$( ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${output_folder}/after.mp3  |cut -d "." -f1 ) 
+                  seconds2=$(( $seconds - 4 ))
+                  start=${seconds2} kind=scanlines in_file=frozen-run-60s.mp4 output_file=frozen-run-60s-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
+                  ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s-v2.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
+                else 
+                    #AFTER
+                  echo "not equal"
+                  ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
+                 fi
+}
+
+
+
+
+########################################################################################################### example
+########################################################################################################### example
+########################################################################################################### example
+########################################################################################################### example
+########################################################################################################### example
+cmd_create_example(){
+
+  #cmd_before
+  if [ -e "${output_folder}/master.mp4" ];then 
+     echo .188
+    else 
+    #BEFORE ##################################################################
+    
+    #cmd_before
+    
     ##################################################################
+
+
+
+
+
+
+
 
 
       if [ -e ${output_folder}/output-code.mp4 ];then 
         echo . 
       else 
 #CODE
-     #   _code > ${output_folder}/code_log.log 2>&1
-     _code_v2
+  
+      #   _code_v2
       fi 
       
-      #A3
-#      if [ -e ${output_folder}/frozen-code-60s.mp4 ];then 
- #       echo .
-  #    else 
-#CODE FREEZE
-   #     ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/output-code.mp4 60 ${output_folder}/frozen-code-60s.mp4
-    #  fi 
+ 
 
 
       export RC_FONTFILE="${font_folder}/DejaVuSans.ttf"
@@ -423,70 +442,67 @@ cmd_create_example(){
       #export RC_FONTCOLOR="white"
       # code run 
       
-      if [ -e ${output_folder}/running-code-demo.mp4 ];then 
-        echo . > ${output_folder}/line410.txt
-      else 
-      echo . > ${output_folder}/line410.txt
-      #RUN CODE
-        #code_run_vera
-
    
-   # if side video exit - lets add it to the right side of ${output_folder}/frozen-code-60s-a.mp4  so we will show it in after code run section 
-   baserun="${output_folder}/frozen-code-60s-a.mp4"
-     # the file out/out.mp4 is created in the left side of project2-p3 exec node with video.sh script in n8n folder 
-      
-     # make frozen-code-60s-a.with-side.mp4  and set it in ${baserun}
-     cmd_create_video_right_to_run
+   
+   
+   
+      if [ -e ${output_folder}/running-code-demo.mp4 ];then 
+        echo . > ${output_folder}/line410notgood.txt
+      else 
+      echo . > ${output_folder}/line437.txt
+         #RUN CODE
+        #code_run_vera
+        # if side video exit - lets add it to the right side of ${output_folder}/frozen-code-60s-a.mp4  so we will show it in after code run section 
+        baserun="${output_folder}/frozen-code-60s-a.mp4"
+          # the file out/out.mp4 is created in the left side of project2-p3 exec node with video.sh script in n8n folder 
+            
+          # make frozen-code-60s-a.with-side.mp4  and set it in ${baserun}
+          cmd_create_video_right_to_run
 
-   bash -x /home/node/tts/scripts/ffmpeg/ffmpeg-run.sh running_code \
-  ${baserun} \
-  ${output_folder}/code_run_to_video.txt \
-  50 1200 3 0.2 \
-  ${output_folder}/running-code-demo.mp4 \
-  ${backup_folder}/gong.mp3 \
-  ${output_folder}/coderun.mp3
+          bash -x /home/node/tts/scripts/ffmpeg/ffmpeg-run.sh running_code \
+          ${baserun} \
+          ${output_folder}/code_run_to_video.txt \
+          50 1200 3 0.2 \
+          ${output_folder}/running-code-demo.mp4 \
+          ${backup_folder}/gong.mp3 \
+          ${output_folder}/coderun.mp3
 
       fi       
       
       #A4
-      if [ -e ${output_folder}/frozen-run-60s.mp4 ];then 
-        echo .
-      else 
-#RUN CODE FREEZE
-   #  echo . > ${output_folder}/frozen0run-60s-start-325.txt
-        ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4
-      fi 
+            if [ -e ${output_folder}/frozen-run-60s.mp4 ];then 
+              echo .noneedfrozenrun60
+            else 
+              echo .needfrozenrun60
+               #RUN CODE FREEZE
+              #  echo . > ${output_folder}/frozen0run-60s-start-325.txt
+              #  ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4
+            fi 
 
 
+      
+      
       if [ -e ${output_folder}/after.mp4 ];then 
-        echo .
+        echo .noneedafter
       else 
-   #   echo . > ${output_folder}/after-started-333.txt
-       #check seconds for frozen-run-60s.mp4
-
-       s=$(basename -- "${output_folder}" |cut -d '-' -f1)
-       if [ "${s%%#*}" -eq "${s##*#}" ]; then 
-         echo "equal"
-         seconds=$( ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${output_folder}/after.mp3  |cut -d "." -f1 ) 
-         seconds2=$(( $seconds - 4 ))
-         start=${seconds2} kind=scanlines in_file=frozen-run-60s.mp4 output_file=frozen-run-60s-v2.mp4 folder=${output_folder} tool=/home/node/tts/scripts/movement back=${output_folder} /home/node/tts/scripts/movement/run-shape.sh
-         ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s-v2.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
-       else 
-#AFTER
-         echo "not equal"
-         ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/frozen-run-60s.mp4 ${output_folder}/after.mp3 ${output_folder}/after.mp4
-       fi
-
-
+        echo .needafter
+                    #   echo . > ${output_folder}/after-started-333.txt
+                          #check seconds for frozen-run-60s.mp4
+           #cmd_after
       fi
+
+
+
+
 fi
 
   if [ -e ${output_folder}/master.mp4 ];then 
-    echo . 
+      echo . 
+      echo . > ${output_folder}/line497.txt
   else 
-  echo . > ${output_folder}/master-started-360.txt
-#MASTER
-    ${home}/ffmpeg-run.sh concat_v2 "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
+     echo . > ${output_folder}/line499.txt
+     #MASTER
+      # ${home}/ffmpeg-run.sh concat_v2 "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
   fi 
 }
 ########################################################################################################### example
@@ -494,8 +510,6 @@ fi
 ########################################################################################################### example
 ########################################################################################################### example
 ########################################################################################################### example
-
-
 
 
 
