@@ -207,14 +207,14 @@ cmd_create_video_right_to_run(){
     pwd
     cp -a /home/node/tts/scripts/text-to-image-comfi/* . 
 
-    echo video_text > ${output_folder}/debug_vide_text.txt
+    echo $video_text > ${output_folder}/debug_vide_text.txt
 
     if [ $(echo $video_text|wc -c) -gt 3 ];then 
        echo .line215 > ${output_folder}/line215
        param1=$(shuf -n 1 /home/node/tts/scripts/text-to-image-comfi/random_line1)
        param2="$param1 holding a sign with text: \" $video_text \" "
 
-#    docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "$param2"
+    docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "$param2"
     file=$(ls -1tr *.png |tail -1)
     echo $file 
       rm -f out.png 
