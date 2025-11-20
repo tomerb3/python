@@ -1,7 +1,10 @@
 #!/bin/bash -x
 
-export ver=ver16
+export ver=ver17
+# less second video1  and video2 smaller
 echo $ver;sleep 3
+
+
 # how to debug in n8n terminal 
 #   create_video_right_to_run
 
@@ -232,8 +235,8 @@ cmd_create_video_right_to_run(){
           # Offsets, appearance delay, and fade timing
           X=150        # pixels from the right edge
           Y=150        # pixels from the top
-          Z=3         # seconds after start to show side video
-          K=10        # seconds on the main timeline to start fading out
+          Z=2         # seconds after start to show side video
+          K=12        # seconds on the main timeline to start fading out
           D=1         # fade-out duration in seconds
           base="${output_folder}/frozen-code-60s-a.mp4"
           side="${output_folder}/out/out.mp4"
