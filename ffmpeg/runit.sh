@@ -251,7 +251,7 @@ cmd_create_video_right_to_run(){
           # Apply alpha fade-out on the overlay stream starting at ST seconds for D seconds
         ffmpeg -y \
           -i "$base" -i "$side" \
-          -filter_complex "[1:v]setpts=PTS-STARTPTS,scale=300:300,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1]; \
+          -filter_complex "[1:v]setpts=PTS-STARTPTS,scale=600:600,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1]; \
                  [0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
           -map "[vout]" -map 0:a? \
           -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
