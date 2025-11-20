@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-export ver=ver20
+export ver=ver21
 # smaller to 300 300 video2 run  
 echo $ver;sleep 3
 
@@ -203,16 +203,17 @@ cmd_debug_code_wsl(){
 
 ########################################################
 cmd_create_video_right_to_run(){
-
+    echo inside-cmd_create_video_right_to_run a1 ;sleep 5
 # 1. create the picture form comfiui in wsl2 - 
     mkdir -p ${output_folder}/out
     cd ${output_folder}/out
     pwd
     cp -a /home/node/tts/scripts/text-to-image-comfi/* . 
 
+    echo video_text > ${output_folder}/debug_vide_text.txt
 
     if [ $(echo $video_text|wc -c) -gt 3 ];then 
-       echo . > ${output_folder}/line215
+       echo .line215 > ${output_folder}/line215
        param1=$(shuf -n 1 /home/node/tts/scripts/text-to-image-comfi/random_line1)
        param2="$param1 \" $video_text \" "
 
@@ -223,16 +224,17 @@ cmd_create_video_right_to_run(){
       cp -a $file out.png
 
       if [ -e out.mp4 ];then 
-         echo .line215 >> ${output_folder}/line215
+         echo .line227 > ${output_folder}/line227
       else 
+       echo .line229 > ${output_folder}/line229
          #lets create out.m4 
          all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
       fi
-      
+       echo .line233 > ${output_folder}/line233
       if [ -e ${output_folder}/frozen-code-60s-a.with-side.mp4 ];then 
-        echo .. > ${output_folder}/line233
+        echo .line235. > ${output_folder}/line235
       else 
-          echo ..noneed-235 >> ${output_folder}/line235 
+          echo ..noneed-237 > ${output_folder}/line237
           # Offsets, appearance delay, and fade timing
           X=150        # pixels from the right edge
           Y=150        # pixels from the top
@@ -255,18 +257,18 @@ cmd_create_video_right_to_run(){
           -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
           "$out"
           export baserun="${output_folder}/frozen-code-60s-a.with-side.mp4"
-
+          echo ..noneed-260 > ${output_folder}/line260
           
 
                  #old -filter_complex "[1:v]setpts=PTS-STARTPTS,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
       fi
-
+    echo ..noneed-265 > ${output_folder}/line265
     else
-       echo ..noneed-253 >> ${output_folder}/line253 
+       echo ..noneed-267 > ${output_folder}/line267
     fi 
     
     
-   
+   echo "end of cmd_create_video_right_to_run "
 
 }
 ########################################################  end of cmd_create_video_right_to_run
@@ -341,41 +343,56 @@ cmd_create_example(){
 
         #cp -a output2.jpg /mnt/c/ffmpeg/
 
+              
+            if [ -e ${output_folder}/v-${back_before_video} ];then 
+              echo .346-no-need-out.mp4 of before
+            else 
+            echo 348 create out.mp4 of before
+            # 1. compilie   ${output_folder}/pic-before/out/out.mp4
+                cd ${output_folder}/pic-before
+                if [ -e out/out.mp4 ];then 
+                echo . 
+                else 
+                  all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder}/pic-before "no"
+                  sleep 30
+                fi 
+            #2 merge it with v-${back_before_video}
+            #   Offsets, appearance delay, and fade timing
+                X=150        # pixels from the right edge
+                Y=150        # pixels from the top
+                Z=1         # seconds after start to show side video
+                K=11        # seconds on the main timeline to start fading out
+                D=2         # fade-out duration in seconds
+                base="${output_folder}/${back_before_video}"
+                side="${output_folder}/pic-before/out/out.mp4"
+                out="${output_folder}/v-${back_before_video}"
+                ST=$(( K - Z ))
+                if [ $ST -lt 0 ]; then ST=0; fi
+                ffmpeg -y \
+                  -i "$base" -i "$side" \
+                  -filter_complex "[1:v]setpts=PTS-STARTPTS,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
+                  -map "[vout]" -map 0:a? \
+                  -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
+                  "$out"
+                  baserun="${output_folder}/v-${back_before_video}"
+            fi
+
+
+
      fi 
-      if [ -e ${output_folder}/v-${back_before_video} ];then 
-        echo .233
+
+
+
+
+
+      if [ -e ${output_folder}/before.mp4 ];then 
+        echo .no need before.mp4
       else 
-      echo .235
-       # 1. compilie   ${output_folder}/pic-before/out/out.mp4
-          cd ${output_folder}/pic-before
-          if [ -e out/out.mp4 ];then 
-          echo . 
-          else 
-            all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder}/pic-before "no"
-            sleep 30
-          fi 
-       #2 merge it with v-${back_before_video}
-       #   Offsets, appearance delay, and fade timing
-          X=150        # pixels from the right edge
-          Y=150        # pixels from the top
-          Z=1         # seconds after start to show side video
-          K=11        # seconds on the main timeline to start fading out
-          D=2         # fade-out duration in seconds
-          base="${output_folder}/${back_before_video}"
-          side="${output_folder}/pic-before/out/out.mp4"
-          out="${output_folder}/v-${back_before_video}"
-          ST=$(( K - Z ))
-          if [ $ST -lt 0 ]; then ST=0; fi
-          ffmpeg -y \
-            -i "$base" -i "$side" \
-            -filter_complex "[1:v]setpts=PTS-STARTPTS,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
-            -map "[vout]" -map 0:a? \
-            -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
-            "$out"
-            baserun="${output_folder}/v-${back_before_video}"
-      fi
-      sleep 10
-      ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/v-${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
+         echo need before.mp4
+         sleep 10
+         ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/v-${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
+         echo end of out.mp4 before.line379
+      fi 
       #A1
     ##################################################################
 
