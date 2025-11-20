@@ -426,7 +426,7 @@ cmd_create_example(){
         echo . 
       else 
 #CODE
-  
+   echo ..
       #   _code_v2
       fi 
       
