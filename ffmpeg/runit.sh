@@ -258,7 +258,6 @@ cmd_create_video_right_to_run(){
           "$out"
           export baserun="${output_folder}/frozen-code-60s-a.with-side.mp4"
           echo ..noneed-260 > ${output_folder}/line260
-          
 
                  #old -filter_complex "[1:v]setpts=PTS-STARTPTS,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
       fi
@@ -266,7 +265,6 @@ cmd_create_video_right_to_run(){
     else
        echo ..noneed-267 > ${output_folder}/line267
     fi 
-    
     
    echo "end of cmd_create_video_right_to_run "
 
@@ -324,10 +322,7 @@ cmd_before(){
          rm -f 1out.png 
          mv out.png 1out.png 
          mv out2.png out.png
-
-        #cp -a output2.jpg /mnt/c/ffmpeg/
-
-              
+        #cp -a output2.jpg /mnt/c/ffmpeg/ 
             if [ -e ${output_folder}/v-${back_before_video} ];then 
               echo .346-no-need-out.mp4 of before
             else 
@@ -360,14 +355,7 @@ cmd_before(){
                   "$out"
                   baserun="${output_folder}/v-${back_before_video}"
             fi
-
-
-
      fi 
-
-
-
-
 
       if [ -e ${output_folder}/before.mp4 ];then 
         echo .no need before.mp4
@@ -378,6 +366,8 @@ cmd_before(){
          echo end of out.mp4 before.line379
       fi 
 }
+
+
 
 cmd_after(){
           s=$(basename -- "${output_folder}" |cut -d '-' -f1)
