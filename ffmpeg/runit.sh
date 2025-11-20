@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-export ver=ver19
+export ver=ver20
 # smaller to 300 300 video2 run  
 echo $ver;sleep 3
 
@@ -292,10 +292,10 @@ cmd_create_example(){
 #BEFORE ##################################################################
    # put in right area the out/out/out.mp4 video  in the before section 
      # need to stop this -   the file out/out/out.mp4 is created before  !!!!!!!!!!!!!!!!!!!!!
-   if [ -e ${output_folder}/pic-before/out/out.png ];then 
-      echo .200
+   if [ -e ${output_folder}/pic-before ];then 
+      echo .200 no-need pib-before
    else
-     echo .202
+     echo .202 create pic-before
      places=("museum" "church" "pool" "sea" "garden" "forest" "mountain" "desert" "city" "village" "new york" "las vegas" "tokyo" "beach")
      colors=("blue" "red" "yellow" "purple" "orange" "pink" "black" "white" "gold" "silver")
      #backpics=("back-shrink1.mp4" "back-shrink2.mp4" "back-shrink3.mp4" "back-shrink4.mp4" "back-shrink5.mp4")
@@ -355,7 +355,7 @@ cmd_create_example(){
             sleep 30
           fi 
        #2 merge it with v-${back_before_video}
-          Offsets, appearance delay, and fade timing
+       #   Offsets, appearance delay, and fade timing
           X=150        # pixels from the right edge
           Y=150        # pixels from the top
           Z=1         # seconds after start to show side video
