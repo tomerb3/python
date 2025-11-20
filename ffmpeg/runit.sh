@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-export ver=ver18
+export ver=ver19
 # smaller to 300 300 video2 run  
 echo $ver;sleep 3
 
@@ -212,7 +212,7 @@ cmd_create_video_right_to_run(){
 
 
     if [ $(echo $video_text|wc -c) -gt 3 ];then 
-       echo .
+       echo . > ${output_folder}/line215
        param1=$(shuf -n 1 /home/node/tts/scripts/text-to-image-comfi/random_line1)
        param2="$param1 \" $video_text \" "
 
@@ -223,15 +223,16 @@ cmd_create_video_right_to_run(){
       cp -a $file out.png
 
       if [ -e out.mp4 ];then 
-         echo .line215 
+         echo .line215 >> ${output_folder}/line215
       else 
          #lets create out.m4 
          all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
       fi
       
       if [ -e ${output_folder}/frozen-code-60s-a.with-side.mp4 ];then 
-        echo ...line222
+        echo .. > ${output_folder}/line233
       else 
+          echo ..noneed-235 >> ${output_folder}/line235 
           # Offsets, appearance delay, and fade timing
           X=150        # pixels from the right edge
           Y=150        # pixels from the top
@@ -261,7 +262,7 @@ cmd_create_video_right_to_run(){
       fi
 
     else
-       echo ..noneed-253
+       echo ..noneed-253 >> ${output_folder}/line253 
     fi 
     
     
@@ -406,9 +407,9 @@ cmd_create_example(){
       # code run 
       
       if [ -e ${output_folder}/running-code-demo.mp4 ];then 
-        echo .
+        echo . > ${output_folder}/line410.txt
       else 
-      echo . > ${output_folder}/running-code-demo-start-304.txt
+      echo . > ${output_folder}/line410.txt
       #RUN CODE
         #code_run_vera
 
