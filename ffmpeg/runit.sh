@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
-export ver=ver23
-# hold a gign with text 
+export ver=ver24
+# un hash all 
 echo $ver;sleep 3
 
 
@@ -28,11 +28,8 @@ if [ -e /home/node/tts/scripts/ffmpeg ];then
   home=/home/node/tts/scripts/ffmpeg
 else
   home=/home/baum/src/python/ffmpeg
-#  cp -a /mnt/c/share/d/* $HOME/a/
-#  rm -rf /home/baum/src/python/ffmpeg/files
-#  cp -a $HOME/a/files /home/baum/src/python/ffmpeg/
 fi
- # home=/data
+ 
 
 cd ${output_folder}/
 touch $ver
@@ -220,15 +217,15 @@ cmd_create_video_right_to_run(){
 #    docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "$param2"
     file=$(ls -1tr *.png |tail -1)
     echo $file 
-#      rm -f out.png 
- #     cp -a $file out.png
+      rm -f out.png 
+      cp -a $file out.png
 
       if [ -e out.mp4 ];then 
          echo .line227 > ${output_folder}/line227
       else 
        echo .line229 > ${output_folder}/line229
          #lets create out.m4 
-  # all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
+   all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
       fi
        echo .line233 > ${output_folder}/line233
       if [ -e ${output_folder}/frozen-code-60s-a.with-side.mp4 ];then 
@@ -400,7 +397,7 @@ cmd_create_example(){
     else 
     #BEFORE ##################################################################
     
-    #cmd_before
+    cmd_before
     
     ##################################################################
 
@@ -417,7 +414,7 @@ cmd_create_example(){
       else 
 #CODE
    echo ..
-      #   _code_v2
+       _code_v2
       fi 
       
  
@@ -466,7 +463,7 @@ cmd_create_example(){
               echo .needfrozenrun60
                #RUN CODE FREEZE
               #  echo . > ${output_folder}/frozen0run-60s-start-325.txt
-              #  ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4
+              ${home}/ffmpeg-run.sh freeze_last_frame ${output_folder}/running-code-demo.mp4 60 ${output_folder}/frozen-run-60s.mp4
             fi 
 
 
@@ -478,7 +475,7 @@ cmd_create_example(){
         echo .needafter
                     #   echo . > ${output_folder}/after-started-333.txt
                           #check seconds for frozen-run-60s.mp4
-           #cmd_after
+           cmd_after
       fi
 
 
@@ -492,7 +489,7 @@ fi
   else 
      echo . > ${output_folder}/line499.txt
      #MASTER
-      # ${home}/ffmpeg-run.sh concat_v2 "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
+       ${home}/ffmpeg-run.sh concat_v2 "${output_folder}/master.mp4" "${output_folder}/before.mp4" "${output_folder}/output-code.mp4" ${output_folder}/running-code-demo.mp4 ${output_folder}/after.mp4
   fi 
 }
 ########################################################################################################### example
