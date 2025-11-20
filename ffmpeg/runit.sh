@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
-export ver=ver22
-# disable stuff
+export ver=ver23
+# hold a gign with text 
 echo $ver;sleep 3
 
 
@@ -215,20 +215,20 @@ cmd_create_video_right_to_run(){
     if [ $(echo $video_text|wc -c) -gt 3 ];then 
        echo .line215 > ${output_folder}/line215
        param1=$(shuf -n 1 /home/node/tts/scripts/text-to-image-comfi/random_line1)
-       param2="$param1 \" $video_text \" "
+       param2="$param1 holding a sign with text: \" $video_text \" "
 
-       docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "$param2"
+#    docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "$param2"
     file=$(ls -1tr *.png |tail -1)
     echo $file 
-      rm -f out.png 
-      cp -a $file out.png
+#      rm -f out.png 
+ #     cp -a $file out.png
 
       if [ -e out.mp4 ];then 
          echo .line227 > ${output_folder}/line227
       else 
        echo .line229 > ${output_folder}/line229
          #lets create out.m4 
-         all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
+  # all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder} "no"
       fi
        echo .line233 > ${output_folder}/line233
       if [ -e ${output_folder}/frozen-code-60s-a.with-side.mp4 ];then 
