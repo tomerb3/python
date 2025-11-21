@@ -93,4 +93,40 @@ curl -OJ http://192.168.0.10:8089/result/$JOB
 
 Use `task_type: "task2"` for the `baum` file (`file2.txt`).
 
-1 ye
+
+
+
+on n8n server: 
+ cat request-mp3-from-mcp-wsl-master.sh
+
+
+#!/bin/bash
+rm -f folder1.mp3
+echo `date`
+text1="$1"
+JOB=$(curl -s -X POST \
+  -H "Content-Type: application/json" \
+  -d "{\"task_type\": \"tts\", \"text\": \"version $1 . \"}" \
+  http://192.168.0.128:8089/task | jq -r '.job_id')
+echo "JOB $JOB"
+wait(){
+  sleep 10
+  if [ $(curl http://192.168.0.128:8089/status/$JOB |grep running |wc -l) -gt 0 ];then
+        echo 0
+   else
+        echo 10
+  fi
+}
+count=0
+while [[ $count -le 1 ]]
+do
+  echo "Count is: $count"
+  count=$(wait)
+done
+
+echo download the mp3 file :folder1.mp3 
+curl -OJ http://192.168.0.128:8089/result/$JOB
+ls -ltr
+rm -f /mnt/c/share/c/folder1.mp3
+cp -a folder1.mp3 /mnt/c/share/c/
+echo `date`
