@@ -1,0 +1,9 @@
+ docker run -d --rm \
+  -p 8089:8089 \
+  -v "$(pwd)/data:/data" \
+  -v "$HOME/src/mcp:/home/baum/src/mcp" \
+  -e "TTS_HOST_BASE=/home/baum/src/mcp" \
+  -e "TTS_SRC_DIR=/home/baum/src/tbstuff/ai/n8n/backup/n8n_data/scripts/tts/docker" \
+  -v "/var/run/docker.sock:/var/run/docker.sock" \
+  --name home-mcp \
+  home-mcp
