@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
-export ver=ver24
-# un hash all 
+export ver=ver25
+# replicate model 0.02 $
 echo $ver;sleep 3
 
 
@@ -200,7 +200,7 @@ cmd_debug_code_wsl(){
 
 ########################################################
 cmd_create_video_right_to_run(){
-    echo inside-cmd_create_video_right_to_run a1 ;sleep 5
+    echo inside-cmd_create_video_right_to_run a1 
 # 1. create the picture form comfiui in wsl2 - 
     mkdir -p ${output_folder}/out
     cd ${output_folder}/out
@@ -214,8 +214,15 @@ cmd_create_video_right_to_run(){
        param1=$(shuf -n 1 /home/node/tts/scripts/text-to-image-comfi/random_line1)
        param2="$param1 holding a sign with text: \" $video_text \" "
 
-    docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "$param2"
-    file=$(ls -1tr *.png |tail -1)
+     file=my-image.png
+     rm -f $file
+    #replicate 0.02 $ with quick model 
+    docker run --rm -e REPLICATE_API_TOKEN=$REPLICATE_API_TOKEN -v ${output_folder}/out:/app replicate1 python replicate1.py "$param2"
+    
+    # comfiui with model fustion3
+    #docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "$param2"
+    
+    #file=$(ls -1tr *.png |tail -1)
     echo $file 
       rm -f out.png 
       cp -a $file out.png
@@ -337,8 +344,8 @@ cmd_before(){
                 X=150        # pixels from the right edge
                 Y=150        # pixels from the top
                 Z=1         # seconds after start to show side video
-                K=11        # seconds on the main timeline to start fading out
-                D=2         # fade-out duration in seconds
+                K=9        # seconds on the main timeline to start fading out
+                D=1         # fade-out duration in seconds
                 base="${output_folder}/${back_before_video}"
                 side="${output_folder}/pic-before/out/out.mp4"
                 out="${output_folder}/v-${back_before_video}"
