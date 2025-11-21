@@ -282,7 +282,7 @@ cmd_create_video_right_to_run(){
 
 cmd_before(){
     echo "cmd_before"
-   if [ -e ${output_folder}/pic-before ];then 
+   if [ -e ${output_folder}/pic-before/out/out.mp4 ];then 
       echo .200 no-need pib-before
    else
      echo .202 create pic-before
