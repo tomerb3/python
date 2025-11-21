@@ -206,6 +206,7 @@ cmd_create_video_right_to_run(){
     cd ${output_folder}/out
     pwd
     cp -a /home/node/tts/scripts/text-to-image-comfi/* . 
+    cp -a /home/node/tts/scripts/replicate/* . 
 
     echo $video_text > ${output_folder}/debug_vide_text.txt
 
