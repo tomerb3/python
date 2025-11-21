@@ -60,6 +60,8 @@ def _run_task(job_id: str, task_type: str, payload: Dict[str, Any]) -> None:
             if not text:
                 raise ValueError("'text' is required for tts task")
 
+            output_file_name = payload.get("output_file_name", "folder1.mp3")
+
             # Host base path for MCP data, used both inside this container and as host path for docker -v
             base_root = Path(os.environ.get("TTS_HOST_BASE", "/home/baum/src/mcp"))
             base_dir = base_root / "folder1"
@@ -99,7 +101,7 @@ def _run_task(job_id: str, task_type: str, payload: Dict[str, Any]) -> None:
                 "--folder_name",
                 "folder1",
                 "--output_file_name",
-                "folder1.mp3",
+                output_file_name,
                 "--model_name",
                 "tts_models/multilingual/multi-dataset/xtts_v2",
                 "--speaker_wav",
@@ -122,7 +124,7 @@ def _run_task(job_id: str, task_type: str, payload: Dict[str, Any]) -> None:
                     f"(code {proc.returncode}):\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
                 )
 
-            target = base_dir / "folder1.mp3"
+            target = base_dir / output_file_name
             if not target.exists():
                 raise RuntimeError(f"Expected output file not found: {target}")
         else:
