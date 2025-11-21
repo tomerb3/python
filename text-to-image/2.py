@@ -25,6 +25,7 @@ def main() -> None:
     parser.add_argument("--smooth", action="store_true", help="Enable motion interpolation to 60fps for smoother animation")
     parser.add_argument("--zoom", type=float, default=1.2, help="Final zoom factor (>1)")
     parser.add_argument("--video-only", action="store_true", help="Skip image generation and only run ffmpeg on an existing output image")
+    parser.add_argument("--direction", choices=["center", "up", "down"], default="center")
     args = parser.parse_args()
 
     if not args.video_only:
@@ -48,8 +49,21 @@ def main() -> None:
     total_frames = max(1, int(args.duration * args.fps))
     # Exponential easing: z = exp(log(final_zoom) * t), t in [0,1]
     z_expr = f"if(eq(on,1),1,min(exp(log({args.zoom})*(on-1)/{max(1, total_frames-1)}),{args.zoom}))"
-    x_expr = "iw/2-(iw/zoom/2)"
-    y_expr = "ih/2-(ih/zoom/2)"
+
+    # Direction-dependent framing
+    if args.direction == "center":
+        x_expr = "iw/2-(iw/zoom/2)"
+        y_expr = "ih/2-(ih/zoom/2)"
+    elif args.direction == "up":
+        x_expr = "iw/2-(iw/zoom/2)"
+        y_expr = "0"
+    elif args.direction == "down":
+        x_expr = "iw/2-(iw/zoom/2)"
+        y_expr = "ih-ih/zoom"
+    else:
+        x_expr = "iw/2-(iw/zoom/2)"
+        y_expr = "ih/2-(ih/zoom/2)"
+
     s_expr = f"{w}x{h}"
 
     # Add a high-quality scaler after zoompan to reduce aliasing/jitter

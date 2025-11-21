@@ -1,7 +1,8 @@
 #!/bin/bash -x
 
 export ver=ver25
-# replicate model 0.02 $
+# zoom up down center 2.py video.sh - did not tested yet
+
 echo $ver;sleep 3
 
 
