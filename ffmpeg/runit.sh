@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
-export ver=ver29
-# replicate fix bug pic-before location
+export ver=ver30
+# scale 700 700 2 videos - ver30
 
 echo $ver;sleep 3
 
@@ -248,7 +248,7 @@ cmd_create_video_right_to_run(){
         echo .line235. > ${output_folder}/line235
       else 
           echo ..noneed-237 > ${output_folder}/line237
-          # Offsets, appearance delay, and fade timing
+          # Offsets, appearance delay, and fade timing                                                          out folder
           X=150        # pixels from the right edge
           Y=150        # pixels from the top
           Z=2         # seconds after start to show side video
@@ -264,7 +264,7 @@ cmd_create_video_right_to_run(){
           # Apply alpha fade-out on the overlay stream starting at ST seconds for D seconds
         ffmpeg -y \
           -i "$base" -i "$side" \
-          -filter_complex "[1:v]setpts=PTS-STARTPTS,scale=600:600,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1]; \
+          -filter_complex "[1:v]setpts=PTS-STARTPTS,scale=700:700,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1]; \
                  [0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
           -map "[vout]" -map 0:a? \
           -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
@@ -385,9 +385,10 @@ cmd_before(){
                 out="${output_folder}/v-${back_before_video}"
                 ST=$(( K - Z ))
                 if [ $ST -lt 0 ]; then ST=0; fi
+                #                                            pic-before folder
                 ffmpeg -y \
                   -i "$base" -i "$side" \
-                  -filter_complex "[1:v]setpts=PTS-STARTPTS,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
+                  -filter_complex "[1:v]setpts=PTS-STARTPTS,scale=700:700,format=rgba,fade=t=out:st=${ST}:d=${D}:alpha=1[v1];[0:v][v1]overlay=x='main_w-overlay_w-${X}':y='${Y}':enable='between(t,${Z},${K}+${D})'[vout]" \
                   -map "[vout]" -map 0:a? \
                   -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
                   "$out"
