@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
-export ver=ver25
-# zoom up down center 2.py video.sh - did not tested yet
+export ver=ver26
+# replicate use also for pic-before folder out.png 
 
 echo $ver;sleep 3
 
@@ -206,7 +206,10 @@ cmd_create_video_right_to_run(){
     mkdir -p ${output_folder}/out
     cd ${output_folder}/out
     pwd
+    
+    # not need i think 
     cp -a /home/node/tts/scripts/text-to-image-comfi/* . 
+    
     cp -a /home/node/tts/scripts/replicate/* . 
 
     echo $video_text > ${output_folder}/debug_vide_text.txt
@@ -298,46 +301,68 @@ cmd_before(){
     mkdir -p ${output_folder}/pic-before
     mkdir -p ${output_folder}/pic-before/out
     cd ${output_folder}/pic-before/out
+    
     HOST="192.168.0.128:7860"
     OUTFILE="out.png"
      path1=$(pwd)
-      curl -s -X POST "http://$HOST/sdapi/v1/txt2img" \
-        -H "Content-Type: application/json" \
-        -d "{
-           \"prompt\": \"$PROMPT\",
-             \"steps\": 20,
-              \"width\": 512,
-               \"height\": 512
-              }" | \
-           jq -r '.images[0]' | base64 -d > "$OUTFILE"
-        echo "Saved image to $OUTFILE"
+  
+   
+
+  # call wsl2 test2image local model 
+      # curl -s -X POST "http://$HOST/sdapi/v1/txt2img" \
+      #   -H "Content-Type: application/json" \
+      #   -d "{
+      #      \"prompt\": \"$PROMPT\",
+      #        \"steps\": 20,
+      #         \"width\": 512,
+      #          \"height\": 512
+      #         }" | \
+      #      jq -r '.images[0]' | base64 -d > "$OUTFILE"
+      #   echo "Saved image to $OUTFILE"
 
         num=$(basename -- "${output_folder}" |cut -d '-' -f1 |cut -d "#" -f1)
         colors=("blue" "red" "black" "purple")
         colorfont="${colors[$RANDOM % ${#colors[@]}]}"
 
-        ffmpeg -i out.png -vf \
-         "drawtext=text=Example $num:\
-         fontfile=/home/node/tts/fonts/Peace-Sanst.ttf:\
-         fontcolor=$colorfont:\
-         fontsize=50:\
-         bordercolor=white:\
-         borderw=3:\
-          x=120:y=250" \
-             out2.png -y
-         rm -f 1out.png 
-         mv out.png 1out.png 
-         mv out2.png out.png
-        #cp -a output2.jpg /mnt/c/ffmpeg/ 
+       # need here replicate use model to create picture with text like Example 1 , "Example $num"
+
+      cp -a /home/node/tts/scripts/replicate/* . 	
+	    param1=$(shuf -n 1 /home/node/tts/scripts/text-to-image-comfi/random_line1)
+      param2="$param1 holding a sign with text: \" Example $num \" "
+	    file=my-image.png
+      rm -f $file
+	    docker run --rm -e REPLICATE_API_TOKEN=$REPLICATE_API_TOKEN -v ${output_folder}/out:/app replicate1 python replicate1.py "$param2"
+	    echo $file 
+      rm -f out.png 
+      cp -a $file out.png
+
+      # write text over the out.png like                  Example 1
+        
+        # ffmpeg -i out.png -vf \
+        #  "drawtext=text=Example $num:\
+        #  fontfile=/home/node/tts/fonts/Peace-Sanst.ttf:\
+        #  fontcolor=$colorfont:\
+        #  fontsize=50:\
+        #  bordercolor=white:\
+        #  borderw=3:\
+        #   x=120:y=250" \
+        #      out2.png -y
+        #  rm -f 1out.png 
+        #  mv out.png 1out.png 
+        #  mv out2.png out.png
+
+
+        
             if [ -e ${output_folder}/v-${back_before_video} ];then 
-              echo .346-no-need-out.mp4 of before
+              echo "348-no-need-create-out.mp4-for-pic-before"
             else 
-            echo 348 create out.mp4 of before
+              echo "348-create-out.mp4-for-pic-before"
             # 1. compilie   ${output_folder}/pic-before/out/out.mp4
                 cd ${output_folder}/pic-before
                 if [ -e out/out.mp4 ];then 
-                echo . 
+                echo "363-no-need-create-out.mp4 pic-before" 
                 else 
+                  echo "365-need-create-out.mp4 pic-before" 
                   all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder}/pic-before "no"
                   sleep 30
                 fi 
@@ -361,6 +386,9 @@ cmd_before(){
                   "$out"
                   baserun="${output_folder}/v-${back_before_video}"
             fi
+
+
+
      fi 
 
       if [ -e ${output_folder}/before.mp4 ];then 
