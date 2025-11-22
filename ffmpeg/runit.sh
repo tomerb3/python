@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
-export ver=ver27
-# replicate save money
+export ver=ver29
+# replicate fix bug pic-before location
 
 echo $ver;sleep 3
 
@@ -338,7 +338,7 @@ cmd_before(){
             param2="$param1 holding a sign with text: \" Example $num \" "
             file=my-image.png
             rm -f $file
-            docker run --rm -e REPLICATE_API_TOKEN=$REPLICATE_API_TOKEN -v ${output_folder}/out:/app replicate1 python replicate1.py "$param2"
+            docker run --rm -e REPLICATE_API_TOKEN=$REPLICATE_API_TOKEN -v ${output_folder}/pic-before/out:/app replicate1 python replicate1.py "$param2"
             echo $file 
             rm -f out.png 
             cp -a $file out.png
