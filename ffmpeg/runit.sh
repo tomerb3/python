@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
-export ver=ver26
-# replicate use also for pic-before folder out.png 
+export ver=ver27
+# replicate save money
 
 echo $ver;sleep 3
 
@@ -218,19 +218,23 @@ cmd_create_video_right_to_run(){
        echo .line215 > ${output_folder}/line215
        param1=$(shuf -n 1 /home/node/tts/scripts/text-to-image-comfi/random_line1)
        param2="$param1 holding a sign with text: \" $video_text \" "
-
-     file=my-image.png
-     rm -f $file
-    #replicate 0.02 $ with quick model 
-    docker run --rm -e REPLICATE_API_TOKEN=$REPLICATE_API_TOKEN -v ${output_folder}/out:/app replicate1 python replicate1.py "$param2"
+       file=my-image.png
     
+       if [ -e out.png ];then 
+       echo .
+       else
+        rm -f $file
+        #replicate 0.02 $ with quick model 
+        docker run --rm -e REPLICATE_API_TOKEN=$REPLICATE_API_TOKEN -v ${output_folder}/out:/app replicate1 python replicate1.py "$param2"
+        echo $file 
+        rm -f out.png 
+        cp -a $file out.png
+      fi
     # comfiui with model fustion3
     #docker run --rm -v ${output_folder}/out:/app comfi1-3.10 python comfi.py --prompt "$param2"
     
     #file=$(ls -1tr *.png |tail -1)
-    echo $file 
-      rm -f out.png 
-      cp -a $file out.png
+
 
       if [ -e out.mp4 ];then 
          echo .line227 > ${output_folder}/line227
@@ -326,16 +330,19 @@ cmd_before(){
 
        # need here replicate use model to create picture with text like Example 1 , "Example $num"
 
-      cp -a /home/node/tts/scripts/replicate/* . 	
-	    param1=$(shuf -n 1 /home/node/tts/scripts/text-to-image-comfi/random_line1)
-      param2="$param1 holding a sign with text: \" Example $num \" "
-	    file=my-image.png
-      rm -f $file
-	    docker run --rm -e REPLICATE_API_TOKEN=$REPLICATE_API_TOKEN -v ${output_folder}/out:/app replicate1 python replicate1.py "$param2"
-	    echo $file 
-      rm -f out.png 
-      cp -a $file out.png
-
+      if [ -e out.png ];then 
+        echo .
+        else 
+            cp -a /home/node/tts/scripts/replicate/* . 	
+            param1=$(shuf -n 1 /home/node/tts/scripts/text-to-image-comfi/random_line1)
+            param2="$param1 holding a sign with text: \" Example $num \" "
+            file=my-image.png
+            rm -f $file
+            docker run --rm -e REPLICATE_API_TOKEN=$REPLICATE_API_TOKEN -v ${output_folder}/out:/app replicate1 python replicate1.py "$param2"
+            echo $file 
+            rm -f out.png 
+            cp -a $file out.png
+       fi
       # write text over the out.png like                  Example 1
         
         # ffmpeg -i out.png -vf \
