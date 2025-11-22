@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
-export ver=ver30
-# scale 700 700 2 videos - ver30
+export ver=ver31
+# ver31 fix bug before
 
 echo $ver;sleep 3
 
@@ -289,10 +289,16 @@ cmd_create_video_right_to_run(){
 
 cmd_before(){
     echo "cmd_before"
-   if [ -e ${output_folder}/pic-before/out/out.mp4 ];then 
-      echo .200 no-need pib-before
+   
+   #if0   pic-before  out.mp4 
+   if [ -e ${output_folder}/v-${back_before_video} ];then
+      echo line295 no-need v-${back_before_video} 
    else
-     echo .202 create pic-before
+      echo line297 need v-${back_before_video} 
+ 
+ 
+ 
+     echo section relate to  create pic-before
      places=("museum" "church" "pool" "sea" "garden" "forest" "mountain" "desert" "city" "village" "new york" "las vegas" "tokyo" "beach")
      colors=("blue" "red" "yellow" "purple" "orange" "pink" "black" "white" "gold" "silver")
      #backpics=("back-shrink1.mp4" "back-shrink2.mp4" "back-shrink3.mp4" "back-shrink4.mp4" "back-shrink5.mp4")
@@ -330,8 +336,8 @@ cmd_before(){
 
        # need here replicate use model to create picture with text like Example 1 , "Example $num"
 
-      if [ -e out.png ];then 
-        echo .
+        if [ -e out.png ];then 
+            echo .
         else 
             cp -a /home/node/tts/scripts/replicate/* . 	
             param1=$(shuf -n 1 /home/node/tts/scripts/text-to-image-comfi/random_line1)
@@ -342,7 +348,7 @@ cmd_before(){
             echo $file 
             rm -f out.png 
             cp -a $file out.png
-       fi
+        fi
       # write text over the out.png like                  Example 1
         
         # ffmpeg -i out.png -vf \
@@ -359,13 +365,13 @@ cmd_before(){
         #  mv out2.png out.png
 
 
-        
-            if [ -e ${output_folder}/v-${back_before_video} ];then 
-              echo "348-no-need-create-out.mp4-for-pic-before"
-            else 
-              echo "348-create-out.mp4-for-pic-before"
+
+
+
             # 1. compilie   ${output_folder}/pic-before/out/out.mp4
                 cd ${output_folder}/pic-before
+            
+            
                 if [ -e out/out.mp4 ];then 
                 echo "363-no-need-create-out.mp4 pic-before" 
                 else 
@@ -373,6 +379,7 @@ cmd_before(){
                   all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder}/pic-before "no"
                   sleep 30
                 fi 
+
             #2 merge it with v-${back_before_video}
             #   Offsets, appearance delay, and fade timing
                 X=150        # pixels from the right edge
@@ -384,7 +391,7 @@ cmd_before(){
                 side="${output_folder}/pic-before/out/out.mp4"
                 out="${output_folder}/v-${back_before_video}"
                 ST=$(( K - Z ))
-                if [ $ST -lt 0 ]; then ST=0; fi
+                    if [ $ST -lt 0 ]; then ST=0; fi
                 #                                            pic-before folder
                 ffmpeg -y \
                   -i "$base" -i "$side" \
@@ -393,11 +400,17 @@ cmd_before(){
                   -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p -c:a copy \
                   "$out"
                   baserun="${output_folder}/v-${back_before_video}"
-            fi
+     
+     
 
 
-
+     
+     
      fi 
+     #if0
+
+
+
 
       if [ -e ${output_folder}/before.mp4 ];then 
         echo .no need before.mp4
