@@ -377,7 +377,7 @@ cmd_before(){
                 else 
                   echo "365-need-create-out.mp4 pic-before" 
                   all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder}/pic-before "no"
-                  sleep 30
+                  sleep 2
                 fi 
 
             #2 merge it with v-${back_before_video}
