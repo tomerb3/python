@@ -56,7 +56,7 @@ code_run_verb(){
 cmd_filter1_v2_debug(){
 
  echo "only code_a line39 from runit.sh cmd_filter1_v2_debug   call  ffmpeg-run.sh filter_script_v3"
- sleep 3
+ sleep 1
  #1. create code_a with text code effect. trim it at the second effect done   - code_a.mp4 
      /app/ffmpeg-run.sh filter_script_v3 ${output_folder}/${back_45_video} ${output_folder}/files/filters.txt ${output_folder}/code_a.mp4 
      cd ${output_folder}
@@ -87,10 +87,10 @@ cmd_filter1_v2(){
     -f lavfi -t "$D" -i anullsrc=r=48000:cl=stereo \
     -shortest -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k \
      "${output_folder}/frozen-code-60s-a.mp4"
-  sleep 2
+  sleep 1
   #5 concat and create code_d.mp4
   /app/ffmpeg-run.sh concat "${output_folder}/code_d.mp4" "${output_folder}/code_b.mp4" "${output_folder}/frozen-code-60s-a.mp4" 
-    sleep 2
+    sleep 1
   cd "${output_folder}"
   MP3="code.mp3"
   MP4="code_b.mp4"
@@ -110,7 +110,7 @@ seconds1=$(( 4 + $delta ))
 echo seconds to wait after mp3 voice end $seconds1
   #6 add voice sound  output_code.mp4     put 5 seconds after code talk  need to check if this work                                                                                      seconds after silense 
   /app/ffmpeg-run.sh mix_talk ${output_folder}/code_d.mp4 ${output_folder}/code.mp3 ${output_folder}/output-code.mp4 1.8 0.5 $seconds1
-  sleep 2
+  sleep 1
 }
 ########################################################  end of cmd_filter1_v2 
 
@@ -377,7 +377,7 @@ cmd_before(){
                 else 
                   echo "365-need-create-out.mp4 pic-before" 
                   all=no /home/node/tts/scripts/n8n/video.sh "no-need" ${output_folder}/pic-before "no"
-                  sleep 2
+                  sleep 1
                 fi 
 
             #2 merge it with v-${back_before_video}
@@ -416,7 +416,7 @@ cmd_before(){
         echo .no need before.mp4
       else 
          echo need before.mp4
-         sleep 10
+         sleep 1
          ${home}/ffmpeg-run.sh one_mp3 ${output_folder}/v-${back_before_video} ${output_folder}/before.mp3 ${output_folder}/before.mp4
          echo end of out.mp4 before.line379
       fi 
