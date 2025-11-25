@@ -1,0 +1,6 @@
+this process will run another:   docker run for tts
+
+make sure tts docker image is built
+
+cd ~/src/tbstuff/ai/n8n/backup/n8n_data/scripts/tts/docker/ 
+./buildnow

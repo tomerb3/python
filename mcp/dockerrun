@@ -1,4 +1,4 @@
- docker run -d --rm \
+ docker run -d \
   -p 8089:8089 \
   -v "$(pwd)/data:/data" \
   -v "$HOME/src/mcp:/home/baum/src/mcp" \
