@@ -4,3 +4,23 @@ make sure tts docker image is built
 
 cd ~/src/tbstuff/ai/n8n/backup/n8n_data/scripts/tts/docker/ 
 ./buildnow
+
+also make sure in 
+
+~/src/mcp/
+
+you have: these files 
+
+
+ ~/src/mcp/ find .
+.
+./run_tts.py
+./send-command-tts
+./run
+./folder1
+./folder1/run_tts.py
+./folder1/video_script.txt
+./folder1/example
+./folder1/example/example.wav
+./example
+./example/example.wav
