@@ -2,6 +2,11 @@
 #! /bin/bash
 set -x 
 
+pica=$(ls -1tr /home/baum/Downloads/ |grep png |tail -2 |head -1 ) 
+
+picb=$(ls -1tr /home/baum/Downloads/ |grep png |tail -2 |tail -1 ) 
+
+export text="She died when I was four… years later at a cancer charity race, a stranger turned around and it was her face"
 
 
 echo a
@@ -17,10 +22,10 @@ echo b
 
 func1(){
     local input_mp4="/mnt/c/share/reel1.mp4"
-    local pic1="/mnt/c/share/pic1.png"
-    local pic2="/mnt/c/share/pic2.png"
+    local pic1="/home/baum/Downloads/$pica"
+    local pic2="/home/baum/Downloads/$picb"
     local output_mp4="/mnt/c/share/out.mp4"
-    local text="We thought this motel was empty… until an old woman appeared from nowhere—and seconds later, my nose exploded with blood."
+    
     local font_file="/mnt/c/share/font1.otf"
     local font_color="white"
     local font_size=48
@@ -67,7 +72,7 @@ func1(){
                         [basev]drawbox=x=0:y=0:w=iw:h=ih/2:color=black@1:t=fill[baseb]; \
                         [pseq]scale=iw:iw*9/16[p16]; \
                         [baseb][p16]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2[ovl]; \
-                        [ovl]drawtext=fontfile=$font_file:text='$wrapped_text_escaped':fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=50[vout]; \
+                        [ovl]drawtext=fontfile=$font_file:text='$wrapped_text_escaped':fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2+60:y=50[vout]; \
                         [0:a]atrim=0:5,asetpts=PTS-STARTPTS[aout]" \
         -map "[vout]" -map "[aout]" \
         -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "$output_mp4"
