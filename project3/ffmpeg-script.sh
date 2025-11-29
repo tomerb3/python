@@ -95,10 +95,10 @@ func1(){
                         [basev]drawbox=x=0:y=0:w=iw:h=ih/2:color=black@1:t=fill[baseb]; \
                         [pseq]scale=iw:iw*9/16[p16]; \
                         [baseb][p16]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2[ovl]; \
-                        [ovl]drawtext=fontfile=$font_file:text=${line1@Q}:fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=40[g1]; \
-                        [g1]drawtext=fontfile=$font_file:text=${line2@Q}:fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=40+$font_size+8[g2]; \
-                        [g2]drawtext=fontfile=$font_file:text=${line3@Q}:fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=40+2*($font_size+8)[g3]; \
-                        [g3]drawtext=fontfile=$font_file:text=${line4@Q}:fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=40+3*($font_size+8)[vout]; \
+                        [ovl]drawtext=fontfile=$font_file:text=${line1@Q}:fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=120[g1]; \
+                        [g1]drawtext=fontfile=$font_file:text=${line2@Q}:fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=120+$font_size+8[g2]; \
+                        [g2]drawtext=fontfile=$font_file:text=${line3@Q}:fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=120+2*($font_size+8)[g3]; \
+                        [g3]drawtext=fontfile=$font_file:text=${line4@Q}:fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=120+3*($font_size+8)[vout]; \
                         [0:a]atrim=0:5,asetpts=PTS-STARTPTS[aout]" \
         -map "[vout]" -map "[aout]" \
         -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "$output_mp4"
