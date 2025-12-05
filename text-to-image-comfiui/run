@@ -1,0 +1,2 @@
+
+ docker run --rm -v /home/baum/src/n8n/comfiui:/app comfi1-3.10 python comfi.py --prompt "a man stand in new york with blonde hair near red dog with running people with laptop with code "
