@@ -1,0 +1,11 @@
+docker run -ti  -v /mnt/c/share:/app/share -v $HOME/.cache/huggingface:/root/.cache/huggingface/ -v /mnt/e/data/ai/models:/app/models dreamomni2 inference_edit.py \
+    --input_img_path "/app/share/pic.png" "/app/share/pic1.jpg" \
+    --input_instruction "Make the woman from the second image stand on the road in the first image." \
+    --output_path "/app/share/output.png"
+
+
+
+    #-e HF_HUB_CACHE=/app/models \  
+#-e HUGGINGFACE_HUB_TOKEN=$hf_token \
+  
+  

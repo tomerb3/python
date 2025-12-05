@@ -1,0 +1,4 @@
+docker build -t dreamomni2gpu .
+
+# inside container check 
+#python -c "import torch; print('cuda available:', torch.cuda.is_available()); print('device count:', torch.cuda.device_count())"

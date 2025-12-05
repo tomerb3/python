@@ -1,0 +1,13 @@
+timm
+ujson
+peft
+datasets
+transformers
+opencv-python
+qwen-vl-utils
+lmdb
+diffusers
+numpy
+protobuf>=4.25.0
+typing_extensions>=4.5.0
+sentencepiece

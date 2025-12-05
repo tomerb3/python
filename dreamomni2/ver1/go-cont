@@ -1,0 +1,2 @@
+docker run -ti --entrypoint=/bin/bash -v /mnt/c/share:/app/share -v $HOME/.cache/huggingface:/root/.cache/huggingface/ -v /mnt/e/data/ai/models:/app/models dreamomni2 
+
