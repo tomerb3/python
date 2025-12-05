@@ -286,8 +286,8 @@ cmd_create_video_right_to_run(){
 ###
 cmd_reel_from_2_pic(){
     echo start cmd_reel_from_2_pic
-      pica=$(ls -1tr  |grep png |tail -2 |head -1 ) 
-      picb=$(ls -1tr  |grep png |tail -2 |tail -1 ) 
+      pica=$(ls -1tr $output_folder/comfiui/ |grep png |tail -2 |head -1 ) 
+      picb=$(ls -1tr $output_folder/comfiui/ |grep png |tail -2 |tail -1 ) 
      export text="${hook}"
      #export text="I was just peeing between classes when a stranger crawled under my stall and turned a normal school day into horror"
 
