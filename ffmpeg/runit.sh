@@ -291,7 +291,7 @@ cmd_reel_from_2_pic(){
      export text="${hook}"
      #export text="I was just peeing between classes when a stranger crawled under my stall and turned a normal school day into horror"
 
-
+set -x
      #need random 
     #local input_mp4="/home/node/tts/back_comfiui/reel2.mp4"
     local pic1="$output_folder/$pica"
