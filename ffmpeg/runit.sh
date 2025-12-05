@@ -294,8 +294,8 @@ cmd_reel_from_2_pic(){
 set -x
      #need random 
     #local input_mp4="/home/node/tts/back_comfiui/reel2.mp4"
-    local pic1="$output_folder/$pica"
-    local pic2="$output_folder/$picb"
+    local pic1="$output_folder/comfiui/$pica"
+    local pic2="$output_folder/comfiui/$picb"
 
     local n=$(( RANDOM % 5 + 1 ))
     local input_mp4="/home/node/tts/back_comfiui/reel${n}.mp4"
