@@ -282,6 +282,12 @@ cmd_create_video_right_to_run(){
    echo "end of cmd_create_video_right_to_run "
 
 }
+
+
+cmd_reel_from_video_green_and_pic(){
+  echo 'new'
+}
+
 ########################################################  end of cmd_create_video_right_to_run
 ###
 cmd_reel_from_2_pic(){
