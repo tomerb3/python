@@ -26,3 +26,11 @@ prompt for lady
 https://www.reddit.com/r/CreatorsAI/comments/1pljbca/prompts_in_comments/
 
 files are in /home/node/tts/back_comfiui
+
+ai will need to give me json with : 
+
+1. caption
+2. hook
+3. file mp4
+4. prompt for the background for the mp4 file he choosen
+
