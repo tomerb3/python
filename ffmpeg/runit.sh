@@ -366,8 +366,18 @@ cmd_reel_from_video_green_and_pic(){
     local inputs=()
     inputs+=(-i "$input_video")
     inputs+=(-loop 1 -i "$input_pic")
-    
+
     local audio_map="-map 0:a"
+
+    # Support both:
+    #   --add_sound=true --mp3=/path/file.mp3
+    # and shorthand:
+    #   --add_sound=/path/file.mp3
+    if [ "$add_sound" != "true" ] && [ "$add_sound" != "false" ] && [ -z "$mp3_file" ]; then
+        mp3_file="$add_sound"
+        add_sound="true"
+    fi
+
     if [ "$add_sound" == "true" ] && [ -n "$mp3_file" ]; then
         inputs+=(-i "$mp3_file")
         audio_map="-map 2:a"
@@ -397,7 +407,7 @@ cmd_reel_from_video_green_and_pic(){
     
     ffmpeg -y \
         "${inputs[@]}" \
-        -filter_complex "[0:v]chromakey=0x00FF00:0.1:0.2[fg]; \
+        -filter_complex "[0:v]chromakey=0x00FF00:0.15:0.1[fg]; \
                          [1:v]scale=720:1280[bg]; \
                          [bg][fg]overlay=(W-w)/2:(H-h)/2:shortest=1[ovl]; \
                          [ovl]drawbox=x=0:y=0:w=iw:h=${bar_h}:color=black@1:t=fill[ob1]; \
