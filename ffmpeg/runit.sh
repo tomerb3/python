@@ -285,7 +285,132 @@ cmd_create_video_right_to_run(){
 
 
 cmd_reel_from_video_green_and_pic(){
-  echo 'new'
+    echo "start cmd_reel_from_video_green_and_pic"
+    
+    # Defaults
+    local add_sound="false"
+    local mp3_file=""
+    local change_time=0
+    local input_video="/home/baum/Downloads/Video-247.mp4"
+    local input_pic="/home/baum/Downloads/1.png"
+    local output_video="$output_folder/reel_green.mp4"
+    local font_color="red"
+    local border_color="black"
+    local border_width=2
+    
+    # Argument parsing
+    for i in "$@"; do
+        case $i in
+            --add_sound=*)
+                add_sound="${i#*=}"
+                ;;
+            --mp3=*)
+                mp3_file="${i#*=}"
+                ;;
+            --change_time=*)
+                change_time="${i#*=}"
+                ;;
+            --font_color=*)
+                font_color="${i#*=}"
+                ;;
+            --border_color=*)
+                border_color="${i#*=}"
+                ;;
+            --border_width=*)
+                border_width="${i#*=}"
+                ;;
+            *)
+                ;;
+        esac
+    done
+
+    # Font settings
+    #local font_file="/home/node/tts/back_comfiui/font1.otf"
+    local font_file="/home/baum/Downloads/font1.otf"
+    # font_color, border_color, border_width are set above via defaults or args
+    local font_size=40
+
+    # Text wrapping logic (same as cmd_reel_from_2_pic)
+    export text="${hook}"
+    local words=()
+    for w in $text; do
+        words+=("$w")
+    done
+
+    local max_per_line=5
+    local line1=""
+    local line2=""
+    local line3=""
+    local line4=""
+    local line5=""
+    local line6=""
+
+    local idx=0
+    local total=${#words[@]}
+    while [ $idx -lt $total ]; do
+        local line_index=$(( idx / max_per_line ))
+        local word=${words[$idx]}
+        case $line_index in
+            0) line1="${line1:+$line1 }$word" ;;
+            1) line2="${line2:+$line2 }$word" ;;
+            2) line3="${line3:+$line3 }$word" ;;
+            3) line4="${line4:+$line4 }$word" ;;
+            4) line5="${line5:+$line5 }$word" ;;
+            5) line6="${line6:+$line6 }$word" ;;
+        esac
+        idx=$(( idx + 1 ))
+    done
+
+    # Prepare inputs
+    local inputs=()
+    inputs+=(-i "$input_video")
+    inputs+=(-loop 1 -i "$input_pic")
+    
+    local audio_map="-map 0:a"
+    if [ "$add_sound" == "true" ] && [ -n "$mp3_file" ]; then
+        inputs+=(-i "$mp3_file")
+        audio_map="-map 2:a"
+    fi
+
+    # Duration logic
+    local duration_flag=""
+    if [ "$change_time" -ne 0 ]; then
+        duration_flag="-t $change_time"
+    else
+        # If not changing time, we usually want the shortest of video/audio which is the video effectively (pic is looped)
+        # But we need to ensure we don't loop forever.
+        duration_flag="-shortest" 
+    fi
+
+    # Filter complex
+    # 1. Color key green screen on input 0 (assuming green ~0x00FF00). using chromakey typically better options exist but basic is:
+    #    chromakey=0x00FF00:0.1:0.2
+    # 2. Scale pic (input 1) to match video resolution (Input 0)
+    # 3. Overlay video on pic
+    # 4. Draw text
+    
+    # Note: Assuming input video resolution for scaling background. Let's assume standard 720x1280 or we use standard scale.
+    # The reference used scale=w=720:h=576[p16] for the PIP.
+    # Here background (pic) is at back. Video is green screen.
+    # We should scale input 1 (pic) to match input 0 (video) size.
+    
+    ffmpeg -y \
+        "${inputs[@]}" \
+        -filter_complex "[0:v]chromakey=0x00FF00:0.1:0.2[fg]; \
+                         [1:v]scale=720:1280[bg]; \
+                         [bg][fg]overlay=(W-w)/2:(H-h)/2:shortest=1[ovl]; \
+                         [ovl]drawtext=fontfile=$font_file:text=${line1@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120[g1]; \
+                         [g1]drawtext=fontfile=$font_file:text=${line2@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120+$font_size+8[g2]; \
+                         [g2]drawtext=fontfile=$font_file:text=${line3@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120+2*($font_size+8)[g3]; \
+                         [g3]drawtext=fontfile=$font_file:text=${line4@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120+3*($font_size+8)[g4]; \
+                         [g4]drawtext=fontfile=$font_file:text=${line5@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120+4*($font_size+8)[g5]; \
+                         [g5]drawtext=fontfile=$font_file:text=${line6@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120+5*($font_size+8)[vout]" \
+        -map "[vout]" $audio_map \
+        -c:v libx264 -pix_fmt yuv420p -c:a aac \
+        $duration_flag \
+        "$output_video"
+
+    echo "end cmd_reel_from_video_green_and_pic created $output_video"
 }
 
 ########################################################  end of cmd_create_video_right_to_run
@@ -780,4 +905,4 @@ cmd_back_left_video(){
   fi 
 }
 
-cmd_$1
+cmd_$1 "${@:2}"
