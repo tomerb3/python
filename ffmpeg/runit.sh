@@ -329,6 +329,7 @@ cmd_reel_from_video_green_and_pic(){
     local font_file="/home/baum/Downloads/font1.otf"
     # font_color, border_color, border_width are set above via defaults or args
     local font_size=40
+    local bar_h=240
 
     # Text wrapping logic (same as cmd_reel_from_2_pic)
     export text="${hook}"
@@ -399,12 +400,14 @@ cmd_reel_from_video_green_and_pic(){
         -filter_complex "[0:v]chromakey=0x00FF00:0.1:0.2[fg]; \
                          [1:v]scale=720:1280[bg]; \
                          [bg][fg]overlay=(W-w)/2:(H-h)/2:shortest=1[ovl]; \
-                         [ovl]drawtext=fontfile=$font_file:text=${line1@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120[g1]; \
-                         [g1]drawtext=fontfile=$font_file:text=${line2@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120+$font_size+8[g2]; \
-                         [g2]drawtext=fontfile=$font_file:text=${line3@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120+2*($font_size+8)[g3]; \
-                         [g3]drawtext=fontfile=$font_file:text=${line4@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120+3*($font_size+8)[g4]; \
-                         [g4]drawtext=fontfile=$font_file:text=${line5@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120+4*($font_size+8)[g5]; \
-                         [g5]drawtext=fontfile=$font_file:text=${line6@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=120+5*($font_size+8)[vout]" \
+                         [ovl]drawbox=x=0:y=0:w=iw:h=${bar_h}:color=black@1:t=fill[ob1]; \
+                         [ob1]drawbox=x=0:y=ih-${bar_h}:w=iw:h=${bar_h}:color=black@1:t=fill[ob2]; \
+                         [ob2]drawtext=fontfile=$font_file:text=${line1@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=40[g1]; \
+                         [g1]drawtext=fontfile=$font_file:text=${line2@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=40+$font_size+8[g2]; \
+                         [g2]drawtext=fontfile=$font_file:text=${line3@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=40+2*($font_size+8)[g3]; \
+                         [g3]drawtext=fontfile=$font_file:text=${line4@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=40+3*($font_size+8)[g4]; \
+                         [g4]drawtext=fontfile=$font_file:text=${line5@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=40+4*($font_size+8)[g5]; \
+                         [g5]drawtext=fontfile=$font_file:text=${line6@Q}:fontcolor=$font_color:fontsize=$font_size:bordercolor=$border_color:borderw=$border_width:x=(w-text_w)/2:y=40+5*($font_size+8)[vout]" \
         -map "[vout]" $audio_map \
         -c:v libx264 -pix_fmt yuv420p -c:a aac \
         $duration_flag \
