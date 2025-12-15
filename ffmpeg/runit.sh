@@ -283,6 +283,7 @@ cmd_create_video_right_to_run(){
 
 }
 
+# output_folder=/home/baum/src/python/ffmpeg/output_test hook='Test hook text tomer baum test4 hani dodo lulu mama munu tomer baum lala yosi guru dodo doni Param Test' /home/baum/src/python/ffmpeg/runit.sh reel_from_video_green_and_pic --font_color=white --border_color=white --border_width=1 --change_time=3 --fg_opacity=1.0 --fg_scale=1 --key_similarity=0.25 --key_blend=0.08
 
 cmd_reel_from_video_green_and_pic(){
     echo "start cmd_reel_from_video_green_and_pic"
@@ -291,12 +292,15 @@ cmd_reel_from_video_green_and_pic(){
     local add_sound="false"
     local mp3_file=""
     local change_time=0
-    local input_video="/home/baum/Downloads/Video-247.mp4"
+    local input_video="/home/baum/Downloads/homelander_in_shock.mp4"
     local input_pic="/home/baum/Downloads/1.png"
     local output_video="$output_folder/reel_green.mp4"
     local font_color="red"
     local border_color="black"
     local border_width=2
+    local key_color="0x00FF00"
+    local key_similarity="0.15"
+    local key_blend="0.10"
     
     # Argument parsing
     for i in "$@"; do
@@ -318,6 +322,15 @@ cmd_reel_from_video_green_and_pic(){
                 ;;
             --border_width=*)
                 border_width="${i#*=}"
+                ;;
+            --key_color=*)
+                key_color="${i#*=}"
+                ;;
+            --key_similarity=*)
+                key_similarity="${i#*=}"
+                ;;
+            --key_blend=*)
+                key_blend="${i#*=}"
                 ;;
             *)
                 ;;
@@ -407,7 +420,7 @@ cmd_reel_from_video_green_and_pic(){
     
     ffmpeg -y \
         "${inputs[@]}" \
-        -filter_complex "[0:v]chromakey=0x00FF00:0.15:0.1[fg]; \
+        -filter_complex "[0:v]chromakey=${key_color}:${key_similarity}:${key_blend},format=rgba[fg]; \
                          [1:v]scale=720:1280[bg]; \
                          [bg][fg]overlay=(W-w)/2:(H-h)/2:shortest=1[ovl]; \
                          [ovl]drawbox=x=0:y=0:w=iw:h=${bar_h}:color=black@1:t=fill[ob1]; \
