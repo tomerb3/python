@@ -1,0 +1,5 @@
+https://stackoverflow.com/questions/50355577/scraping-wikipedia-tables-with-python-selectively
+
+docker build -t wiki-scrape:py310 .
+
+docker run --rm wiki-scrape:py310 -p https://en.wikipedia.org/wiki/List_of_reported_UFO_sightings
