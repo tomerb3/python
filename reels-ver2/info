@@ -1,0 +1,53 @@
+only_mid_text(){
+bash script.sh render_slide1 \
+  --png  /mnt/c/share/1/$1 \
+  --out  /mnt/c/share/1/$2 \
+  --font  /mnt/c/share/1/KGLoveMolly.ttf \
+  --mid-text "$3" --words-per-line $4 \
+  --mid-y-offset -$5 \
+  --top-text "TOP TITLE HERE" \
+  --bot-text "BOTTOM CTA" 
+}
+  #TOP_H=220 MID_Y=220 MID_H=1480 BOT_Y=1700 BOT_H=220 \
+#bash script.sh render_slide1 --png file1.png --out out/slide1.mp4 --font ./path/to/font.ttf
+
+
+if_need_pic(){
+
+    bash script.sh render_slide1 \
+  --png  /mnt/c/share/1/page1.png \
+  --out  /mnt/c/share/1/slide1.mp4 \
+  --font /mnt/c/share/1/KGLoveMolly.ttf \
+  --mid-img /mnt/c/share/1/aa.png \
+  --mid-img-w 900 --mid-img-h 900 
+  --mid-text "pov need to think of a prompt" --words-per-line 4
+}
+
+tran(){
+    ffmpeg -y \
+  -i slide1.mp4 -i slide2.mp4 -i slide3.mp4 -i slide4.mp4 -i aa.mp3 \
+  -filter_complex "\
+    [0:v][1:v]xfade=transition=slideleft:duration=1:offset=1[v12]; \
+    [v12][2:v]xfade=transition=slideleft:duration=1:offset=2[v123]; \
+    [v123][3:v]xfade=transition=slideleft:duration=1:offset=3[v]; \
+    [4:a]atrim=0:5,asetpts=N/SR/TB[a] \
+  " \
+  -map "[v]" -map "[a]" \
+  -c:v libx264 -pix_fmt yuv420p -r 30 \
+  -c:a aac -shortest \
+  master.mp4
+}
+
+a(){
+if_need_pic
+
+only_mid_text page2.png slide2.mp4 "Tomer Baum" 4 10
+
+only_mid_text page3.png slide3.mp4 "kuku kuku" 4 10
+
+only_mid_text page4.png slide4.mp4 "yair aviv baum ariel orit tomer" 4 80
+}
+
+cd /mnt/c/share/1/
+pwd 
+tran
