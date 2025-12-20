@@ -237,3 +237,106 @@
    shift
    render_slide1 "$@"
  fi
+
+ merge_master() {
+   local slide1=""
+   local slide2=""
+   local slide3=""
+   local slide4=""
+   local audio=""
+   local out=""
+
+   local hold_sec=1.7
+   local trans_sec=0.7
+
+   local mid_x=${MID_X}
+   local mid_y=${MID_Y}
+   local mid_w=${MID_W}
+   local mid_h=${MID_H}
+
+   while [[ $# -gt 0 ]]; do
+     case "$1" in
+       --slide1) slide1="$2"; shift 2;;
+       --slide2) slide2="$2"; shift 2;;
+       --slide3) slide3="$2"; shift 2;;
+       --slide4) slide4="$2"; shift 2;;
+       --audio) audio="$2"; shift 2;;
+       --out) out="$2"; shift 2;;
+
+       --hold) hold_sec="$2"; shift 2;;
+       --trans) trans_sec="$2"; shift 2;;
+       --mid-x) mid_x="$2"; shift 2;;
+       --mid-y) mid_y="$2"; shift 2;;
+       --mid-w) mid_w="$2"; shift 2;;
+       --mid-h) mid_h="$2"; shift 2;;
+
+       *) echo "unknown arg: $1" >&2; return 2;;
+     esac
+   done
+
+   if [[ -z "${slide1}" || -z "${slide2}" || -z "${slide3}" || -z "${slide4}" || -z "${audio}" || -z "${out}" ]]; then
+     echo "merge_master requires --slide1 --slide2 --slide3 --slide4 --audio --out" >&2
+     return 2
+   fi
+
+   if ! require_cmd ffmpeg; then
+     echo "ffmpeg not found in PATH" >&2
+     return 127
+   fi
+
+   local seg
+   seg=$(awk -v h="${hold_sec}" -v t="${trans_sec}" 'BEGIN{printf "%.6f", h+t}')
+   local total
+   total=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", (3*seg)+h}')
+
+   local start1
+   local start2
+   local start3
+   local end1
+   local end2
+   local end3
+   start1=$(awk -v h="${hold_sec}" 'BEGIN{printf "%.6f", h}')
+   end1=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", seg}')
+   start2=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", seg+h}')
+   end2=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", 2*seg}')
+   start3=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", 2*seg+h}')
+   end3=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", 3*seg}')
+
+   local fc
+   fc=""
+   fc+="[0:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b1];"
+   fc+="[1:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b2];"
+   fc+="[2:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b3];"
+   fc+="[3:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${hold_sec},setpts=PTS-STARTPTS[b4];"
+   fc+="[b1][b2][b3][b4]concat=n=4:v=1:a=0[base];"
+
+   fc+="[0:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m1];"
+   fc+="[1:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m2];"
+   fc+="[m2]split=2[m2a][m2b];"
+   fc+="[2:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m3];"
+   fc+="[m3]split=2[m3a][m3b];"
+   fc+="[3:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m4];"
+
+   fc+="[m1][m2a]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start1}/TB[t12];"
+   fc+="[m2b][m3a]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start2}/TB[t23];"
+   fc+="[m3b][m4]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start3}/TB[t34];"
+
+   fc+="[base][t12]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start1},${end1})'[v1];"
+   fc+="[v1][t23]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start2},${end2})'[v2];"
+   fc+="[v2][t34]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start3},${end3})'[v];"
+
+   fc+="[4:a]atrim=0:${total},asetpts=N/SR/TB[a]"
+
+   ffmpeg -y \
+     -i "${slide1}" -i "${slide2}" -i "${slide3}" -i "${slide4}" -i "${audio}" \
+     -filter_complex "${fc}" \
+     -map "[v]" -map "[a]" \
+     -r "${FPS}" -c:v libx264 -pix_fmt yuv420p \
+     -c:a aac -shortest \
+     "${out}"
+ }
+
+ if [[ "${1:-}" == "merge_master" ]]; then
+   shift
+   merge_master "$@"
+ fi
