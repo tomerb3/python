@@ -64,23 +64,30 @@
   
    local top_text=""
    local mid_text=""
+   local mid2_text=""
    local bot_text=""
  
    local top_size=72
    local mid_size=96
+   local mid2_size=72
    local bot_size=64
  
    local top_color="white"
    local mid_color="white"
+   local mid2_color="white"
    local bot_color="white"
  
    local top_outline_color="black"
    local mid_outline_color="black"
+   local mid2_outline_color="black"
    local bot_outline_color="black"
  
    local top_outline=4
    local mid_outline=6
+   local mid2_outline=4
    local bot_outline=4
+ 
+   local mid2_y_offset=120
  
    local wrap_mode="words"
    local words_per_line=4
@@ -105,29 +112,38 @@
   
        --top-text) top_text="$2"; shift 2;;
        --mid-text) mid_text="$2"; shift 2;;
+       --mid2-text) mid2_text="$2"; shift 2;;
        --bot-text) bot_text="$2"; shift 2;;
  
        --top-size) top_size="$2"; shift 2;;
        --mid-size) mid_size="$2"; shift 2;;
+       --mid2-size) mid2_size="$2"; shift 2;;
        --bot-size) bot_size="$2"; shift 2;;
  
        --top-color) top_color="$2"; shift 2;;
        --mid-color) mid_color="$2"; shift 2;;
+       --mid2-color) mid2_color="$2"; shift 2;;
        --bot-color) bot_color="$2"; shift 2;;
        --top-font-color) top_color="$2"; shift 2;;
        --mid-font-color) mid_color="$2"; shift 2;;
+       --mid2-font-color) mid2_color="$2"; shift 2;;
        --bot-font-color) bot_color="$2"; shift 2;;
  
        --top-outline-color) top_outline_color="$2"; shift 2;;
        --mid-outline-color) mid_outline_color="$2"; shift 2;;
+       --mid2-outline-color) mid2_outline_color="$2"; shift 2;;
        --bot-outline-color) bot_outline_color="$2"; shift 2;;
  
        --top-outline) top_outline="$2"; shift 2;;
        --mid-outline) mid_outline="$2"; shift 2;;
+       --mid2-outline) mid2_outline="$2"; shift 2;;
        --bot-outline) bot_outline="$2"; shift 2;;
  
        --wrap-mode) wrap_mode="$2"; shift 2;;
        --words-per-line) words_per_line="$2"; shift 2;;
+       --words) words_per_line="$2"; shift 2;;
+
+       --mid2-y-offset) mid2_y_offset="$2"; shift 2;;
  
        *) echo "unknown arg: $1" >&2; return 2;;
      esac
@@ -161,6 +177,7 @@
    if [[ "${wrap_mode}" == "words" ]]; then
      top_text="$(wrap_words "${words_per_line}" "${top_text}")"
      mid_text="$(wrap_words "${words_per_line}" "${mid_text}")"
+     mid2_text="$(wrap_words "${words_per_line}" "${mid2_text}")"
      bot_text="$(wrap_words "${words_per_line}" "${bot_text}")"
    fi
  
@@ -177,6 +194,12 @@
      tf="${tmp_dir}/mid.txt"
      printf '%s' "${mid_text}" >"${tf}"
      filters+="drawtext=fontfile='${font_file}':textfile='${tf}':reload=0:text_align=center:fontsize=${mid_size}:fontcolor=${mid_color}:bordercolor=${mid_outline_color}:borderw=${mid_outline}:x=${MID_X}+(w-${MID_W})/2+(${MID_W}-text_w)/2:y=${MID_Y}+(${MID_H}-text_h)/2+${mid_y_offset},"
+   fi
+
+   if [[ -n "${mid2_text}" ]]; then
+     tf="${tmp_dir}/mid2.txt"
+     printf '%s' "${mid2_text}" >"${tf}"
+     filters+="drawtext=fontfile='${font_file}':textfile='${tf}':reload=0:text_align=center:fontsize=${mid2_size}:fontcolor=${mid2_color}:bordercolor=${mid2_outline_color}:borderw=${mid2_outline}:x=${MID_X}+(w-${MID_W})/2+(${MID_W}-text_w)/2:y=${MID_Y}+(${MID_H}-text_h)/2+${mid2_y_offset},"
    fi
  
    if [[ -n "${bot_text}" ]]; then
@@ -259,6 +282,7 @@
    local slide2=""
    local slide3=""
    local slide4=""
+   local slide5=""
    local audio=""
    local out=""
 
@@ -276,6 +300,7 @@
        --slide2) slide2="$2"; shift 2;;
        --slide3) slide3="$2"; shift 2;;
        --slide4) slide4="$2"; shift 2;;
+       --slide5) slide5="$2"; shift 2;;
        --audio) audio="$2"; shift 2;;
        --out) out="$2"; shift 2;;
 
@@ -291,7 +316,7 @@
    done
 
    if [[ -z "${slide1}" || -z "${slide2}" || -z "${slide3}" || -z "${slide4}" || -z "${audio}" || -z "${out}" ]]; then
-     echo "merge_master requires --slide1 --slide2 --slide3 --slide4 --audio --out" >&2
+     echo "merge_master requires --slide1 --slide2 --slide3 --slide4 [--slide5] --audio --out" >&2
      return 2
    fi
 
@@ -302,54 +327,105 @@
 
    local seg
    seg=$(awk -v h="${hold_sec}" -v t="${trans_sec}" 'BEGIN{printf "%.6f", h+t}')
-   local total
-   total=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", (3*seg)+h}')
 
-   local start1
-   local start2
-   local start3
-   local end1
-   local end2
-   local end3
-   start1=$(awk -v h="${hold_sec}" 'BEGIN{printf "%.6f", h}')
-   end1=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", seg}')
-   start2=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", seg+h}')
-   end2=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", 2*seg}')
-   start3=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", 2*seg+h}')
-   end3=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", 3*seg}')
+   if [[ -n "${slide5}" ]]; then
+     local total
+     total=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", (4*seg)+h}')
 
-   local fc
-   fc=""
-   fc+="[0:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b1];"
-   fc+="[1:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b2];"
-   fc+="[2:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b3];"
-   fc+="[3:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${hold_sec},setpts=PTS-STARTPTS[b4];"
-   fc+="[b1][b2][b3][b4]concat=n=4:v=1:a=0[base];"
+     local start1 start2 start3 start4
+     local end1 end2 end3 end4
+     start1=$(awk -v h="${hold_sec}" 'BEGIN{printf "%.6f", h}')
+     end1=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", seg}')
+     start2=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", seg+h}')
+     end2=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", 2*seg}')
+     start3=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", 2*seg+h}')
+     end3=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", 3*seg}')
+     start4=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", 3*seg+h}')
+     end4=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", 4*seg}')
 
-   fc+="[0:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m1];"
-   fc+="[1:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m2];"
-   fc+="[m2]split=2[m2a][m2b];"
-   fc+="[2:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m3];"
-   fc+="[m3]split=2[m3a][m3b];"
-   fc+="[3:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m4];"
+     local fc
+     fc=""
+     fc+="[0:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b1];"
+     fc+="[1:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b2];"
+     fc+="[2:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b3];"
+     fc+="[3:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b4];"
+     fc+="[4:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${hold_sec},setpts=PTS-STARTPTS[b5];"
+     fc+="[b1][b2][b3][b4][b5]concat=n=5:v=1:a=0[base];"
 
-   fc+="[m1][m2a]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start1}/TB[t12];"
-   fc+="[m2b][m3a]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start2}/TB[t23];"
-   fc+="[m3b][m4]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start3}/TB[t34];"
+     fc+="[0:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m1];"
+     fc+="[1:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m2];"
+     fc+="[m2]split=2[m2a][m2b];"
+     fc+="[2:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m3];"
+     fc+="[m3]split=2[m3a][m3b];"
+     fc+="[3:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m4];"
+     fc+="[m4]split=2[m4a][m4b];"
+     fc+="[4:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m5];"
 
-   fc+="[base][t12]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start1},${end1})'[v1];"
-   fc+="[v1][t23]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start2},${end2})'[v2];"
-   fc+="[v2][t34]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start3},${end3})'[v];"
+     fc+="[m1][m2a]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start1}/TB[t12];"
+     fc+="[m2b][m3a]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start2}/TB[t23];"
+     fc+="[m3b][m4a]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start3}/TB[t34];"
+     fc+="[m4b][m5]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start4}/TB[t45];"
 
-   fc+="[4:a]atrim=0:${total},asetpts=N/SR/TB[a]"
+     fc+="[base][t12]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start1},${end1})'[v1];"
+     fc+="[v1][t23]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start2},${end2})'[v2];"
+     fc+="[v2][t34]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start3},${end3})'[v3];"
+     fc+="[v3][t45]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start4},${end4})'[v];"
 
-   ffmpeg -y \
-     -i "${slide1}" -i "${slide2}" -i "${slide3}" -i "${slide4}" -i "${audio}" \
-     -filter_complex "${fc}" \
-     -map "[v]" -map "[a]" \
-     -r "${FPS}" -c:v libx264 -pix_fmt yuv420p \
-     -c:a aac -shortest \
-     "${out}"
+     fc+="[5:a]atrim=0:${total},asetpts=N/SR/TB[a]"
+
+     ffmpeg -y \
+       -i "${slide1}" -i "${slide2}" -i "${slide3}" -i "${slide4}" -i "${slide5}" -i "${audio}" \
+       -filter_complex "${fc}" \
+       -map "[v]" -map "[a]" \
+       -r "${FPS}" -c:v libx264 -pix_fmt yuv420p \
+       -c:a aac -shortest \
+       "${out}"
+   else
+     local total
+     total=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", (3*seg)+h}')
+
+     local start1 start2 start3
+     local end1 end2 end3
+     start1=$(awk -v h="${hold_sec}" 'BEGIN{printf "%.6f", h}')
+     end1=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", seg}')
+     start2=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", seg+h}')
+     end2=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", 2*seg}')
+     start3=$(awk -v seg="${seg}" -v h="${hold_sec}" 'BEGIN{printf "%.6f", 2*seg+h}')
+     end3=$(awk -v seg="${seg}" 'BEGIN{printf "%.6f", 3*seg}')
+
+     local fc
+     fc=""
+     fc+="[0:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b1];"
+     fc+="[1:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b2];"
+     fc+="[2:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${seg},setpts=PTS-STARTPTS[b3];"
+     fc+="[3:v]tpad=stop_mode=clone:stop_duration=10,trim=0:${hold_sec},setpts=PTS-STARTPTS[b4];"
+     fc+="[b1][b2][b3][b4]concat=n=4:v=1:a=0[base];"
+
+     fc+="[0:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m1];"
+     fc+="[1:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m2];"
+     fc+="[m2]split=2[m2a][m2b];"
+     fc+="[2:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m3];"
+     fc+="[m3]split=2[m3a][m3b];"
+     fc+="[3:v]tpad=stop_mode=clone:stop_duration=10,crop=${mid_w}:${mid_h}:${mid_x}:${mid_y},trim=0:${seg},setpts=PTS-STARTPTS[m4];"
+
+     fc+="[m1][m2a]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start1}/TB[t12];"
+     fc+="[m2b][m3a]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start2}/TB[t23];"
+     fc+="[m3b][m4]xfade=transition=slideleft:duration=${trans_sec}:offset=${hold_sec},trim=${hold_sec}:${seg},setpts=PTS-STARTPTS+${start3}/TB[t34];"
+
+     fc+="[base][t12]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start1},${end1})'[v1];"
+     fc+="[v1][t23]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start2},${end2})'[v2];"
+     fc+="[v2][t34]overlay=x=${mid_x}:y=${mid_y}:enable='between(t,${start3},${end3})'[v];"
+
+     fc+="[4:a]atrim=0:${total},asetpts=N/SR/TB[a]"
+
+     ffmpeg -y \
+       -i "${slide1}" -i "${slide2}" -i "${slide3}" -i "${slide4}" -i "${audio}" \
+       -filter_complex "${fc}" \
+       -map "[v]" -map "[a]" \
+       -r "${FPS}" -c:v libx264 -pix_fmt yuv420p \
+       -c:a aac -shortest \
+       "${out}"
+   fi
  }
 
  if [[ "${1:-}" == "merge_master" ]]; then

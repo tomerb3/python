@@ -20,11 +20,14 @@ render_kind(){
   local png=""
   local out=""
   local text=""
+  local text2=""
   local wpl=""
   local yoff=""
+  local yoff2=""
   local img=""
   local imgw=""
   local imgh=""
+  local size2=""
 
   local options=()
 
@@ -33,8 +36,11 @@ render_kind(){
       --png) png="$2"; shift 2;;
       --out) out="$2"; shift 2;;
       --text) text="$2"; shift 2;;
+      --text2) text2="$2"; shift 2;;
       --words) wpl="$2"; shift 2;;
       --yoff) yoff="$2"; shift 2;;
+      --yoff2) yoff2="$2"; shift 2;;
+      --size2) size2="$2"; shift 2;;
       --img) img="$2"; shift 2;;
       --imgw) imgw="$2"; shift 2;;
       --imgh) imgh="$2"; shift 2;;
@@ -87,6 +93,21 @@ render_kind(){
       if [[ -n "${imgw}" ]]; then options+=(--mid-img-w "${imgw}"); fi
       if [[ -n "${imgh}" ]]; then options+=(--mid-img-h "${imgh}"); fi
       ;;
+    4)
+      if [[ -z "${text}" ]]; then
+        echo "kind=4 requires --text" >&2
+        return 2
+      fi
+      if [[ -z "${text2}" ]]; then
+        echo "kind=4 requires --text2" >&2
+        return 2
+      fi
+      options+=(--mid-text "${text}" --mid2-text "${text2}")
+      if [[ -n "${wpl}" ]]; then options+=(--words-per-line "${wpl}"); fi
+      if [[ -n "${yoff}" ]]; then options+=(--mid-y-offset "${yoff}"); fi
+      if [[ -n "${yoff2}" ]]; then options+=(--mid2-y-offset "${yoff2}"); fi
+      if [[ -n "${size2}" ]]; then options+=(--mid2-size "${size2}"); fi
+      ;;
     *)
       echo "unknown kind: ${kind} (expected 1|2|3)" >&2
       return 2
@@ -128,7 +149,7 @@ pic_final(){
   --mid-img-y-mm-offset -70
 }
 
-tran(){
+tran4(){
    bash script.sh merge_master \
   --slide1 /mnt/c/share/1/slide1.mp4 \
   --slide2 /mnt/c/share/1/slide2.mp4 \
@@ -142,60 +163,145 @@ tran(){
  
 }
 
-a(){
+
 # kind 1 text only 
 #kind 2 text + pic 
 #kind=3  picture only 
 
+
+a1(){
     render_kind 2 \
-      --png page1.png \
+      --png $1.png \
       --out slide1.mp4 \
       --text "pov need to think of a prompt" \
       --words 4 \
       --img aa.png \
       --imgw 900 \
       --imgh 900
+}
+
+ 
 #if_need_pic
 
 #--mid-size 70 or 120 
-
+a2(){
     render_kind 1 \
-      --png page2.png \
+      --png $1.png \
       --out slide2.mp4 \
       --text "Tomer Baum la morning todat yesterday lovely" \
       --mid-size 70 \
-      --words 4 
-
-
-      render_kind 1 \
-      --png page3.png \
-      --out slide3.mp4 \
-      --text "Prompt : 'ku ku lala tomer' baum univerecity doda mother father lala Tomer Baum" \
       --words 4 \
-      --mid-outline-color black\
       --mid-outline 0 \
-      --mid-size 70 \
-      --mid-font-color black
+      --mid-color black 
+}
 
-      render_kind 3 \
-      --png page4.png \
-      --out slide4.mp4 \
-      --png page2.png 
+    #   render_kind 1 \
+    #   --png page3.png \
+    #   --out slide3.mp4 \
+    #   --text "Prompt : 'ku ku lala tomer' baum univerecity doda mother father lala Tomer Baum" \
+    #   --words 4 \
+    #   --mid-outline-color black\
+    #   --mid-outline 0 \
+    #   --mid-size 70 \
+    #   --mid-font-color black
 
+a3(){
+render_kind 4 \
+  --png $1.png \
+  --out slide3.mp4 \
+  --text "Prompt: 'TITLE LINE lala mimi nunu' " \
+  --text2 "Prompt2: 'lili kkkk subtitle line here tomer baum baum2' " \
+  --words 4 \
+  --yoff -160 \
+  --yoff2 340 \
+  --size2 60 -- \
+  --mid-size 90 \
+  --mid2-size 90 \
+  --mid-color black \
+  --mid-outline 0 \
+  --mid-outline-color black \
+  --mid2-font-color black \
+  --mid2-outline 0
+}
+
+a4(){
+
+       render_kind 3 \
+       --png $1.png \
+       --out slide4.mp4 \
+       --img aa.png \
+       --imgw 800 \
+       --imgh 800 \
+       --mid-img-y-mm-offset -70
+}
+
+a5(){
+
+       render_kind 3 \
+       --png $1.png \
+       --out slide5.mp4 \
+       --img aa.png \
+       --imgw 800 \
+       --imgh 800 \
+       --mid-img-y-mm-offset -70
+}
 #only_mid_text page2.png slide2.mp4 "Tomer Baum" 4 10
 
 #only_mid_text page3.png slide3.mp4 "kuku kuku" 4 10
 
 #only_mid_text page4.png slide4.mp4 "yair aviv baum ariel orit tomer" 4 280
 
+
+four_slide(){
+a1 page1
+a2 page2
+a3 page3
+a4 page4
+tran4
 }
 
-a
-tran
+#four_slide
+
+
+tran5(){
+   bash script.sh merge_master \
+  --slide1 /mnt/c/share/1/slide1.mp4 \
+  --slide2 /mnt/c/share/1/slide2.mp4 \
+  --slide3 /mnt/c/share/1/slide3.mp4 \
+  --slide4 /mnt/c/share/1/slide4.mp4 \
+  --slide5 /mnt/c/share/1/slide5.mp4 \
+  --audio /mnt/c/share/1/2.mp3 \
+  --out /mnt/c/share/1/master5.mp4 \
+  --hold 1.7 \
+  --trans 0.7 \
+  --mid-x 0 --mid-y 300 --mid-w 1080 --mid-h 1120
+ 
+}
+
+
+tran5ver2(){
+   bash script.sh merge_master \
+  --slide1 /mnt/c/share/1/slide1.mp4 \
+  --slide2 /mnt/c/share/1/slide2.mp4 \
+  --slide3 /mnt/c/share/1/slide3.mp4 \
+  --slide4 /mnt/c/share/1/slide4.mp4 \
+  --slide5 /mnt/c/share/1/slide5.mp4 \
+  --audio /mnt/c/share/1/3.mp3 \
+  --out /mnt/c/share/1/master5.mp4 \
+  --hold 2.4 \
+  --trans 1.2 \
+  --mid-x 0 --mid-y 300 --mid-w 1080 --mid-h 1220
+ 
+}
 
 
 
-#pic_final
-
-
-#only_mid_text page4.png slide4.mp4 "yair aviv baum ariel orit tomer" 4 280
+five_slide(){
+a1 page1-5
+a2 page2-5
+a3 page3-5
+a4 page4-5
+a5 page5-5
+tran5ver2
+}
+five_slide
