@@ -5,6 +5,7 @@
  CANVAS_W=${CANVAS_W:-1080}
  CANVAS_H=${CANVAS_H:-1920}
  FPS=${FPS:-30}
+ MM_DPI=${MM_DPI:-96}
  
  SLIDE_DUR_SEC=${SLIDE_DUR_SEC:-2.0}
  
@@ -56,6 +57,8 @@
    local mid_img_h=0
    local mid_img_x=""
    local mid_img_y=""
+   local mid_img_x_mm_offset=0
+   local mid_img_y_mm_offset=0
 
    local mid_y_offset=0
   
@@ -94,6 +97,9 @@
        --mid-img-h) mid_img_h="$2"; shift 2;;
        --mid-img-x) mid_img_x="$2"; shift 2;;
        --mid-img-y) mid_img_y="$2"; shift 2;;
+
+       --mid-img-x-mm-offset) mid_img_x_mm_offset="$2"; shift 2;;
+       --mid-img-y-mm-offset) mid_img_y_mm_offset="$2"; shift 2;;
 
        --mid-y-offset) mid_y_offset="$2"; shift 2;;
   
@@ -200,6 +206,13 @@
      else
        oy="${MID_Y}+(${MID_H}-${imgh})/2"
      fi
+
+     local xoff_px
+     local yoff_px
+     xoff_px=$(awk -v mm="${mid_img_x_mm_offset}" -v dpi="${MM_DPI}" 'BEGIN{printf "%.6f", (mm*dpi/25.4)}')
+     yoff_px=$(awk -v mm="${mid_img_y_mm_offset}" -v dpi="${MM_DPI}" 'BEGIN{printf "%.6f", (mm*dpi/25.4)}')
+     ox="(${ox})+(${xoff_px})"
+     oy="(${oy})+(${yoff_px})"
 
      local fc
      fc="[0:v]${base_filter}[base];[1:v]scale=${imgw}:${imgh}:force_original_aspect_ratio=decrease[img];[base][img]overlay=x=${ox}:y=${oy}:format=auto[ol];"

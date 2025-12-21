@@ -27,13 +27,24 @@ if_need_pic(){
   --bot-text "BOTTOM CTA" 
 }
 
+pic_final(){
+
+  bash script.sh render_slide1 \
+  --png /mnt/c/share/1/page4.png \
+  --out /mnt/c/share/1/slide4.mp4 \
+  --font /mnt/c/share/1/KGLoveMolly.ttf \
+  --mid-img /mnt/c/share/1/aa.png \
+  --mid-img-w 800 --mid-img-h 800 \
+  --mid-img-y-mm-offset -70
+}
+
 tran(){
    bash script.sh merge_master \
   --slide1 /mnt/c/share/1/slide1.mp4 \
   --slide2 /mnt/c/share/1/slide2.mp4 \
   --slide3 /mnt/c/share/1/slide3.mp4 \
   --slide4 /mnt/c/share/1/slide4.mp4 \
-  --audio /mnt/c/share/1/aa.mp3 \
+  --audio /mnt/c/share/1/1.mp3 \
   --out /mnt/c/share/1/master.mp4 \
   --hold 1.7 \
   --trans 0.7 \
@@ -48,9 +59,13 @@ only_mid_text page2.png slide2.mp4 "Tomer Baum" 4 10
 
 only_mid_text page3.png slide3.mp4 "kuku kuku" 4 10
 
-only_mid_text page4.png slide4.mp4 "yair aviv baum ariel orit tomer" 4 280
+#only_mid_text page4.png slide4.mp4 "yair aviv baum ariel orit tomer" 4 280
+pic_final
 }
 
-a
-tran
+#a
+#tran
+pic_final
+
+
 #only_mid_text page4.png slide4.mp4 "yair aviv baum ariel orit tomer" 4 280
