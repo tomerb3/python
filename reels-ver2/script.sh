@@ -114,6 +114,9 @@
        --top-color) top_color="$2"; shift 2;;
        --mid-color) mid_color="$2"; shift 2;;
        --bot-color) bot_color="$2"; shift 2;;
+       --top-font-color) top_color="$2"; shift 2;;
+       --mid-font-color) mid_color="$2"; shift 2;;
+       --bot-font-color) bot_color="$2"; shift 2;;
  
        --top-outline-color) top_outline_color="$2"; shift 2;;
        --mid-outline-color) mid_outline_color="$2"; shift 2;;
