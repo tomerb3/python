@@ -277,6 +277,121 @@
    render_slide1 "$@"
  fi
 
+ if [[ "${1:-}" == "render_kind" ]]; then
+   shift
+   render_kind "$@"
+ fi
+
+render_kind(){
+  local kind="${1:-}"
+  shift || true
+
+  local png=""
+  local out=""
+  local text=""
+  local text2=""
+  local wpl=""
+  local yoff=""
+  local yoff2=""
+  local img=""
+  local imgw=""
+  local imgh=""
+  local size2=""
+
+  local options=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --png) png="$2"; shift 2;;
+      --out) out="$2"; shift 2;;
+      --text) text="$2"; shift 2;;
+      --text2) text2="$2"; shift 2;;
+      --words) wpl="$2"; shift 2;;
+      --yoff) yoff="$2"; shift 2;;
+      --yoff2) yoff2="$2"; shift 2;;
+      --size2) size2="$2"; shift 2;;
+      --img) img="$2"; shift 2;;
+      --imgw) imgw="$2"; shift 2;;
+      --imgh) imgh="$2"; shift 2;;
+      --) shift; break;;
+      *) break;;
+    esac
+  done
+
+  if [[ -z "${kind}" || -z "${png}" || -z "${out}" ]]; then
+    echo "usage: render_kind <kind> --png <file> --out <file> [--text ..] [--img ..] [--] <extra render_slide1 args>" >&2
+    return 2
+  fi
+
+  local img_path="${img}"
+  if [[ -n "${img_path}" && "${img_path}" != /* ]]; then
+    img_path="/mnt/c/share/1/${img_path}"
+  fi
+
+  case "${kind}" in
+    1)
+      if [[ -z "${text}" ]]; then
+        echo "kind=1 requires --text" >&2
+        return 2
+      fi
+      options+=(--mid-text "${text}")
+      if [[ -n "${wpl}" ]]; then options+=(--words-per-line "${wpl}"); fi
+      if [[ -n "${yoff}" ]]; then options+=(--mid-y-offset "${yoff}"); fi
+      ;;
+    2)
+      if [[ -z "${text}" ]]; then
+        echo "kind=2 requires --text" >&2
+        return 2
+      fi
+      if [[ -z "${img}" ]]; then
+        echo "kind=2 requires --img" >&2
+        return 2
+      fi
+      options+=(--mid-text "${text}" --mid-img "${img_path}")
+      if [[ -n "${wpl}" ]]; then options+=(--words-per-line "${wpl}"); fi
+      if [[ -n "${yoff}" ]]; then options+=(--mid-y-offset "${yoff}"); fi
+      if [[ -n "${imgw}" ]]; then options+=(--mid-img-w "${imgw}"); fi
+      if [[ -n "${imgh}" ]]; then options+=(--mid-img-h "${imgh}"); fi
+      ;;
+    3)
+      if [[ -z "${img}" ]]; then
+        echo "kind=3 requires --img" >&2
+        return 2
+      fi
+      options+=(--mid-img "${img_path}")
+      if [[ -n "${imgw}" ]]; then options+=(--mid-img-w "${imgw}"); fi
+      if [[ -n "${imgh}" ]]; then options+=(--mid-img-h "${imgh}"); fi
+      ;;
+    4)
+      if [[ -z "${text}" ]]; then
+        echo "kind=4 requires --text" >&2
+        return 2
+      fi
+      if [[ -z "${text2}" ]]; then
+        echo "kind=4 requires --text2" >&2
+        return 2
+      fi
+      options+=(--mid-text "${text}" --mid2-text "${text2}")
+      if [[ -n "${wpl}" ]]; then options+=(--words-per-line "${wpl}"); fi
+      if [[ -n "${yoff}" ]]; then options+=(--mid-y-offset "${yoff}"); fi
+      if [[ -n "${yoff2}" ]]; then options+=(--mid2-y-offset "${yoff2}"); fi
+      if [[ -n "${size2}" ]]; then options+=(--mid2-size "${size2}"); fi
+      ;;
+    *)
+      echo "unknown kind: ${kind} (expected 1|2|3)" >&2
+      return 2
+      ;;
+  esac
+
+  options+=("$@")
+
+  render_slide1 \
+    --png "/mnt/c/share/1/${png}" \
+    --out "/mnt/c/share/1/${out}" \
+    --font "/mnt/c/share/1/KGLoveMolly.ttf" \
+    "${options[@]}"
+}
+
  merge_master() {
    local slide1=""
    local slide2=""
