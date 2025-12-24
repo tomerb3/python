@@ -1,7 +1,7 @@
 #!/bin/bash -x 
 
 only_mid_text(){
-bash script.sh render_slide1 \
+bash reels-ver2.sh render_slide1 \
   --png  /mnt/c/share/1/$1 \
   --out  /mnt/c/share/1/$2 \
   --font  /mnt/c/share/1/KGLoveMolly.ttf \
@@ -116,14 +116,14 @@ render_kind(){
 
   options+=("$@")
 
-  bash script.sh render_slide1 \
+  bash reels-ver2.sh render_slide1 \
     --png "/mnt/c/share/1/${png}" \
     --out "/mnt/c/share/1/${out}" \
     --font "/mnt/c/share/1/KGLoveMolly.ttf" \
     "${options[@]}"
 }
   #TOP_H=220 MID_Y=220 MID_H=1480 BOT_Y=1700 BOT_H=220 \
-#bash script.sh render_slide1 --png file1.png --out out/slide1.mp4 --font ./path/to/font.ttf
+#bash reels-ver2.sh render_slide1 --png file1.png --out out/slide1.mp4 --font ./path/to/font.ttf
 
 
 if_need_pic(){
@@ -150,7 +150,7 @@ pic_final(){
 }
 
 tran4(){
-   bash script.sh merge_master \
+   bash reels-ver2.sh merge_master \
   --slide1 /mnt/c/share/1/slide1.mp4 \
   --slide2 /mnt/c/share/1/slide2.mp4 \
   --slide3 /mnt/c/share/1/slide3.mp4 \
@@ -281,7 +281,7 @@ tran4
 
 
 tran5(){
-   bash script.sh merge_master \
+   bash reels-ver2.sh merge_master \
   --slide1 /mnt/c/share/1/slide1.mp4 \
   --slide2 /mnt/c/share/1/slide2.mp4 \
   --slide3 /mnt/c/share/1/slide3.mp4 \
@@ -297,7 +297,7 @@ tran5(){
 
 
 tran5ver2(){
-   bash script.sh merge_master \
+   bash reels-ver2.sh merge_master \
   --slide1 /mnt/c/share/1/slide1.mp4 \
   --slide2 /mnt/c/share/1/slide2.mp4 \
   --slide3 /mnt/c/share/1/slide3.mp4 \
