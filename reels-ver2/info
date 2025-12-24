@@ -173,11 +173,13 @@ a1(){
     render_kind 2 \
       --png $1.png \
       --out slide1.mp4 \
-      --text "pov need to think of a prompt" \
+      --text "4 Prompts to help you solve X Problem" \
       --words 4 \
       --img aa.png \
       --imgw 900 \
-      --imgh 900
+      --imgh 900 \
+      --mid-outline 1 \
+      --mid-color red 
 }
 
  
@@ -188,7 +190,7 @@ a2(){
     render_kind 1 \
       --png $1.png \
       --out slide2.mp4 \
-      --text "Tomer Baum la morning todat yesterday lovely" \
+      --text "Prompt1: 'Baum la morning todat yesterday lovely'" \
       --mid-size 70 \
       --words 4 \
       --mid-outline 0 \
@@ -209,8 +211,8 @@ a3(){
 render_kind 4 \
   --png $1.png \
   --out slide3.mp4 \
-  --text "Prompt: 'TITLE LINE lala mimi nunu' " \
-  --text2 "Prompt2: 'lili kkkk subtitle line here tomer baum baum2' " \
+  --text "Prompt2 'TITLE LINE lala mimi nunu' " \
+  --text2 "Prompt3: 'lili kkkk subtitle line here tomer baum baum2' " \
   --words 4 \
   --yoff -160 \
   --yoff2 340 \
@@ -224,7 +226,22 @@ render_kind 4 \
   --mid2-outline 0
 }
 
+
+
+
 a4(){
+render_kind 1 \
+  --png $1.png \
+  --out slide4.mp4 \
+  --text "Prompt4 'TITLE LINE lala mimi nunu kkkkk jjjjj yyyyyy' " \
+  --words 4 \
+  --mid-size 70 \
+  --mid-color black \
+  --mid-outline 0 \
+  --mid-outline-color black 
+}
+
+a41(){
 
        render_kind 3 \
        --png $1.png \
@@ -240,7 +257,7 @@ a5(){
        render_kind 3 \
        --png $1.png \
        --out slide5.mp4 \
-       --img aa.png \
+       --img cta.png \
        --imgw 800 \
        --imgh 800 \
        --mid-img-y-mm-offset -70
