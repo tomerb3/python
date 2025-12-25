@@ -1,6 +1,6 @@
 #!/bin/bash -x
  
- echo ver4;sleep 2
+ echo ver5;sleep 2
  set -euo pipefail
  
 base_folder="${base_folder:-/mnt/c/share/1}"
@@ -324,7 +324,7 @@ render_kind(){
     return 2
   fi
 
-  local img_path="${img}"
+  local img_path="/hh/${img}"
   if [[ -n "${img_path}" && "${img_path}" != /* ]]; then
     img_path="${base_folder}/comfiui/${img_path}"
   fi
