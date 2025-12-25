@@ -325,9 +325,9 @@ render_kind(){
   fi
 
   local img_path="${base_folder}/comfiui/${img}"
-  if [[ -n "${img_path}" && "${img_path}" != /* ]]; then
-    img_path="${base_folder}/comfiui/${img_path}"
-  fi
+  #if [[ -n "${img_path}" && "${img_path}" != /* ]]; then
+   # img_path="${base_folder}/comfiui/${img_path}"
+  #fi
 echo img_path $img_path;sleep 3
   case "${kind}" in
     1)
