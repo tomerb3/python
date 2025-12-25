@@ -2,6 +2,9 @@
  
  set -euo pipefail
  
+base_folder="${base_folder:-/mnt/c/share/1}"
+back_folder="${back_folder:-/mnt/c/share/1}"
+
  CANVAS_W=${CANVAS_W:-1080}
  CANVAS_H=${CANVAS_H:-1920}
  FPS=${FPS:-30}
@@ -172,7 +175,7 @@
 
    local tmp_dir
    tmp_dir="$(mktemp -d)"
-   trap 'rm -rf "${tmp_dir}"' RETURN
+   trap 'rm -rf "${tmp_dir:-}"' RETURN
  
    if [[ "${wrap_mode}" == "words" ]]; then
      top_text="$(wrap_words "${words_per_line}" "${top_text}")"
@@ -277,10 +280,7 @@
    render_slide1 "$@"
  fi
 
- if [[ "${1:-}" == "render_kind" ]]; then
-   shift
-   render_kind "$@"
- fi
+
 
 render_kind(){
   local kind="${1:-}"
@@ -325,7 +325,7 @@ render_kind(){
 
   local img_path="${img}"
   if [[ -n "${img_path}" && "${img_path}" != /* ]]; then
-    img_path="/mnt/c/share/1/${img_path}"
+    img_path="${back_folder}/${img_path}"
   fi
 
   case "${kind}" in
@@ -386,9 +386,9 @@ render_kind(){
   options+=("$@")
 
   render_slide1 \
-    --png "/mnt/c/share/1/${png}" \
-    --out "/mnt/c/share/1/${out}" \
-    --font "/mnt/c/share/1/KGLoveMolly.ttf" \
+    --png "${back_folder}/${png}" \
+    --out "${base_folder}/${out}" \
+    --font "${back_folder}/KGLoveMolly.ttf" \
     "${options[@]}"
 }
 
@@ -546,4 +546,9 @@ render_kind(){
  if [[ "${1:-}" == "merge_master" ]]; then
    shift
    merge_master "$@"
+ fi
+
+ if [[ "${1:-}" == "render_kind" ]]; then
+   shift
+   render_kind "$@"
  fi

@@ -1,5 +1,130 @@
 #!/bin/bash -x 
 
+
+
+
+
+base_folder="${base_folder:-/mnt/c/share/1}"
+p1="Baum la morning todat yesterday lovely"
+p2="lala mumu tomer baum orit arielle yair aviv baum hani margalit Baum la morning todat yesterday lovely"
+p3="kuku lala mumu tomer baum orit arielle yair aviv baum hani margalit Baum la morning todat yesterday lovely"
+hook="aaa 4 Prompts to help you solve X Problem"
+
+
+
+
+bash reels-ver2.sh render_kind 2 \
+      --png page1-5.png \
+      --out slide1.mp4 \
+      --text "\"${hook}\" " \
+      --words 4 \
+      --img aa.png \
+      --imgw 700 \
+      --imgh 700 \
+      --yoff -520 \
+      --mid-outline 0 \
+      --mid-color blue 
+
+
+bash reels-ver2.sh render_kind 1 \
+      --png page2-5.png \
+      --out slide2.mp4 \
+      --text "Prompt \"${p1}\"" \
+      --words 4 \
+      --yoff -100 \
+      -- \
+      --mid-size 70 \
+      --mid-outline 0 \
+      --mid-color black
+
+
+
+# a1 page1-5
+# a2 page2-5
+# a3 page3-5
+# a4 page4-5
+# a5 page5-5
+# tran5ver2
+
+
+# bash reels-ver2.sh render_kind 4 \
+#   --png page3-5.png \
+#   --out slide3.mp4 \
+#   --text "Prompt2 'TITLE LINE lala mimi nunu' " \
+#   --text2 "Prompt3: 'lili kkkk subtitle line here tomer baum baum2' " \
+#   --words 4 \
+#   --yoff -160 \
+#   --yoff2 340 \
+#   --size2 60 -- \
+#   --mid-size 90 \
+#   --mid2-size 90 \
+#   --mid-color black \
+#   --mid-outline 0 \
+#   --mid-outline-color black \
+#   --mid2-font-color black \
+#   --mid2-outline 0
+
+bash reels-ver2.sh render_kind 1 \
+      --png page3-5.png \
+      --out slide3.mp4 \
+      --text "Prompt \"${p2}\"" \
+      --words 4 \
+      --yoff -100 \
+      -- \
+      --mid-size 70 \
+      --mid-outline 0 \
+      --mid-color black
+
+bash reels-ver2.sh render_kind 1 \
+  --png page4-5.png \
+  --out slide4.mp4 \
+  --text "Prompt \"${p3}\" " \
+  --words 4 \
+  --yoff -100 \
+  -- \
+  --mid-size 70 \
+  --mid-color black \
+  --mid-outline 0 \
+  --mid-outline-color black
+
+
+
+bash reels-ver2.sh render_kind 3 \
+       --png page5-5.png \
+       --out slide5.mp4 \
+       --img cta.png \
+       --imgw 800 \
+       --imgh 800 \
+       --mid-img-y-mm-offset -70
+
+
+
+
+   bash reels-ver2.sh merge_master \
+  --slide1 "${base_folder}/slide1.mp4" \
+  --slide2 "${base_folder}/slide2.mp4" \
+  --slide3 "${base_folder}/slide3.mp4" \
+  --slide4 "${base_folder}/slide4.mp4" \
+  --slide5 "${base_folder}/slide5.mp4" \
+  --audio "${base_folder}/3.mp3" \
+  --out "${base_folder}/master5.mp4" \
+  --hold 2.4 \
+  --trans 1.2 \
+  --mid-x 0 --mid-y 300 --mid-w 1080 --mid-h 1220
+
+
+
+
+
+
+
+
+
+
+
+
+
+exit 0
 only_mid_text(){
 bash reels-ver2.sh render_slide1 \
   --png  /mnt/c/share/1/$1 \
