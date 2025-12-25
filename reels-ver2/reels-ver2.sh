@@ -268,7 +268,7 @@ back_folder="${back_folder:-/mnt/c/share/1}"
      fi
 
      ffmpeg -y \
-       -loop 1 -t "${dur}" -i "b/${back_folder}/${png}" \
+       -loop 1 -t "${dur}" -i "${back_folder}/${png}" \
        -vf "${vf}" \
        -r "${FPS}" \
        -c:v libx264 -pix_fmt yuv420p \
