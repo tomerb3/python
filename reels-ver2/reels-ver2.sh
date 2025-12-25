@@ -325,7 +325,7 @@ render_kind(){
 
   local img_path="${img}"
   if [[ -n "${img_path}" && "${img_path}" != /* ]]; then
-    img_path="${back_folder}/${img_path}"
+    img_path="${base_folder}/${img_path}"
   fi
 
   case "${kind}" in
