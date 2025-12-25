@@ -386,7 +386,7 @@ render_kind(){
   options+=("$@")
 
   render_slide1 \
-    --png "${back_folder}/${png}" \
+    --png "${png}" \
     --out "${base_folder}/${out}" \
     --font "${back_folder}/KGLoveMolly.ttf" \
     "${options[@]}"
