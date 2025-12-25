@@ -1,6 +1,6 @@
 #!/bin/bash -x
  
- echo ver2;sleep 2
+ echo ver3;sleep 2
  set -euo pipefail
  
 base_folder="${base_folder:-/mnt/c/share/1}"
