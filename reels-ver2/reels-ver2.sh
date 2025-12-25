@@ -252,7 +252,7 @@ back_folder="${back_folder:-/mnt/c/share/1}"
      fi
 
      ffmpeg -y \
-       -loop 1 -t "${dur}" -i "${png}" \
+       -loop 1 -t "${dur}" -i "${back_folder}/${png}" \
        -loop 1 -t "${dur}" -i "${mid_img}" \
        -filter_complex "${fc}" -map "[vout]" \
        -r "${FPS}" \
@@ -267,7 +267,7 @@ back_folder="${back_folder:-/mnt/c/share/1}"
      fi
 
      ffmpeg -y \
-       -loop 1 -t "${dur}" -i "${png}" \
+       -loop 1 -t "${dur}" -i "${back_folder}/${png}" \
        -vf "${vf}" \
        -r "${FPS}" \
        -c:v libx264 -pix_fmt yuv420p \
@@ -386,7 +386,7 @@ render_kind(){
   options+=("$@")
 
   render_slide1 \
-    --png "${png}" \
+    --png "${back_folder}/${png}" \
     --out "${base_folder}/${out}" \
     --font "${back_folder}/KGLoveMolly.ttf" \
     "${options[@]}"
