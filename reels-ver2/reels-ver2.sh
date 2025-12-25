@@ -253,7 +253,7 @@ back_folder="${back_folder:-/mnt/c/share/1}"
      fi
 
      ffmpeg -y \
-       -loop 1 -t "${dur}" -i "a/${back_folder}/${png}" \
+       -loop 1 -t "${dur}" -i "${back_folder}/${png}" \
        -loop 1 -t "${dur}" -i "${mid_img}" \
        -filter_complex "${fc}" -map "[vout]" \
        -r "${FPS}" \
