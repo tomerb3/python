@@ -555,7 +555,7 @@ set -x
                         [g3]drawtext=fontfile=$font_file:text=${line4@Q}:fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=120+3*($font_size+8)[g4]; \
                         [g4]drawtext=fontfile=$font_file:text=${line5@Q}:fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=120+4*($font_size+8)[g5]; \
                         [g5]drawtext=fontfile=$font_file:text=${line6@Q}:fontcolor=$font_color:fontsize=$font_size:x=(w-text_w)/2:y=120+5*($font_size+8)[vout]; \
-                        [0:a]atrim=0:5,asetpts=PTS-STARTPTS[aout]" \
+                        [0:a]atrim=0:$time1,asetpts=PTS-STARTPTS[aout]" \
         -map "[vout]" -map "[aout]" \
         -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "$output_mp4"
         echo end cmd_reel_from_2_pic
