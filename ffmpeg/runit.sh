@@ -456,8 +456,10 @@ set -x
 
     if [ $( ls -1tr /home/node/tts/back_comfiui/r*.mp4 |wc -l) -eq 1 ];then 
       local input_mp4=$(ls -1tr /home/node/tts/back_comfiui/r*.mp4)
+      time1=7
     else
       local n=$(( RANDOM % 6 + 1 ))
+      time1=5
       local input_mp4="/home/node/tts/back_comfiui/reel${n}.mp4"
     fi
 
@@ -543,7 +545,7 @@ set -x
                         [2:v]trim=0:2.5,setpts=PTS-STARTPTS[p2]; \
                         [1:v]trim=0:1.5,setpts=PTS-STARTPTS[p1b]; \
                         [p1a][p2][p1b]concat=n=3:v=1:a=0[pseq]; \
-                        [0:v]trim=0:5,setpts=PTS-STARTPTS[basev]; \
+                        [0:v]trim=0:$time1,setpts=PTS-STARTPTS[basev]; \
                         [basev]drawbox=x=0:y=0:w=iw:h=ih/2:color=black@1:t=fill[baseb]; \
                         [pseq]scale=w=720:h=576[p16]; \
                         [baseb][p16]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2[ovl]; \
