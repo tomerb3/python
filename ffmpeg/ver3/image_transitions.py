@@ -214,10 +214,7 @@ def build_filter_complex(
         )
         current = out_label
 
-    final_label = "[vout]"
-    parts.append(f"{current}trim=duration={total_duration},setpts=PTS-STARTPTS{final_label}")
-
-    return ";".join(parts), final_label
+    return ";".join(parts), current
 
 
 def run_ffmpeg(cmd: List[str]) -> None:
