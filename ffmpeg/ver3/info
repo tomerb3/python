@@ -1,0 +1,27 @@
+python3 image_transitions.py \
+  --input-folder /path/to/images \
+  --output out.mp4
+
+
+  python3 image_transitions.py \
+  --input-files img_001.jpg img_002.jpg img_003.jpg \
+  --transition slideright \
+  --still 2.5 \
+  --duration 0.8 \
+  --output slideshow.mp4
+
+
+
+
+  python3 image_transitions.py \
+  --input-folder ./stills \
+  --transition crossfade \
+  --zoom in \
+  --still 2.0 \
+  --duration 1.0 \
+  --resolution 3840x2160 \
+  --fps 30 \
+  --crf 18 \
+  --preset slow \
+  --output 4k_slideshow.mp4 \
+  --log-level DEBUG

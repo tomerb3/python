@@ -8,23 +8,23 @@ base_folder="${base_folder:-/mnt/c/share/1}"
 p1="Baum la morning todat yesterday lovely"
 p2="lala mumu tomer baum orit arielle yair aviv baum hani margalit Baum la morning todat yesterday lovely"
 p3="kuku lala mumu tomer baum orit arielle yair aviv baum hani margalit Baum la morning todat yesterday lovely"
-hook="aaa 4 Prompts to help you solve X Problem"
-
-
+hook="aaa2 4 Prompts to help you solve X Problem"
 
 
 bash reels-ver2.sh render_kind 2 \
-      --png page1-5.png \
-      --out slide1.mp4 \
-      --text "\"${hook}\" " \
-      --words 4 \
-      --img aa.png \
-      --imgw 700 \
-      --imgh 700 \
-      --mid-size 60 \
-      --yoff -520 \
-      --mid-outline 0 \
-      --mid-color blue 
+  --png page1-5.png \
+  --out slide1.mp4 \
+  --text "${hook} " \
+  --words 4 \
+  --img aa.png \
+  --imgw 700 \
+  --imgh 700 \
+  --yoff -580 \
+  -- \
+  --mid-outline 0 \
+  --mid-color blue \
+  --mid-size 60
+
 
 
 bash reels-ver2.sh render_kind 1 \
@@ -111,7 +111,7 @@ bash reels-ver2.sh render_kind 3 \
   --out "${base_folder}/master5.mp4" \
   --hold 2.4 \
   --trans 1.2 \
-  --mid-x 0 --mid-y 300 --mid-w 1080 --mid-h 1220
+  --mid-x 0 --mid-y 300 --mid-w 1000 --mid-h 1220
 
 
 

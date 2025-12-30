@@ -1,0 +1,5 @@
+python3 image_transitions.py \
+  --input-folder /mnt/c/share/2 \
+  --still 2 \
+  --duration 0.8 \
+  --output /mnt/c/share/2/4k_slideshow.mp4

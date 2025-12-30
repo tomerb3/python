@@ -454,8 +454,12 @@ set -x
     local pic1="$output_folder/comfiui/$pica"
     local pic2="$output_folder/comfiui/$picb"
 
-    local n=$(( RANDOM % 6 + 1 ))
-    local input_mp4="/home/node/tts/back_comfiui/reel${n}.mp4"
+    if [ $( ls -1tr /home/node/tts/back_comfiui/r*.mp4 |wc -l) -eq 1 ];then 
+      local input_mp4=$(ls -1tr /home/node/tts/back_comfiui/r*.mp4)
+    else
+      local n=$(( RANDOM % 6 + 1 ))
+      local input_mp4="/home/node/tts/back_comfiui/reel${n}.mp4"
+    fi
 
     local output_mp4="$output_folder/reel.mp4"
     
