@@ -1,9 +1,11 @@
-docker build -t 2mfaver1 .
+
+#!/bin/bash -x 
+#docker build -t 2mfaver1 .
 
 
 
 docker run -ti -e script_name=tb-2ver.py 2mfaver1 main -d 123456
 
-it will exit 0 or 1 if code tb1 is good or not
+#it will exit 0 or 1 if code tb1 is good or not
 
 

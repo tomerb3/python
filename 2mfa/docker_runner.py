@@ -23,7 +23,8 @@ def main() -> int:
         print("ERROR: env var 'script_name' is required (e.g. -e script_name=tb-2ver.py)", file=sys.stderr)
         return 2
 
-    script_path = os.path.join(os.getcwd(), script_name)
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    script_path = os.path.join(app_dir, script_name)
     if not os.path.isfile(script_path):
         print(f"ERROR: script not found: {script_path}", file=sys.stderr)
         return 2
