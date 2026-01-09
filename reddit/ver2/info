@@ -1,4 +1,21 @@
 
+
+I updated ver2/run.py so it now:
+
+Fetches the week’s top submissions (limit=10 as before)
+Sorts them by score desc
+Takes the top 5
+Randomly picks 1 from those 5
+Then continues exactly as before: 10 top-level comments + same JSON fields + optional -e file=... output
+Validation outcome
+I rebuilt and ran the container and confirmed it still outputs valid JSON with:
+
+thread.title
+thread.selftext
+comments[]
+Completion status
+
+
 #python3 -m venv /home/baum/venv/scrape_reddit
 
 . /home/baum/venv/scrape_reddit/bin/activate
