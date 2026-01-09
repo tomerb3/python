@@ -1,0 +1,7 @@
+
+#python3 -m venv /home/baum/venv/scrape_reddit
+
+. /home/baum/venv/scrape_reddit/bin/activate
+
+python3 1.py --subreddit n8n --include-inspiration
+

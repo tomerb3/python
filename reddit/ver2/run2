@@ -1,0 +1,9 @@
+
+mkdir -p /tmp/out
+
+docker run --rm \
+  -e file=/out/output.json \
+  -v /tmp/out:/out \
+  scrape_reddit_ver2 \
+  --subreddit 'n8n'
+

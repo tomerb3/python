@@ -1,0 +1,95 @@
+{
+  "subreddit": "n8n",
+  "thread": {
+    "id": "1q4rsso",
+    "title": "I wanted a personal assistant but couldn’t afford one, so I built this instead",
+    "selftext": "After I started learning automation, I noticed something annoying. I wasn’t tired from doing real work — I was tired from doing small, boring things. Checking emails. Updating my calendar. Remembering tasks. Tracking receipts. All the little stuff added up.\n\nI kept thinking, *“This is what a personal assistant should do.”*  \nBut I couldn’t afford to hire one.\n\nSo I decided to try building one myself.\n\nAt first, I made small automations. Then I had a bigger idea: what if I built something I could **talk to**, and it would figure out what I wanted and do it for me?\n\nNow I use a personal AI assistant I built using automation. I talk to it through Telegram using text, voice messages, pictures, or PDFs. There’s one main “manager” that understands what I’m asking. Then it sends the job to the right helper — like one for emails, one for my calendar, one for to-dos, one for expenses, and one for images. Sometimes it uses more than one helper at the same time.\n\nThe biggest surprise wasn’t the tech. It was how much calmer my day feels. I don’t have to remember everything. I don’t jump between apps as much. It feels more like giving work to someone instead of doing it all myself.\n\nThis started as a learning project, but now I actually use it every day.\n\nI’m sharing it here because I want honest thoughts and ideas.\n\n**I’m curious:**\n\n* What would you want a personal AI assistant to help you with?\n* Would you trust something like this with your email, calendar, or money?\n* If you’ve built automations before, what usually goes wrong?\n* What feels too much, and what feels missing?\n\nI’ve attached **all the tools and resources I used to build this** at the end of the post so anyone can look at them or use them.\n\n# Code And Resources\n\n* [**Youtube Link**](https://www.youtube.com/watch?v=0IcPYzbmCug)\n* [**Drive Link**](https://drive.google.com/drive/folders/1JceLKcPbLfaP1igYJc4sjIE4uzWfsGBC?usp=drive_link)",
+    "url": "https://www.reddit.com/gallery/1q4rsso",
+    "permalink": "/r/n8n/comments/1q4rsso/i_wanted_a_personal_assistant_but_couldnt_afford/",
+    "score": 261,
+    "num_comments": 72,
+    "created_utc": 1767633724.0
+  },
+  "comments": [
+    {
+      "id": "nxv5h6v",
+      "author": "Osxai",
+      "body": "​I relate so hard to this. The moment I realize a task can be automated, I instantly lose the will to do it manually. It becomes a mental block because I know there's a better way. Seeing a complete setup like this is exactly what I needed to bridge that gap. Thanks for sharing the files!",
+      "score": 14,
+      "created_utc": 1767639164.0,
+      "permalink": "/r/n8n/comments/1q4rsso/i_wanted_a_personal_assistant_but_couldnt_afford/nxv5h6v/"
+    },
+    {
+      "id": "nxvappy",
+      "author": "weenis-flaginus",
+      "body": "What's the second pictures workflow for? Confused on how the contacts play into it",
+      "score": 3,
+      "created_utc": 1767640574.0,
+      "permalink": "/r/n8n/comments/1q4rsso/i_wanted_a_personal_assistant_but_couldnt_afford/nxvappy/"
+    },
+    {
+      "id": "nxvgu1v",
+      "author": "DepartureNo2745",
+      "body": "Please start using only github and not google drive for future posts.  Thanks!",
+      "score": 3,
+      "created_utc": 1767642267.0,
+      "permalink": "/r/n8n/comments/1q4rsso/i_wanted_a_personal_assistant_but_couldnt_afford/nxvgu1v/"
+    },
+    {
+      "id": "nxxdiag",
+      "author": "Matiofsky",
+      "body": "Brilliant, was wanting to do similar stuff, Gmail, Gcalendar, todo ( was interesting in exploring), expenses is awe, I guess notes (voice to text, something to be reviewed later, possibly with a brief prepared by an AI agent).\n\nThanks for sharing, will review it soon!",
+      "score": 2,
+      "created_utc": 1767662606.0,
+      "permalink": "/r/n8n/comments/1q4rsso/i_wanted_a_personal_assistant_but_couldnt_afford/nxxdiag/"
+    },
+    {
+      "id": "nxxio0o",
+      "author": "Longjumping_Music572",
+      "body": "I would like to know about this. \n\nIs there a step by step process to make this happen.",
+      "score": 2,
+      "created_utc": 1767664273.0,
+      "permalink": "/r/n8n/comments/1q4rsso/i_wanted_a_personal_assistant_but_couldnt_afford/nxxio0o/"
+    },
+    {
+      "id": "nxxrj58",
+      "author": "domusaureatx",
+      "body": "Saving this for later review, thank you for sharing. I’m working on a similar approach but using Siri instead as I’d like the ability to just converse instead of texting back and forth.",
+      "score": 2,
+      "created_utc": 1767667168.0,
+      "permalink": "/r/n8n/comments/1q4rsso/i_wanted_a_personal_assistant_but_couldnt_afford/nxxrj58/"
+    },
+    {
+      "id": "nxxvnvu",
+      "author": "BBQMosquitos",
+      "body": "Looks insane",
+      "score": 2,
+      "created_utc": 1767668528.0,
+      "permalink": "/r/n8n/comments/1q4rsso/i_wanted_a_personal_assistant_but_couldnt_afford/nxxvnvu/"
+    },
+    {
+      "id": "nxy2k7g",
+      "author": "atvircaio",
+      "body": "Great job on this!!  Really amazing.  \n\n\nAnswers to your questions:   \n  \nWhat would you want a personal AI assistant to help you with?  \n\\- Draft emails based on relationship data  \n\\- Take the transcriptions of my zoom calls and create tasks, reminders, and notify other team members  \n\\- Send me daily 'kick in the ass' messages to keep me motivated.  \n\\- Have a built in reference to books like 10x is easier than 2x and 80/20 to make sure I'm focusing on the right (highest leverage) activities.   \n\\- Send happy birthday messages to people using my voice (and applicable relationship data)     \n\\- I could make a laundry list of other things I would want  \n  \nWould you trust something like this with your email, calendar, or money?  \nYes  \n  \nIf you’ve built automations before, what usually goes wrong?  \n\\- Everything. I suck at automaticons  🤣  \n  \nWhat feels too much, and what feels missing?  \n\\- Seems very thorough  \n\\- Nothing is \"missing\" per se.  Everyone lives life differently, every entrepreneur runs their business differently. If you were planning to make this public, one idea that would make it super powerful for people is to have them fill out a questionnaire - goals, values, challenges, risk tolerance, etc.  In fact, you could have them do 16personalities to find out their personality type and their strengths and weaknesses.  Then somehow 'personalize' the workflow to them.",
+      "score": 2,
+      "created_utc": 1767670897.0,
+      "permalink": "/r/n8n/comments/1q4rsso/i_wanted_a_personal_assistant_but_couldnt_afford/nxy2k7g/"
+    },
+    {
+      "id": "nxy2uqn",
+      "author": "keith976",
+      "body": "Having developed and sold a few AI Automation workflows myself heres my 2 cents\n\nA lot of these \"AI Automation\" Workflow I feel is consuming unnecessary AI credits. (Not your workflow but generally what I've observed)\n\nMost of these functionality the agent is executing can be handled with some simple JS code (data splitting, simple conditional logic). The AI agent should be doing what AI does best, smart context extraction, image generation, dynamic text generation",
+      "score": 2,
+      "created_utc": 1767670999.0,
+      "permalink": "/r/n8n/comments/1q4rsso/i_wanted_a_personal_assistant_but_couldnt_afford/nxy2uqn/"
+    },
+    {
+      "id": "nxzldc5",
+      "author": "SnooWoofers7340",
+      "body": "thank you for sharing, very kind and transparent of you, im curently building my own, descent success so far, facing great challenge with drive browsing (pdf and excel doc in particular) i want my virtual PA do be able to find document by name, sumerise or extract info from them, im stuck on that part for quiet sometime, thank you much for sharing your json ill defiently take a look into your aproach and get inspired by it to fix my current issues. See bellow my current aproach for text, image, document, voice note (working really well) + my current tentative for the google drive part.\n\nhttps://preview.redd.it/rm7edydtopbg1.png?width=1493&format=png&auto=webp&s=fa31d3f7b3a2fbeef666672bf0baa94f471252dc",
+      "score": 2,
+      "created_utc": 1767697838.0,
+      "permalink": "/r/n8n/comments/1q4rsso/i_wanted_a_personal_assistant_but_couldnt_afford/nxzldc5/"
+    }
+  ]
+}
