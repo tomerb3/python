@@ -1,6 +1,7 @@
 import praw
 import json
 import os
+import random
 
 import argparse
 
@@ -17,7 +18,8 @@ if not submissions:
     print(json.dumps({"subreddit": args.subreddit, "thread": None, "comments": []}, ensure_ascii=True))
     raise SystemExit(0)
 
-top_submission = max(submissions, key=lambda s: s.score)
+top_candidates = sorted(submissions, key=lambda s: s.score, reverse=True)[:5]
+top_submission = random.choice(top_candidates)
 
 top_submission.comments.replace_more(limit=0)
 
