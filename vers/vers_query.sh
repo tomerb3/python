@@ -1,8 +1,8 @@
-#!/bin/bash -x
+#!/bin/bash 
  
  set -euo pipefail
  
- base_folder=${base_folder:-/home/baum/src/itc-deployment-tools}
+ base_folder=${base_folder:-$HOME/src/itc-deployment-tools}
  # bash /home/baum/src/python/vers/vers_query.sh --env ci1 --os windows --version 5.0.0.822
 
  
