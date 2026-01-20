@@ -1,4 +1,5 @@
 import sys
+import os
 import logging
 from time import gmtime, strftime, time, sleep
 import getopt
@@ -12,7 +13,7 @@ logging.basicConfig(
 )
 
 # Configuration
-DEFAULT_SECRET = 'ewt5 ovnu kqqo ssrp tg2c 5x2f jxnw a23a'
+DEFAULT_SECRET = os.getenv('TOTP_SECRET', 'default')
 DEFAULT_SECRET_KEY = DEFAULT_SECRET.replace(" ", "")
 
 # Global variables

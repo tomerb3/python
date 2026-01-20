@@ -1,0 +1,4 @@
+docker run -ti \
+  -e script_name=tb-2ver.py \
+  -e TOTP_SECRET="$TOTP_SECRET" \
+  2mfaver1 main -d $1
