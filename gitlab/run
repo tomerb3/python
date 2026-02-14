@@ -1,0 +1,15 @@
+
+GITLAB_HOME=/home/baum/src/gitlab
+docker stop gitlab
+docker rm gitlab
+
+docker run --detach \
+  --hostname gitlab.devopsite.top \
+  --publish 8084:80 --publish 22:22 \
+  --name gitlab \
+  --restart always \
+  --volume $GITLAB_HOME/config:/etc/gitlab \
+  --volume $GITLAB_HOME/logs:/var/log/gitlab \
+  --volume $GITLAB_HOME/data:/var/opt/gitlab \
+  gitlab/gitlab-ce:nightly
+
