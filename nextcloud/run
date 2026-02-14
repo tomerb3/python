@@ -1,0 +1,9 @@
+docker stop nextcloud
+docker rm nextcloud
+
+docker run -d \
+  --name nextcloud \
+  --restart unless-stopped \
+  -p 8085:80 \
+  -v /home/baum/src/nextcloud/html:/var/www/html \
+  nextcloud:latest
