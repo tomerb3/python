@@ -1,0 +1,3 @@
+docker stop nextcloud
+docker rm nextcloud
+
