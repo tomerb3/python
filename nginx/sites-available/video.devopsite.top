@@ -32,9 +32,3 @@ server {
     }
 }
 
-# Optional but recommended: redirect http->https
-server {
-    listen 80;
-    server_name video.devopsite.top;
-    return 301 https://$host$request_uri;
-}
