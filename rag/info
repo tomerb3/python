@@ -1,0 +1,18 @@
+p1 - i will need windows of n8n wsl to mount 6333 so n8n will use the ip with 6333 to talk api to it
+
+https://gemini.google.com/share/b798e61eafb7
+
+to run the db :
+
+docker run -d \
+  -p 6333:6333 \
+  -p 6334:6334 \
+  -v $(pwd)/qdrant_storage:/qdrant/storage \
+  --name qdrant \
+  --restart unless-stopped \
+  qdrant/qdrant
+
+
+  example of n8n webhook : 
+
+  
