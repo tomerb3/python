@@ -1,3 +1,6 @@
+docker stop qdrant
+docker rm qdrant
+
 docker run -d \
   -p 6333:6333 \
   -p 6334:6334 \
