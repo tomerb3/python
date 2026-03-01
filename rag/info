@@ -4,15 +4,13 @@ https://gemini.google.com/share/b798e61eafb7
 
 to run the db :
 
-docker run -d \
-  -p 6333:6333 \
-  -p 6334:6334 \
-  -v $(pwd)/qdrant_storage:/qdrant/storage \
-  --name qdrant \
-  --restart unless-stopped \
-  qdrant/qdrant
+
+in file p1-run-qdrant
 
 
-  example of n8n webhook : 
+in n8n cred: 
 
-  .
+For Name, type exactly: api-key
+
+For Value, paste your key: your-super-secret-key-123
+
