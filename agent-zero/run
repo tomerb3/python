@@ -1,0 +1,5 @@
+docker stop agent-zero
+docker rm agent-zero
+mkdir -p $HOME/src/agent-zero
+docker run -d -p 50080:80 -v $HOME/src/agent-zero:/a0/usr --name agent-zero agent0ai/agent-zero
+
