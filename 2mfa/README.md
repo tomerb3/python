@@ -10,3 +10,7 @@ There are currently 2 files that you can run:
 **visual.py**: This file will show a UI box using tkinter, for those of us like something a little more polished.
 ***
 You can see how this works here: [YouTube Tutorial](https://youtu.be/MQVdg3wlcnU)
+
+# make sure in ~/.zshrc the 2MFA token is there
+* * * * * /home/baum/src/python/2mfa/cron_write_2mfa.sh
+* * * * * sleep 30; /home/baum/src/python/2mfa/cron_write_2mfa.sh

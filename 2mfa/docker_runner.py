@@ -55,6 +55,9 @@ def main() -> int:
     if isinstance(result, int):
         return result
 
+    if result is not None:
+        print(result)
+
     return 0
 
 

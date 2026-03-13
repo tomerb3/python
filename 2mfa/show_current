@@ -1,0 +1,3 @@
+ docker run --rm -ti \                                                                       10s
+  -e script_name=tb-2ver.py \
+  2mfaver1 generate_google_2fa_code "$(echo "$TOKEN_2MFA_TB1" | tr -d ' ')"
