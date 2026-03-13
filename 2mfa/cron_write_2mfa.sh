@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-set -x
+
 set -euo pipefail
 
-OUT_FILE="/tmp/2mfa.txt"
+OUT_FILE="/home/baum/src/n8nfiles/2mfa.txt"
 
 if [[ -z "${TOKEN_2MFA_TB1:-}" ]]; then
   exit 2
@@ -26,8 +26,7 @@ tmp_file="$(mktemp)"
   tail -n 2 "$OUT_FILE" 2>/dev/null || true
   echo "$code"
 } >"$tmp_file"
-echo line29
+
 chmod 600 "$tmp_file" 2>/dev/null || true
 rm -f "$OUT_FILE"
 mv "$tmp_file" "$OUT_FILE"
-echo line33

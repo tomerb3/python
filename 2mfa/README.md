@@ -11,6 +11,6 @@ There are currently 2 files that you can run:
 ***
 You can see how this works here: [YouTube Tutorial](https://youtu.be/MQVdg3wlcnU)
 
-# make sure in ~/.zshrc the 2MFA token is there
-* * * * * /home/baum/src/python/2mfa/cron_write_2mfa.sh
-* * * * * sleep 30; /home/baum/src/python/2mfa/cron_write_2mfa.sh
+
+* * * * * TOKEN_2MFA_TB1="YOUR_SECRET_HERE" /home/baum/src/python/2mfa/cron_write_2mfa.sh
+* * * * * sleep 30; TOKEN_2MFA_TB1="YOUR_SECRET_HERE" /home/baum/src/python/2mfa/cron_write_2mfa.sh
