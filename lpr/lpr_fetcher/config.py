@@ -4,7 +4,7 @@ CAMERA_URL = os.environ.get("LPR_CAMERA_URL", "http://shomron13.ddns.net:8215")
 USERNAME = os.environ.get("LPR_CAMERA_USER", "admin")
 PASSWORD = os.environ.get("LPR_CAMERA_PASSWORD")
 
-OUTPUT_DIR = "/home/baum/src/lpr/lpr_fetcher"
+OUTPUT_DIR = "/home/baum/src/n8nfiles/lpr"
 IMAGES_DIR = f"{OUTPUT_DIR}/images"
 VEHICLES_FILE = f"{OUTPUT_DIR}/vehicles.json"
 

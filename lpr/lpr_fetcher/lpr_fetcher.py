@@ -246,6 +246,7 @@ def main():
         logger.error("LPR_CAMERA_PASSWORD environment variable not set")
         sys.exit(1)
 
+    Path(config.OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
     Path(config.IMAGES_DIR).mkdir(parents=True, exist_ok=True)
 
     if not check_disk_space(config.OUTPUT_DIR, config.MIN_DISK_SPACE_MB):
