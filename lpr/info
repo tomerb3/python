@@ -1,0 +1,16 @@
+  1. Cron - twice per hour (every 30 min):
+  crontab -e
+  Change to:
+  */30 * * * * /home/baum/src/lpr/lpr_fetcher/run_fetcher.sh
+
+  2. Your n8n can read /home/baum/src/lpr/lpr_fetcher/vehicles.json — it contains all accumulated records.
+
+  File structure:
+  /home/baum/src/lpr/lpr_fetcher/
+  ├── lpr_fetcher.py    # Main script (appends + dedupes)
+  ├── config.py         # Configuration
+  ├── run_fetcher.sh    # Cron wrapper
+  └── vehicles.json     # All records (grows over time)
+
+  Each record has: capture_time, plate_number, lane, direction, match_result, country
+

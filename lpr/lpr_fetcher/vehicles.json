@@ -1,0 +1,162 @@
+[
+  {
+    "capture_time": "2026-03-25T20:33:38+0800",
+    "plate_number": "53857703",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "whitelist",
+    "country": "ISR"
+  },
+  {
+    "capture_time": "2026-03-25T20:34:51+0800",
+    "plate_number": "53857703",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "whitelist",
+    "country": "ISR"
+  },
+  {
+    "capture_time": "2026-03-25T20:34:53+0800",
+    "plate_number": "53857703",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "whitelist",
+    "country": "ISR"
+  },
+  {
+    "capture_time": "2026-03-25T20:35:13+0800",
+    "plate_number": "18903704",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "whitelist",
+    "country": "ISR"
+  },
+  {
+    "capture_time": "2026-03-25T20:37:50+0800",
+    "plate_number": "S943501",
+    "lane": "1",
+    "direction": "forward",
+    "match_result": "otherlist",
+    "country": "IRL"
+  },
+  {
+    "capture_time": "2026-03-25T20:37:52+0800",
+    "plate_number": "5943501",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "otherlist",
+    "country": "IRL"
+  },
+  {
+    "capture_time": "2026-03-25T20:37:54+0800",
+    "plate_number": "5943501",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "otherlist",
+    "country": "IRL"
+  },
+  {
+    "capture_time": "2026-03-25T20:37:55+0800",
+    "plate_number": "5943501",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "otherlist",
+    "country": "IRL"
+  },
+  {
+    "capture_time": "2026-03-25T20:37:58+0800",
+    "plate_number": "5943501",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "otherlist",
+    "country": "IRL"
+  },
+  {
+    "capture_time": "2026-03-25T20:37:59+0800",
+    "plate_number": "5943501",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "otherlist",
+    "country": "IRL"
+  },
+  {
+    "capture_time": "2026-03-25T20:38:11+0800",
+    "plate_number": "5943501",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "otherlist",
+    "country": "IRL"
+  },
+  {
+    "capture_time": "2026-03-25T20:38:14+0800",
+    "plate_number": "5943501",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "otherlist",
+    "country": "IRL"
+  },
+  {
+    "capture_time": "2026-03-25T20:43:16+0800",
+    "plate_number": "18903704",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "whitelist",
+    "country": "ISR"
+  },
+  {
+    "capture_time": "2026-03-25T20:44:54+0800",
+    "plate_number": "53857703",
+    "lane": "1",
+    "direction": "forward",
+    "match_result": "whitelist",
+    "country": "ISR"
+  },
+  {
+    "capture_time": "2026-03-25T20:44:55+0800",
+    "plate_number": "53857703",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "whitelist",
+    "country": "ISR"
+  },
+  {
+    "capture_time": "2026-03-25T20:44:56+0800",
+    "plate_number": "53857703",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "whitelist",
+    "country": "ISR"
+  },
+  {
+    "capture_time": "2026-03-25T20:54:14+0800",
+    "plate_number": "25943501",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "whitelist",
+    "country": "ISR"
+  },
+  {
+    "capture_time": "2026-03-25T20:54:15+0800",
+    "plate_number": "25943501",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "whitelist",
+    "country": "ISR"
+  },
+  {
+    "capture_time": "2026-03-25T20:58:19+0800",
+    "plate_number": "40764903",
+    "lane": "1",
+    "direction": "forward",
+    "match_result": "whitelist",
+    "country": "ISR"
+  },
+  {
+    "capture_time": "2026-03-25T20:58:20+0800",
+    "plate_number": "40764903",
+    "lane": "1",
+    "direction": "unknown",
+    "match_result": "whitelist",
+    "country": "ISR"
+  }
+]
