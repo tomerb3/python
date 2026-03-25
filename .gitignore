@@ -4,3 +4,5 @@ master.mp4
 *.Identifier
 manim/.cache
 *.mov
+vehicles.json.bak
+vehicles.json
