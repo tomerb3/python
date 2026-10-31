@@ -43908,3 +43908,59 @@
 2026-10-31 09:00:02,449 - INFO - Saved 95821 total records to /home/baum/src/n8nfiles/lpr/vehicles.json
 2026-10-31 09:00:02,449 - INFO - Added 11 new records (95821 total)
 2026-10-31 09:00:02,496 - INFO - Done
+2026-10-31 09:30:01,290 - INFO - Fetching vehicles from http://shomron13.ddns.net:8215
+2026-10-31 09:30:01,290 - INFO - Trying endpoint: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 09:30:01,323 - INFO - Endpoint works: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 09:30:01,329 - INFO - Got 20 vehicles from API
+2026-10-31 09:30:02,122 - INFO - Saved 95841 total records to /home/baum/src/n8nfiles/lpr/vehicles.json
+2026-10-31 09:30:02,122 - INFO - Added 20 new records (95841 total)
+2026-10-31 09:30:02,172 - INFO - Done
+2026-10-31 10:00:03,602 - INFO - Fetching vehicles from http://shomron13.ddns.net:8215
+2026-10-31 10:00:03,603 - INFO - Trying endpoint: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 10:00:03,634 - INFO - Endpoint works: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 10:00:03,639 - INFO - Got 20 vehicles from API
+2026-10-31 10:00:04,469 - INFO - Saved 95848 total records to /home/baum/src/n8nfiles/lpr/vehicles.json
+2026-10-31 10:00:04,470 - INFO - Added 7 new records (95848 total)
+2026-10-31 10:00:04,525 - INFO - Done
+2026-10-31 10:30:02,059 - INFO - Fetching vehicles from http://shomron13.ddns.net:8215
+2026-10-31 10:30:02,059 - INFO - Trying endpoint: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 10:30:02,097 - INFO - Endpoint works: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 10:30:02,101 - INFO - Got 20 vehicles from API
+2026-10-31 10:30:02,846 - INFO - Saved 95858 total records to /home/baum/src/n8nfiles/lpr/vehicles.json
+2026-10-31 10:30:02,846 - INFO - Added 10 new records (95858 total)
+2026-10-31 10:30:02,902 - INFO - Done
+2026-10-31 11:00:01,787 - INFO - Fetching vehicles from http://shomron13.ddns.net:8215
+2026-10-31 11:00:01,787 - INFO - Trying endpoint: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 11:00:01,812 - INFO - Endpoint works: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 11:00:01,818 - INFO - Got 20 vehicles from API
+2026-10-31 11:00:02,554 - INFO - Saved 95877 total records to /home/baum/src/n8nfiles/lpr/vehicles.json
+2026-10-31 11:00:02,554 - INFO - Added 19 new records (95877 total)
+2026-10-31 11:00:02,601 - INFO - Done
+2026-10-31 11:30:01,742 - INFO - Fetching vehicles from http://shomron13.ddns.net:8215
+2026-10-31 11:30:01,743 - INFO - Trying endpoint: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 11:30:01,773 - INFO - Endpoint works: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 11:30:01,778 - INFO - Got 20 vehicles from API
+2026-10-31 11:30:02,509 - INFO - Saved 95887 total records to /home/baum/src/n8nfiles/lpr/vehicles.json
+2026-10-31 11:30:02,509 - INFO - Added 10 new records (95887 total)
+2026-10-31 11:30:02,553 - INFO - Done
+2026-10-31 12:00:01,185 - INFO - Fetching vehicles from http://shomron13.ddns.net:8215
+2026-10-31 12:00:01,185 - INFO - Trying endpoint: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 12:00:01,218 - INFO - Endpoint works: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 12:00:01,222 - INFO - Got 20 vehicles from API
+2026-10-31 12:00:01,929 - INFO - Saved 95901 total records to /home/baum/src/n8nfiles/lpr/vehicles.json
+2026-10-31 12:00:01,929 - INFO - Added 14 new records (95901 total)
+2026-10-31 12:00:01,973 - INFO - Done
+2026-10-31 12:30:01,546 - INFO - Fetching vehicles from http://shomron13.ddns.net:8215
+2026-10-31 12:30:01,546 - INFO - Trying endpoint: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 12:30:01,571 - INFO - Endpoint works: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 12:30:01,575 - INFO - Got 20 vehicles from API
+2026-10-31 12:30:02,286 - INFO - Saved 95921 total records to /home/baum/src/n8nfiles/lpr/vehicles.json
+2026-10-31 12:30:02,286 - INFO - Added 20 new records (95921 total)
+2026-10-31 12:30:02,331 - INFO - Done
+2026-10-31 13:00:01,842 - INFO - Fetching vehicles from http://shomron13.ddns.net:8215
+2026-10-31 13:00:01,842 - INFO - Trying endpoint: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 13:00:01,880 - INFO - Endpoint works: http://shomron13.ddns.net:8215/ISAPI/Traffic/channels/1/vehicleDetect/plates
+2026-10-31 13:00:01,885 - INFO - Got 20 vehicles from API
+2026-10-31 13:00:02,674 - INFO - Saved 95938 total records to /home/baum/src/n8nfiles/lpr/vehicles.json
+2026-10-31 13:00:02,674 - INFO - Added 17 new records (95938 total)
+2026-10-31 13:00:02,722 - INFO - Done
